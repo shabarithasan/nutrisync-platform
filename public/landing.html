@@ -9721,22 +9721,53 @@
 
     <!-- End of headEnd -->
 <script>
-['click','mousedown','pointerdown','mouseup','pointerup'].forEach(ev => window.addEventListener(ev, function(e) {
-  let el = e.target.closest('a') || e.target.closest('[data-reset="button"]');
-  if (el) {
-    let text = el.innerText || el.textContent || '';
-    let href = el.getAttribute('href') || '';
-    if (href.includes('/login') || text.includes('Log in')) {
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      if (ev === 'click' || ev === 'mouseup' || ev === 'pointerup') {
-        e.preventDefault();
-        window.location.href = '/login';
-      }
+(function() {
+  var LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
+
+  function forceNavigate(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    window.location.replace(LOGIN_URL);
+  }
+
+  function patchButtons() {
+    // Target anchors that link to login
+    document.querySelectorAll('a[href*="/login"]').forEach(function(el) {
+      if (el._loginPatched) return;
+      el._loginPatched = true;
+      el.addEventListener('mousedown', forceNavigate, true);
+      el.addEventListener('click', forceNavigate, true);
+      el.onclick = forceNavigate;
+    });
+  }
+
+  // Run right away (gets static HTML buttons before React hydrates)
+  patchButtons();
+
+  // Run after DOM is parsed
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchButtons);
+  }
+
+  // Run after React/Framer hydrates (watch for any DOM mutation)
+  var observer = new MutationObserver(patchButtons);
+  function startObserver() {
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+      // Also patch every second for 10s after load to catch late hydration
+      var count = 0;
+      var interval = setInterval(function() {
+        patchButtons();
+        if (++count > 10) clearInterval(interval);
+      }, 1000);
     }
   }
-}, true));
-</script></head>
+  if (document.body) startObserver();
+  else document.addEventListener('DOMContentLoaded', startObserver);
+})();
+</script>
+</head>
 
 <body>
     <script async src="/events.framer.com/script?v=2" data-fid="251796e341529b36601f5495a43e4ca23d916637f341381f59162b826a2c8fd4" data-no-nt></script>
