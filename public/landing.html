@@ -3,6 +3,43 @@
 <html lang="en" dir="ltr">
 
 <head>
+
+<script>
+(function() {
+  var LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
+  var isNavigating = false;
+
+  function intercept(e) {
+    var el = e.target;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (el.tagName === 'A') {
+        var txt = (el.textContent || '').trim();
+        if (txt === 'Log in / Sign up') {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (!isNavigating) {
+            isNavigating = true;
+            window.location.href = LOGIN_URL;
+          }
+          return false;
+        }
+      }
+      el = el.parentElement;
+    }
+  }
+
+  // Attach to the absolute top-level window, in capture phase
+  // Since this script is in <head>, it runs before Framer's scripts
+  window.addEventListener('click', intercept, true);
+  window.addEventListener('mousedown', intercept, true);
+  window.addEventListener('pointerdown', intercept, true);
+  window.addEventListener('mouseup', intercept, true);
+  window.addEventListener('pointerup', intercept, true);
+  window.addEventListener('touchstart', intercept, true);
+  window.addEventListener('touchend', intercept, true);
+})();
+</script>
     <meta charset="utf-8">
 
 
@@ -16092,86 +16129,7 @@
 
     <!-- End of bodyEnd -->
 
-<script>
-(function() {
-  var LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
 
-  function forceLogin(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    window.location.replace(LOGIN_URL);
-    return false;
-  }
-
-  function patchAll() {
-    var anchors = document.querySelectorAll('a');
-    for (var i = 0; i < anchors.length; i++) {
-      var a = anchors[i];
-      var txt = (a.textContent || '').trim();
-      if (txt === 'Log in / Sign up' && !a._lp) {
-        a._lp = true;
-        a.addEventListener('mousedown', forceLogin, true);
-        a.addEventListener('pointerdown', forceLogin, true);
-        a.addEventListener('click', forceLogin, true);
-        a.onclick = forceLogin;
-        a.onmousedown = forceLogin;
-        a.onpointerdown = forceLogin;
-      }
-    }
-  }
-
-  // Keep patching every 500ms forever (Framer keeps recreating elements)
-  setInterval(patchAll, 500);
-
-  // Also use MutationObserver
-  if (document.body) {
-    new MutationObserver(patchAll).observe(document.body, {childList: true, subtree: true});
-  }
-
-  // Nuclear fallback: window-level capture listener
-  window.addEventListener('click', function(e) {
-    var el = e.target;
-    while (el && el !== document.body) {
-      if (el.tagName === 'A' && (el.textContent || '').trim() === 'Log in / Sign up') {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        window.location.replace(LOGIN_URL);
-        return false;
-      }
-      el = el.parentElement;
-    }
-  }, true);
-
-  // Same for mousedown (Framer uses this)
-  window.addEventListener('mousedown', function(e) {
-    var el = e.target;
-    while (el && el !== document.body) {
-      if (el.tagName === 'A' && (el.textContent || '').trim() === 'Log in / Sign up') {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-      }
-      el = el.parentElement;
-    }
-  }, true);
-
-  window.addEventListener('pointerdown', function(e) {
-    var el = e.target;
-    while (el && el !== document.body) {
-      if (el.tagName === 'A' && (el.textContent || '').trim() === 'Log in / Sign up') {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        return false;
-      }
-      el = el.parentElement;
-    }
-  }, true);
-})();
-</script>
 </body>
 
 </html>
