@@ -38,7 +38,7 @@ export default function AIChat() {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer \${API_KEY}`,
+          'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -56,37 +56,11 @@ export default function AIChat() {
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I am having trouble connecting to the brain right now. Please check your API key.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I am having trouble connecting to the brain right now. Please try again.' }]);
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (isConfiguring && isOpen) {
-    return (
-      <div style={{
-        position: 'fixed', bottom: '24px', right: '24px', zIndex: 10001,
-        width: '360px', padding: '24px', background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(30px)',
-        border: '1px solid rgba(255,255,255,0.5)', borderRadius: '24px', boxShadow: '0 24px 48px rgba(0,0,0,0.2)'
-      }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '18px' }}>⚙️ Setup AI Assistant</h3>
-        <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#666' }}>Please enter your Groq API key. It will be stored safely in your browser.</p>
-        <input 
-          type="password" 
-          value={apiKey} 
-          onChange={e => setApiKey(e.target.value)} 
-          placeholder="gsk_..."
-          style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #ccc', marginBottom: '16px' }}
-        />
-        <button 
-          onClick={() => { localStorage.setItem('GROQ_KEY', apiKey); setIsConfiguring(false); }}
-          style={{ width: '100%', background: '#3b82f6', color: '#fff', border: 'none', padding: '12px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Save & Start Chatting
-        </button>
-      </div>
-    );
-  }
 
   if (!isOpen) {
     return (
@@ -128,10 +102,7 @@ export default function AIChat() {
           <span style={{ fontSize: '20px' }}>✨</span>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>NutriSync AI</h3>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          
-          <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
-        </div>
+        <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
       </div>
 
       {/* Messages Area */}
