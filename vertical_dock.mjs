@@ -1,4 +1,6 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import fs from 'fs';
+
+const dockComponent = `import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
   const [mouseY, setMouseY] = useState(null);
@@ -100,7 +102,7 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
       const bounceWidth = Math.max(-8, -baseIconSize * 0.15);
       el.style.transition = 'transform 0.2s ease-out';
       // Bounce along X axis since it's on the left
-      el.style.transform = `translateX(${bounceWidth}px)`;
+      el.style.transform = \`translateX(\${bounceWidth}px)\`;
       setTimeout(() => el.style.transform = 'translateX(0px)', 200);
     }
     onAppClick(appId);
@@ -114,20 +116,20 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
   return (
     <div 
       ref={dockRef}
-      className={`macos-dock ${className}`}
+      className={\`macos-dock \${className}\`}
       style={{
-        height: `${contentHeight + padding * 2}px`,
-        width: `${baseIconSize + padding * 2}px`,
+        height: \`\${contentHeight + padding * 2}px\`,
+        width: \`\${baseIconSize + padding * 2}px\`,
         background: 'rgba(255, 255, 255, 0.25)',
         backdropFilter: 'blur(30px) saturate(1.5)',
         WebkitBackdropFilter: 'blur(30px) saturate(1.5)',
-        borderRadius: `${Math.max(12, baseIconSize * 0.4)}px`,
+        borderRadius: \`\${Math.max(12, baseIconSize * 0.4)}px\`,
         border: '1px solid rgba(255, 255, 255, 0.4)',
-        boxShadow: `
-          0 ${Math.max(4, baseIconSize * 0.1)}px ${Math.max(16, baseIconSize * 0.4)}px rgba(0, 0, 0, 0.15),
+        boxShadow: \`
+          0 \${Math.max(4, baseIconSize * 0.1)}px \${Math.max(16, baseIconSize * 0.4)}px rgba(0, 0, 0, 0.15),
           inset 1px 0 0 rgba(255, 255, 255, 0.8)
-        `,
-        padding: `${padding}px`,
+        \`,
+        padding: \`\${padding}px\`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -141,7 +143,7 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
       <div 
         style={{
           position: 'relative',
-          width: `${baseIconSize}px`,
+          width: \`\${baseIconSize}px\`,
           height: '100%'
         }}
       >
@@ -163,10 +165,10 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'flex-start',
-                top: `${position - scaledSize / 2}px`,
+                top: \`\${position - scaledSize / 2}px\`,
                 left: '0px',
-                height: `${scaledSize}px`,
-                width: `${scaledSize}px`,
+                height: \`\${scaledSize}px\`,
+                width: \`\${scaledSize}px\`,
                 transformOrigin: 'left center',
                 zIndex: Math.round(scale * 10)
               }}
@@ -178,18 +180,18 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
                 height={scaledSize}
                 style={{
                   objectFit: 'contain',
-                  filter: `drop-shadow(0 ${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px ${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,${0.1 + (scale - 1) * 0.1}))`
+                  filter: \`drop-shadow(0 \${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px \${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,\${0.1 + (scale - 1) * 0.1}))\`
                 }}
               />
               {openApps.includes(app.id) && (
                 <div 
                   style={{
                     position: 'absolute',
-                    left: `${Math.max(-4, -baseIconSize * 0.1)}px`,
+                    left: \`\${Math.max(-4, -baseIconSize * 0.1)}px\`,
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    width: `${Math.max(3, baseIconSize * 0.06)}px`,
-                    height: `${Math.max(3, baseIconSize * 0.06)}px`,
+                    width: \`\${Math.max(3, baseIconSize * 0.06)}px\`,
+                    height: \`\${Math.max(3, baseIconSize * 0.06)}px\`,
                     borderRadius: '50%',
                     backgroundColor: 'rgba(0, 0, 0, 0.4)',
                   }}
@@ -204,3 +206,7 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
 };
 
 export default MacOSDock;
+`;
+
+fs.writeFileSync('src/MacOSDock.jsx', dockComponent);
+console.log('Updated MacOSDock to be vertical!');
