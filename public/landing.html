@@ -5,41 +5,41 @@
 <head>
 
 <script>
-(function() {
-  var LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
-  var isNavigating = false;
-
-  function intercept(e) {
-    var el = e.target;
-    while (el && el !== document.body && el !== document.documentElement) {
-      if (el.tagName === 'A') {
-        var txt = (el.textContent || '').trim();
-        if (txt === 'Log in / Sign up') {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          if (!isNavigating) {
-            isNavigating = true;
-            window.location.href = LOGIN_URL;
-          }
-          return false;
+  window.LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
+  window.forceLogin = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    window.location.href = window.LOGIN_URL;
+    return false;
+  };
+  
+  function patchAllButtons() {
+    var anchors = document.querySelectorAll('a');
+    for (var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      var txt = (a.textContent || '').trim();
+      if (txt === 'Log in / Sign up') {
+        if (!a.dataset.patched) {
+          a.dataset.patched = 'true';
+          a.addEventListener('mousedown', window.forceLogin, true);
+          a.addEventListener('pointerdown', window.forceLogin, true);
+          a.addEventListener('click', window.forceLogin, true);
+          a.onclick = window.forceLogin;
         }
       }
-      el = el.parentElement;
     }
   }
 
-  // Attach to the absolute top-level window, in capture phase
-  // Since this script is in <head>, it runs before Framer's scripts
-  window.addEventListener('click', intercept, true);
-  window.addEventListener('mousedown', intercept, true);
-  window.addEventListener('pointerdown', intercept, true);
-  window.addEventListener('mouseup', intercept, true);
-  window.addEventListener('pointerup', intercept, true);
-  window.addEventListener('touchstart', intercept, true);
-  window.addEventListener('touchend', intercept, true);
-})();
+  // Observe all DOM changes to catch buttons as soon as Framer renders them
+  new MutationObserver(patchAllButtons).observe(document.documentElement, {childList: true, subtree: true});
+  
+  // Fallback interval
+  setInterval(patchAllButtons, 500);
 </script>
+
+
+
     <meta charset="utf-8">
 
 
