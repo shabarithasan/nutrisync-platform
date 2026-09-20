@@ -1,1 +1,1 @@
-const https = require('https'); https.get('https://nutrisync-platform.onrender.com', res => { let d = ''; res.on('data', c => d+=c); res.on('end', () => console.log(d.includes('/login') ? 'YES' : 'NO')); })
+const fs = require('fs'); let code = fs.readFileSync('src/main.jsx', 'utf8'); let m = code.match(/className=\"panel big-chart\"[\s\S]*?<\/section>/); if(m) console.log(m[0]);

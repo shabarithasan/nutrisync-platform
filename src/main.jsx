@@ -136,28 +136,29 @@ function LivePedometer({ m, upd, tk }) {
   const day = m[tk] || {};
   const steps = +(day.steps) || 0;
   
-  useEffect(() => {
+  const handleShake = () => {
     if (!active) return;
-    const interval = setInterval(() => {
-      upd(tk, { steps: +(m[tk]?.steps || 0) + Math.floor(Math.random() * 8) + 3 });
-    }, 1500);
-    return () => clearInterval(interval);
-  }, [active, tk, upd, m]);
+    upd(tk, { steps: +(m[tk]?.steps || 0) + Math.floor(Math.random() * 8) + 10 });
+  };
 
   return (
     <div className="panel live-sensor" style={{ position: 'relative', overflow: 'hidden', padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', background: active ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'var(--card)', color: active ? '#fff' : 'inherit', transition: 'all 0.3s ease' }}>
-      <div style={{ background: active ? 'rgba(255,255,255,0.2)' : 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+      <div 
+        onClick={handleShake}
+        style={{ cursor: active ? 'pointer' : 'default', background: active ? 'rgba(255,255,255,0.2)' : 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+        title={active ? 'Tap to simulate a few steps!' : ''}
+      >
         <span style={{ fontSize: '32px' }}>👟</span>
         {active && (
           <>
-            <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(255,255,255,0.5)', borderRadius: '50%', animation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite' }}></div>
-            <div style={{ position: 'absolute', inset: -8, border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', animation: 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite 0.2s' }}></div>
+            <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(255,255,255,0.5)', borderRadius: '50%', animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite' }}></div>
+            <div style={{ position: 'absolute', inset: -8, border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite 0.5s' }}></div>
           </>
         )}
       </div>
       <div style={{ flex: 1 }}>
         <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: active ? '#fff' : 'inherit' }}>Smart Pedometer Sensor</h3>
-        <p style={{ margin: '4px 0 0', opacity: 0.9, fontSize: '14px' }}>{active ? 'Sensor connected. Walking detected!' : 'Connect device to track steps live.'}</p>
+        <p style={{ margin: '4px 0 0', opacity: 0.9, fontSize: '14px' }}>{active ? 'Sensor connected. Tap the sneaker to log steps!' : 'Connect device to track steps.'}</p>
       </div>
       <div style={{ textAlign: 'right' }}>
         <div style={{ fontSize: '28px', fontWeight: '800', fontVariantNumeric: 'tabular-nums' }}>{steps.toLocaleString()}</div>
@@ -169,7 +170,7 @@ function LivePedometer({ m, upd, tk }) {
       >
         {active ? 'Disconnect' : 'Connect'}
       </button>
-      <style>{`@+keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
+      <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
     </div>
   );
 }
