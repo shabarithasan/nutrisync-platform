@@ -5,7 +5,7 @@ export default function metadata(params, activeLocale) {
         favicon: "/framerusercontent.com/assets/bOhGX9UFa1Vo4et3pY3kZ1jZxg.png",
         robots: "max-image-preview:large",
         socialImage: "/framerusercontent.com/assets/F47LViuIqbnLTpkz52m0wXj9H8.png",
-        title: "Calorie App"
+        title: "NutriSync"
     };
 }
 export const metadataVersion = 1;

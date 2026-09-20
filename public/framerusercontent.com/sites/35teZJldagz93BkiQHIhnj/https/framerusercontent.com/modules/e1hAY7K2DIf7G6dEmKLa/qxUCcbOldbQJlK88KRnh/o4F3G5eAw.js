@@ -196,7 +196,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                                 style: {
                                                     "--framer-text-color": "var(--extracted-r6o4lv, var(--token-6f575146-d030-44ff-bd4a-6f2dbedb3233, rgb(31, 31, 31)))"
                                                 },
-                                                children: "Calorie App"
+                                                children: "NutriSync"
                                             })
                                         }),
                                         className: "framer-19k6s4f",
@@ -1062,7 +1062,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             width: "100%",
                                             ...addPropertyOverrides({
                                                 JBjL7RLQ9: {
-                                                    name: "Calorie App."
+                                                    name: "NutriSync"
                                                 }
                                             }, baseVariant, gestureVariant)
                                         })

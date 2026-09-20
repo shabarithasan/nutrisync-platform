@@ -76,10 +76,10 @@ const css = [`.framer-N7CGh { -webkit-mask: ${mask}; aspect-ratio: 1; display: b
  * @framerSupportedLayoutWidth any-prefer-fixed
  * @framerSupportedLayoutHeight any-prefer-fixed
  * @framerImmutableVariables true
- * @framerVector {"name":"Calorie App Icon","set":{"localId":"vectorSet/cDYPHb2Gh","id":"cDYPHb2Gh","moduleId":"8uIaAGRZEqS5v5W5nrnM"}}
+ * @framerVector {"name":"NutriSync Icon","set":{"localId":"vectorSet/cDYPHb2Gh","id":"cDYPHb2Gh","moduleId":"8uIaAGRZEqS5v5W5nrnM"}}
  */
 const Icon = withCSS(Component, css, "framer-N7CGh");
-Icon.displayName = "Calorie App Icon";
+Icon.displayName = "NutriSync Icon";
 export default Icon;
 export const __FramerMetadata__ = {
     "exports": {
@@ -93,7 +93,7 @@ export const __FramerMetadata__ = {
                 "framerSupportedLayoutWidth": "any-prefer-fixed",
                 "framerSupportedLayoutHeight": "any-prefer-fixed",
                 "framerImmutableVariables": "true",
-                "framerVector": "{\"name\":\"Calorie App Icon\",\"set\":{\"localId\":\"vectorSet/cDYPHb2Gh\",\"id\":\"cDYPHb2Gh\",\"moduleId\":\"8uIaAGRZEqS5v5W5nrnM\"}}",
+                "framerVector": "{\"name\":\"NutriSync Icon\",\"set\":{\"localId\":\"vectorSet/cDYPHb2Gh\",\"id\":\"cDYPHb2Gh\",\"moduleId\":\"8uIaAGRZEqS5v5W5nrnM\"}}",
                 "framerContractVersion": "1"
             }
         },

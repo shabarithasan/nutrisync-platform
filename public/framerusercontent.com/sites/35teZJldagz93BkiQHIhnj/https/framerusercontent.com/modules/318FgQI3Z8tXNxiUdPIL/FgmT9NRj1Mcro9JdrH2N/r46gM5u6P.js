@@ -251,7 +251,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             style: {
                                                 "--framer-text-color": "var(--extracted-r6o4lv, var(--token-6f575146-d030-44ff-bd4a-6f2dbedb3233, rgb(31, 31, 31)))"
                                             },
-                                            children: "Calorie App"
+                                            children: "NutriSync"
                                         })
                                     }),
                                     className: "framer-1i7a6bt",
@@ -439,7 +439,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                         layoutId: "iLQTm0_im",
                                         variant: "NnkVR7pPY",
                                         width: "100%",
-                                        Zvyicx_bc: "https://www.apple.com/app-store/",
+                                        Zvyicx_bc: "/login",
                                         ...addPropertyOverrides({
                                             aaLe3BYJb: {
                                                 dT71tAd3I: "Download"

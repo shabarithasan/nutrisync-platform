@@ -311,7 +311,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                 layoutId: "Cj_KJsqoC",
                                 variant: "UIhoj7n9D",
                                 width: "100%",
-                                Zvyicx_bc: "https://www.apple.com/app-store/"
+                                Zvyicx_bc: "/login"
                             })
                         })
                     })]
