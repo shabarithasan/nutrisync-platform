@@ -406,3 +406,15 @@ button.primary::after {
 .dark .report-list article:hover {
   box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
 }
+
+
+/* Holographic Parallax Sensor Tilt */
+.panel, .dt-card, .hero-card {
+  transform: perspective(1000px) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+/* Ensure hover states override parallax slightly, or add to it */
+.dt-card:hover {
+  transform: perspective(1000px) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) translateY(-4px) scale(1.02);
+}
