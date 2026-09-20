@@ -117,7 +117,180 @@ function Overview({profile,setPage}){const {m,upd}=useLog();const t=calcTargets(
 function DietProfile({profile,setProfile}){const [form,setForm]=useState(profile);const [saved,setSaved]=useState(false);const [generated,setGenerated]=useState(false);const [missing,setMissing]=useState([]);const target=useMemo(()=>calcTargets(form),[form]);const change=e=>setForm({...form,[e.target.name]:e.target.value});const save=e=>{e.preventDefault();setProfile(form);localStorage.setItem('nutrisync-profile',JSON.stringify(form));setSaved(true)};const generate=e=>{e.preventDefault();const need=[];if(!form.age)need.push('age is required');else if(form.age<10||form.age>100)need.push('age must be between 10 and 100');if(!form.gender)need.push('gender is required');if(!form.height)need.push('height is required');else if(form.height<120||form.height>220)need.push('height must be between 120 and 220 cm');if(!form.weight)need.push('weight is required');else if(form.weight<30||form.weight>300)need.push('weight must be between 30 and 300 kg');if(!form.goal)need.push('weight goal is required');if(!form.diet)need.push('food preference is required');setMissing(need);if(need.length)return;setGenerated(true);setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),50)};const hasHealth=form.health&&form.health!=='Normal';return <><Header title="Create your diet profile" desc="Fill in your details, then press Generate to see your diet estimate." profile={profile}/><BMICalculator/><form className="profile-form" onSubmit={save}><section><h3>1. Basic information</h3><div className="form-grid"><label>Full name<input name="name" value={form.name} onChange={change}/></label><label>Age<input name="age" type="number" value={form.age} onChange={change}/></label><label>Gender<select name="gender" value={form.gender} onChange={change}><option value="">Select gender</option><option value="female">Female</option><option value="male">Male</option></select></label><label>Height (cm)<input name="height" type="number" value={form.height} onChange={change}/></label><label>Current weight (kg)<input name="weight" type="number" value={form.weight} onChange={change}/></label></div></section><section><h3>2. Health condition</h3><div className="form-grid"><label>Health condition<select name="health" value={form.health} onChange={change}><option value="Normal">Normal / No conditions</option><option value="Diabetes">Diabetes</option><option value="Hypertension">Hypertension</option><option value="High Cholesterol">High Cholesterol</option><option value="Thyroid">Thyroid disorder</option><option value="PCOS">PCOS</option><option value="Kidney Disease">Kidney Disease</option><option value="Other">Other</option></select></label>{hasHealth&&<label>Details (optional)<input name="healthDetails" placeholder="Briefly describe your condition" value={form.healthDetails||''} onChange={change}/></label>}<label>Food allergies (optional)<input name="allergies" placeholder="e.g. peanuts, shellfish" value={form.allergies} onChange={change}/></label><label>Foods to avoid (optional)<input name="avoid" placeholder="e.g. dairy, gluten" value={form.avoid} onChange={change}/></label></div>{hasHealth&&<p className="health-note" style={{fontSize:11,color:'var(--muted)',marginTop:8,background:'#f0fdf4',border:'1px solid #dcfce7',borderRadius:8,padding:'8px 12px'}}>For medical conditions, nutrition goals should be confirmed with a qualified healthcare professional.</p>}</section><section><h3>3. What is your weight goal?</h3><p style={{fontSize:12,color:'var(--muted)',marginBottom:14}}>Select one option to personalize your calorie targets.</p><div className="goal-cards"><button type="button" className={'goal-card'+(form.goal==='loss'?' active':'')} onClick={()=>setForm({...form,goal:'loss'})}><div className="goal-icon">ðŸ“‰</div><b>Lose Weight</b><small>Calorie deficit Â· reduce body weight</small></button><button type="button" className={'goal-card'+(form.goal==='maintenance'?' active':'')} onClick={()=>setForm({...form,goal:'maintenance'})}><div className="goal-icon">âš–ï¸</div><b>Maintain Weight</b><small>Maintenance calories Â· keep current weight</small></button><button type="button" className={'goal-card'+(form.goal==='gain'?' active':'')} onClick={()=>setForm({...form,goal:'gain'})}><div className="goal-icon">ðŸ“ˆ</div><b>Gain Weight</b><small>Calorie surplus Â· increase body weight</small></button></div></section><section><h3>4. Diet preferences</h3><div className="form-grid"><label>Food preference<select name="diet" value={form.diet} onChange={change}><option value="">Select food preference</option><option value="vegetarian">Vegetarian</option><option value="non_vegetarian">Non-Vegetarian</option><option value="vegan">Vegan</option><option value="eggetarian">Eggetarian</option></select></label><label>Meals per day<select name="mealsPerDay" value={form.mealsPerDay} onChange={change}><option value="">Select meals per day</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></label><label>Preferred cuisine<input name="cuisine" value={form.cuisine} onChange={change}/></label></div></section>{missing.length>0&&<p className="notice" style={{color:'#ef4444'}}>Please fill in before generating: {missing.join(', ')}</p>}{generated&&<><button className="primary" style={{display:'block',margin:'0 auto',width:'min(100%,340px)'}}>Save profile</button>{saved&&<span className="saved">Profile saved.</span>}<section className="calculation"><h3>Your transparent nutrition estimate</h3><div className="calc-grid">{[['BMI',target.bmi+' ('+target.cat+')'],['Target BMI',target.targetBmi],['Target weight',target.targetWeight+' kg'],['BMR',target.bmr+' kcal'],['TDEE',target.tdee+' kcal'],['Daily calorie target',target.calories+' kcal'],['Protein',target.protein+' g'],['Protein basis',target.basis+' kg'],['Carbohydrates',target.carbs+' g'],['Fat',target.fat+' g']].map(x=><div key={x[0]}><small>{x[0]}</small><b>{x[1]}</b></div>)}</div></section></>}<button type="button" className="primary" onClick={generate} style={{display:'block',margin:'20px auto 0',width:'min(100%,340px)'}}>Generate Nutrition Estimate</button></form></>}
 function Progress({profile}){const t=calcTargets(profile);const start=+profile.weight||0;const goal=+profile.targetWeight||start;const h=+profile.height||0;const tk=todayKey();const [weights,setWeights]=useState(()=>{try{return JSON.parse(localStorage.getItem('nts-progress'))||[]}catch{return[]}});const [inp,setInp]=useState('');const sorted=[...weights].sort((a,b)=>a.d<b.d?-1:1);const loggedToday=sorted.some(x=>x.d===tk);const cur=sorted.length?sorted[sorted.length-1].w:start;const addW=()=>{const v=parseFloat(inp);if(!v||v<20||v>300)return;const next=[...weights.filter(x=>x.d!==tk),{d:tk,w:v}].sort((a,b)=>a.d<b.d?-1:1);setWeights(next);localStorage.setItem('nts-progress',JSON.stringify(next));setInp('')};const rmW=()=>{const next=weights.filter(x=>x.d!==tk);setWeights(next);localStorage.setItem('nts-progress',JSON.stringify(next))};const ws=new Set(sorted.map(x=>x.d));let ss=0,dd=new Date();if(!ws.has(todayKey()))dd.setDate(dd.getDate()-1);while(ws.has(keyOf(dd))){ss++;dd.setDate(dd.getDate()-1)}let best=0,run=0,prev=null;sorted.forEach(x=>{const p=x.d.split('-');const ts=new Date(+p[0],+p[1]-1,+p[2]).getTime();const diffP=prev?(ts-prev)/86400000:0;run=diffP===1?run+1:1;best=Math.max(best,run);prev=ts});const diff=Math.abs(start-goal);const pct=diff>0?Math.min(100,Math.round(Math.max(0,start-cur)/diff*100)):0;const bmiCur=h>0?Math.round(cur/((h/100)**2)*10)/10:0;const catC=bmiCur<18.5?'Underweight':bmiCur<25?'Healthy weight':bmiCur<30?'Overweight':'Obese';const W0=56;const base=new Date(...agoKey(W0).split('-').map((x,i)=>+x-(i===1?1:0)));const real=sorted.map(x=>{const p=x.d.split('-').map(Number);const off=Math.round((new Date(p[0],p[1]-1,p[2])-base)/86400000);return off>=0&&off<=W0?{x:off/W0*700,w:x.w}:null}).filter(Boolean);const dots=real;const series=dots.length>1?dots:[{x:0,w:cur},{x:700,w:cur}];const from=dots.length?dots[dots.length-1]:{x:0,w:cur};const proj=[{x:from.x,w:from.w},{x:700,w:goal}];const lo=Math.min(...series.map(p=>p.w),...proj.map(p=>p.w))-1,hi=Math.max(...series.map(p=>p.w),...proj.map(p=>p.w))+1;const y=v=>Math.min(230,190-((v-lo)/((hi-lo)||1))*150);const sm=arr=>{let d='M'+arr[0].x.toFixed(1)+' '+y(arr[0].w).toFixed(1);for(let i=0;i<arr.length-1;i++){const p0=arr[i-1]||arr[i],p1=arr[i],p2=arr[i+1],p3=arr[i+2]||p2;d+=' C'+((p1.x+(p2.x-p0.x)/6)).toFixed(1)+' '+y(p1.w+(p2.w-p0.w)/6).toFixed(1)+' '+((p2.x-(p3.x-p1.x)/6)).toFixed(1)+' '+y(p2.w-(p3.w-p1.w)/6).toFixed(1)+' '+p2.x.toFixed(1)+' '+y(p2.w).toFixed(1)}return d};const path=sm(series);const pPath=sm(proj);return (<><Header title="Progress, not perfection" desc="A daily check-in that turns small steps into a real journey." profile={profile}/><section className="kpis"><article><span>Current weight</span><strong>{cur} <small>kg</small></strong><em>{loggedToday?'✓ logged today':'enter today’s weight below'}</em></article><article><span>Current BMI</span><strong>{bmiCur}</strong><em>● {catC}</em></article><article><span>Check-in streak</span><strong>{ss}<small> days</small></strong><em>Best: {best} days · {pct}% to goal</em></article></section><section className="panel checkin"><div className="panel-title"><div><h3>Daily check-in</h3><p>{loggedToday?'Nice — you’ve already checked in today.':`${diff.toFixed(1)} kg ${start>goal?'to lose':start<goal?'to gain':'to goal'} · Goal: ${goal} kg`}</p></div></div>{loggedToday?<div className="checkin-done"><b>Today: {cur} kg</b><button className="ghost" onClick={rmW}>Undo check-in</button></div>:<div className="checkin-row"><input type="number" placeholder="Today’s weight (kg)" value={inp} onChange={e=>setInp(e.target.value)} min="20" max="300"/><button className="primary" onClick={addW}>Log weight</button></div>}{sorted.length>0&&<div className="checkin-history">{sorted.slice(-4).reverse().map(x=><span key={x.d}><b>{x.w} kg</b>{shortLabel(x.d)}</span>)}</div>}</section><section className="panel big-chart"><div className="panel-title"><div><h3>Weight journey</h3><p>Projected path to {goal} kg · your logged days appear on it.</p></div><button>{sorted.length} log{sorted.length===1?'':'s'}</button></div><svg viewBox="0 0 700 230" preserveAspectRatio="none"><line x1="0" x2="700" y1={y(goal)} y2={y(goal)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="7 6"/><path d={pPath} fill="none" stroke="#22c55e" strokeWidth="3" strokeDasharray="5 7" opacity=".75"/><path d={path} fill="none" stroke="#22c55e" strokeWidth="5" strokeLinecap="round"/><path d={path+' V230 H0Z'} fill="url(#fade)"/><defs><linearGradient id="fade" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#22c55e" stopOpacity=".25"/><stop offset="1" stopColor="#22c55e" stopOpacity="0"/></linearGradient></defs>{dots.map((d,i)=><circle key={i} cx={d.x} cy={y(d.w)} r="5.5" fill="#fff" stroke="#22c55e" strokeWidth="3"/>)}<text x="700" y={y(goal)-10} textAnchor="end" fontSize="11" fill="#b45309" fontWeight="700">goal {goal} kg</text><text x={dots.length?dots[0].x:0} y={Math.min(222,y((dots.length?dots[0].w:cur))+18)} textAnchor="start" fontSize="11" fill="#111827" fontWeight="700">start {dots.length?dots[0].w:cur} kg</text><text x={Math.max(60,Math.min(640,from.x))} y={y(from.w)-14} textAnchor="middle" fontSize="12" fill="#111827" fontWeight="700">{from.w} kg</text></svg><div className="chart-labels"><span>{shortLabel(agoKey(56))}</span><span>{shortLabel(agoKey(42))}</span><span>{shortLabel(agoKey(28))}</span><span>{shortLabel(agoKey(14))}</span><span>{shortLabel(agoKey(0))}</span></div></section></>);}
 function Water({profile}){const {m,upd}=useLog();const target=Math.max(6,Math.round((+profile.weight||70)*35/250));const name=profile?.name?.split(' ')[0]||'there';const litres=(target*0.25).toFixed(1);const tk=todayKey();const day=m[tk]||{};const w=+day.water||0;const times=day.times||[];const setWater=n=>{const c=Math.max(0,Math.min(target,n));const t=n>w?[...times,new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})].slice(-8):times.slice(0,-1);upd(tk,{water:c,times:t})};const wk=[6,5,4,3,2,1,0].map(n=>+((m[agoKey(n)]||{}).water)||0);const wkMax=Math.max(...wk,1);const wkLabels=[...Array(7)].map((_,i)=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][(new Date().getDay()-6+i+14)%7]);const mls=Math.round((+profile.weight||70)*35/6);const pct=target?Math.round(w/target*100):0;return (<><Header title="Hydrate with intention" desc="Every glass you log is saved — your streak survives tomorrow." profile={profile}/><section className="water-page"><div className="water-card"><div className="water-ring"><b>{w}</b><span>of {target} glasses</span></div><h2>Nice work, {name}!</h2><p>{w>=target?'You hit today’s hydration goal. Glowing from the inside out!':w<target*0.5?`Let’s get those first glasses in — you’ve got this.`:`You’re ${pct}% there — keep it flowing.`}</p><div className="ov-ctrl" style={{justifyContent:'center'}}><button onClick={()=>setWater(w+1)} className="primary">+ Add a glass</button><button onClick={()=>setWater(Math.max(0,w-1))} className="ghost">Undo</button></div><p className="water-note">{w} of {target} glasses · {pct}% today · {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</p></div><div className="water-side panel"><h3>Your hydration rhythm</h3><p>Today’s goal: {litres} litres · {target} glasses (35 ml per kg of body weight)</p>{(times.length?times:['No drinks logged yet']).map((x,i)=><div className="water-log" key={i}><span>◒</span><b>{x==='No drinks logged yet'?'Tap “+ Add a glass” to start':x}</b><small>{x==='No drinks logged yet'?'':mls+' ml'}</small></div>)}<div className="chart">{wk.map((v,i)=><div key={i}><i style={{height:`${Math.round(v/wkMax*100)}%`,background:v>0?'#2563eb':'#f1f5f9'}}/><span>{wkLabels[i]}</span></div>)}</div><p className="water-note">Last 7 days of glasses</p></div></section></>);}
-function Reports({profile}){const {m}=useLog();const [period,setPeriod]=useState('week');const [copied,setCopied]=useState(false);const days=period==='week'?7:30;const logs=[...Array(days)].map((_,i)=>({k:agoKey(i),o:m[agoKey(i)]||{}}));const active=logs.filter(l=>l.o.water||l.o.kcal||l.o.steps||(l.o.work&&l.o.work.length));const n=active.length||1;const avgWater=Math.round(active.reduce((a,l)=>a+(+l.o.water||0),0)/n);const avgSteps=Math.round(active.reduce((a,l)=>a+(+l.o.steps||0),0)/n);const avgKcal=Math.round(active.reduce((a,l)=>a+(+l.o.kcal||0),0)/n);const workouts=active.reduce((a,l)=>a+(l.o.work||[]).length,0);const t=calcTargets(profile);const [weights]=useState(()=>{try{return JSON.parse(localStorage.getItem('nts-progress'))||[]}catch{return[]}});const ws=[...weights].sort((a,b)=>a.d<b.d?-1:1);const delta=ws.length>1?Math.round((ws[ws.length-1].w-ws[0].w)*10)/10:null;const lines=[`NUTRISYNC WELLNESS REPORT`,`Generated: ${new Date().toLocaleString('en-GB')}`,`Period: ${period==='week'?'last 7 days':'last 30 days'}`,``,`Daily calories target: ${t.calories} kcal`,`Calories logged (avg): ${avgKcal} kcal/day`,`Water (avg): ${avgWater} glasses/day`,`Steps (avg): ${avgSteps.toLocaleString()}/day`,`Workouts logged: ${workouts}`,`Weight change: ${delta===null?'not enough check-ins':(delta>0?'+':'')+delta+' kg'}`,`Check-ins logged: ${ws.length}`,``,`Made with NutriSync — small steps, big change.`];const txt=lines.join(String.fromCharCode(10));const download=()=>{const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='nutrisync-report-'+todayKey()+'.txt';a.click();URL.revokeObjectURL(url)};const copy=()=>{navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),1600)})};return (<><Header title="Your wellness reports" desc="Real numbers from your daily logs — downloadable, shareable, yours." profile={profile}/><section className="panel report-tool"><div className="panel-title"><div><h3>Report period</h3><p>Pick a window and the numbers below update instantly.</p></div><div className="metric-tabs" style={{margin:0,width:'220px'}}><button className={period==='week'?'on':''} onClick={()=>setPeriod('week')}>Last 7 days</button><button className={period==='month'?'on':''} onClick={()=>setPeriod('month')}>Last 30 days</button></div></div><div className="report-stats"><div><span>Days active</span><b>{active.length}</b><small>of {days} days</small></div><div><span>Calories (avg)</span><b>{avgKcal.toLocaleString()}</b><small>target {t.calories.toLocaleString()} kcal</small></div><div><span>Water (avg)</span><b>{avgWater}</b><small>glasses/day</small></div><div><span>Steps (avg)</span><b>{avgSteps.toLocaleString()}</b><small>steps/day</small></div><div><span>Workouts</span><b>{workouts}</b><small>logged</small></div><div><span>Weight change</span><b>{delta===null?'—':(delta>0?'+':'')+delta}</b><small>{delta===null?'log on Progress page':'kg over journey'}</small></div></div><div className="report-actions"><button className="primary" onClick={download}>Download report ↓</button><button className="ghost" onClick={copy}>{copied?'✓ Copied!':'Copy summary'}</button></div></section><section className="report-list">{[['Weekly nutrition report','Real averages of calories, water, steps and workouts.','This week'],['Monthly progress report','Trends from your last 30 days of daily check-ins.','Last 30 days'],['AI health summary','Personal recommendations based on your patterns.','Updated today']].map(x=><article key={x[0]}><span>▤</span><div><h3>{x[0]}</h3><p>{x[1]}</p></div><small>{x[2]}</small><button onClick={download}>Download ↓</button></article>)}</section></>);}
+function Reports({profile}){
+  const {m} = useLog();
+  const [period, setPeriod] = useState('week');
+  const [copied, setCopied] = useState(false);
+  const [openModal, setOpenModal] = useState(null);
+
+  const days = period === 'week' ? 7 : 30;
+  const logs = [...Array(days)].map((_, i) => ({ k: agoKey(i), o: m[agoKey(i)] || {} }));
+  const active = logs.filter(l => l.o.water || l.o.kcal || l.o.steps || (l.o.work && l.o.work.length));
+  const n = active.length || 1;
+  
+  const avgWater = Math.round(active.reduce((a, l) => a + (+l.o.water || 0), 0) / n);
+  const avgSteps = Math.round(active.reduce((a, l) => a + (+l.o.steps || 0), 0) / n);
+  const avgKcal = Math.round(active.reduce((a, l) => a + (+l.o.kcal || 0), 0) / n);
+  const workouts = active.reduce((a, l) => a + (l.o.work || []).length, 0);
+  
+  const t = calcTargets(profile);
+  
+  const [weights] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('nts-progress')) || []; }
+    catch { return []; }
+  });
+  const ws = [...weights].sort((a, b) => a.d < b.d ? -1 : 1);
+  const delta = ws.length > 1 ? Math.round((ws[ws.length - 1].w - ws[0].w) * 10) / 10 : null;
+  
+  const txt = `NUTRISYNC WELLNESS REPORT\nGenerated: ${new Date().toLocaleString('en-GB')}\nPeriod: ${period === 'week' ? 'last 7 days' : 'last 30 days'}\n\nDaily calories target: ${t.calories} kcal\nCalories logged (avg): ${avgKcal} kcal/day\nWater (avg): ${avgWater} glasses/day\nSteps (avg): ${avgSteps.toLocaleString()}/day\nWorkouts logged: ${workouts}\nWeight change: ${delta === null ? 'not enough check-ins' : (delta > 0 ? '+' : '') + delta + ' kg'}\nCheck-ins logged: ${ws.length}\n\nMade with NutriSync — small steps, big change.`;
+  
+  const download = () => {
+    const blob = new Blob([txt], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'nutrisync-report-' + todayKey() + '.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  
+  const copy = () => {
+    navigator.clipboard && navigator.clipboard.writeText(txt).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    });
+  };
+
+  const generateAiInsights = () => {
+    let insights = [];
+    if (avgWater < t.water) insights.push("💧 You're averaging slightly below your water target. Try keeping a bottle visible at your desk.");
+    else insights.push("💧 Excellent hydration! You're hitting your water goals consistently.");
+    
+    if (avgSteps < 5000) insights.push("🚶 Your step count is a bit low. A short 15-minute walk after lunch can drastically improve this.");
+    else if (avgSteps >= 10000) insights.push("🚶 Outstanding step count! You are extremely active.");
+    
+    if (avgKcal > t.calories + 300) insights.push("🍎 You are averaging slightly above your calorie target. Watch out for hidden liquid calories.");
+    else if (avgKcal < t.calories - 500 && avgKcal > 0) insights.push("🍎 You might be under-eating based on your goals. Make sure you fuel your body adequately.");
+    else insights.push("🍎 Calorie intake looks perfectly aligned with your targets.");
+
+    if (workouts === 0) insights.push("💪 No workouts logged in this period. Even 10 minutes of stretching counts!");
+    else if (workouts > 3) insights.push(`💪 Great consistency with ${workouts} workouts logged!`);
+    
+    return insights;
+  };
+
+  return (
+    <>
+      <Header title="Wellness Reports & Insights" desc="Interactive analytics and AI-driven insights from your daily logs." profile={profile} />
+      
+      <section className="panel report-tool" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="panel-title">
+          <div>
+            <h3>Analytics Window</h3>
+            <p>Switch periods to instantly visualize your health trends.</p>
+          </div>
+          <div className="metric-tabs" style={{ margin: 0, width: '220px' }}>
+            <button className={period === 'week' ? 'on' : ''} onClick={() => setPeriod('week')}>Last 7 days</button>
+            <button className={period === 'month' ? 'on' : ''} onClick={() => setPeriod('month')}>Last 30 days</button>
+          </div>
+        </div>
+
+        <div className="report-visuals" style={{ display: 'grid', gap: '20px', marginTop: '24px' }}>
+          
+          <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
+              <span style={{ fontWeight: 600 }}>🔥 Calories (Average)</span>
+              <span style={{ color: 'var(--muted)' }}>{avgKcal.toLocaleString()} / {t.calories.toLocaleString()} kcal</span>
+            </div>
+            <div style={{ height: '8px', background: 'var(--line)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, (avgKcal / (t.calories||1)) * 100)}%`, background: (avgKcal > t.calories) ? 'var(--orange)' : 'var(--mint)', transition: 'width 1s cubic-bezier(0.16,1,0.3,1)' }} />
+            </div>
+          </div>
+
+          <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
+              <span style={{ fontWeight: 600 }}>💧 Water (Average)</span>
+              <span style={{ color: 'var(--muted)' }}>{avgWater} / {t.water} glasses</span>
+            </div>
+            <div style={{ height: '8px', background: 'var(--line)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, (avgWater / (t.water||1)) * 100)}%`, background: '#0ea5e9', transition: 'width 1s cubic-bezier(0.16,1,0.3,1)' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 100px', background: 'var(--bg)', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand)' }}>{avgSteps.toLocaleString()}</div>
+              <div style={{ color: 'var(--muted)', fontSize: '12px' }}>Avg Steps/Day</div>
+            </div>
+            <div style={{ flex: '1 1 100px', background: 'var(--bg)', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand)' }}>{workouts}</div>
+              <div style={{ color: 'var(--muted)', fontSize: '12px' }}>Workouts Logged</div>
+            </div>
+            <div style={{ flex: '1 1 100px', background: 'var(--bg)', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--brand)' }}>{delta===null?'—':(delta>0?'+':'')+delta+'kg'}</div>
+              <div style={{ color: 'var(--muted)', fontSize: '12px' }}>Weight Change</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="report-actions" style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--line)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button className="primary" onClick={download}>Download Text Report ↓</button>
+          <button className="ghost" onClick={copy}>{copied ? '✓ Copied!' : 'Copy to Clipboard'}</button>
+          <button className="ghost" style={{ marginLeft: 'auto', background: 'var(--brand)', color: '#fff', border: 'none' }} onClick={() => setOpenModal('ai')}>✨ Generate AI Insights</button>
+        </div>
+      </section>
+
+      <section className="report-list">
+        <article style={{ cursor: 'pointer', transition: 'transform 0.2s', border: period==='week'?'1px solid var(--brand)':'' }} onClick={() => setPeriod('week')}>
+          <span style={{ background: 'rgba(249, 115, 22, 0.1)', color: '#f97316' }}>📊</span>
+          <div>
+            <h3>Weekly Pulse</h3>
+            <p>View your 7-day averages and adherence.</p>
+          </div>
+          <small style={{color: period==='week'?'var(--brand)':'var(--muted)'}}>{period==='week'?'Active':'View'}</small>
+        </article>
+        
+        <article style={{ cursor: 'pointer', transition: 'transform 0.2s', border: period==='month'?'1px solid var(--brand)':'' }} onClick={() => setPeriod('month')}>
+          <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>📈</span>
+          <div>
+            <h3>Monthly Trends</h3>
+            <p>Analyze long-term progress and consistency.</p>
+          </div>
+          <small style={{color: period==='month'?'var(--brand)':'var(--muted)'}}>{period==='month'?'Active':'View'}</small>
+        </article>
+
+        <article style={{ cursor: 'pointer', transition: 'transform 0.2s' }} onClick={() => setOpenModal('ai')}>
+          <span style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>✨</span>
+          <div>
+            <h3>AI Health Summary</h3>
+            <p>Get instant feedback based on your patterns.</p>
+          </div>
+          <small style={{color:'var(--brand)'}}>Recommended</small>
+        </article>
+      </section>
+
+      {openModal === 'ai' && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 99999, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', animation: 'slideUpCard 0.3s' }} onClick={() => setOpenModal(null)}>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '24px', padding: '32px', maxWidth: '500px', width: '100%', boxShadow: '0 24px 48px rgba(0,0,0,0.2)', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>✨ AI Health Insights</h2>
+            <p style={{ color: 'var(--muted)', marginBottom: '24px' }}>Based on your {period === 'week' ? '7-day' : '30-day'} patterns.</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {generateAiInsights().map((insight, idx) => (
+                <div key={idx} style={{ background: 'var(--bg)', padding: '16px', borderRadius: '12px', fontSize: '15px', lineHeight: '1.5', border: '1px solid var(--line)' }}>
+                  {insight}
+                </div>
+              ))}
+            </div>
+
+            <button className="primary" style={{ width: '100%', marginTop: '24px', padding: '14px', borderRadius: '12px' }} onClick={() => setOpenModal(null)}>Got it, thanks!</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 function ProfilePage({auth, onLogout}) { const user = auth?.user || {}; const name = user.name || 'User'; const email = user.email || ''; const initials = name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase(); return (<><Header title="Profile" desc="Manage your account settings." profile={{name}}/><section className="profile-page"><div className="profile-card"><div className="profile-avatar">{initials}</div><h2>{name}</h2><p>{email}</p></div><div className="profile-actions"><button onClick={onLogout}><span className="pa-login">🔑</span><div>Login<small>Sign in with a different account</small></div></button><button onClick={onLogout}><span className="pa-switch">👥</span><div>Another Account<small>Switch to a different account</small></div></button><button onClick={onLogout}><span className="pa-logout">🚪</span><div>Logout<small>Sign out of your account</small></div></button></div></section></>); }
 const adminKey='nts-admin-auth';
 function AdminLogin({onSuccess}){const [form,setForm]=useState({email:'',password:''});const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [showPw,setShowPw]=useState(false);const ch=e=>setForm({...form,[e.target.name]:e.target.value});const sub=async()=>{setBusy(true);setError('');if(!form.email||!form.password){setError('Admin email and password are required.');setBusy(false);return}try{const r=await fetch(apiBase+'/api/auth/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(form)});const d=await r.json().catch(()=>({}));if(!r.ok){setError(d.error||'Admin login failed.');return}localStorage.setItem(adminKey,JSON.stringify({accessToken:d.accessToken,user:d.user}));onSuccess()}catch{setError('Could not reach the API server. Make sure it is running.')}finally{setBusy(false)}};return <div className="auth-page"><div className="auth-card"><div className="auth-mark">⚙</div><div className="logo">nutri<span>sync</span><em>ADMIN</em></div><h1>Admin sign in</h1><p>Restricted area — authorized administrators only.</p><input name="email" type="email" placeholder="Admin email" value={form.email} onChange={ch}/><div className="pw-wrap"><input name="password" type={showPw?'text':'password'} placeholder="Admin password" value={form.password} onChange={ch}/><button type="button" className="pw-toggle" onClick={()=>setShowPw(!showPw)}>{showPw?'Hide':'Show'}</button></div>{error&&<p className="auth-error">{error}</p>}<button className="primary" onClick={sub} disabled={busy}>{busy?'Please wait…':'Sign in to Admin'}</button><button className="ghost" onClick={()=>{location.hash=''}}>← Back to NutriSync</button></div></div>}
