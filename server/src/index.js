@@ -136,11 +136,6 @@ const distPath = path.join(__dirname, '../../dist');
 app.use(express.static(distPath, { index: false }));
 app.use((req, res, next) => {
   if (req.method === 'GET' && req.path === '/') {
-    // If they have a refreshToken, they are logged in, so serve the React app
-    if (req.cookies.refreshToken) {
-      return res.sendFile(path.join(distPath, 'index.html'));
-    }
-    // Otherwise serve the Framer landing page
     return res.sendFile(path.join(distPath, 'landing.html'));
   }
   if (req.method === 'GET' && !req.path.startsWith('/api/')) {
@@ -148,7 +143,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
 app.use((error, req, res, next) => { console.error(error); res.status(500).json({ error: 'Unexpected server error.' }); });
 
 const port = Number(process.env.PORT || 4000);
