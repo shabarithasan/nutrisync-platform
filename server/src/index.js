@@ -44,11 +44,8 @@ app.post('/api/auth/register', async (req, res, next) => {
     const body = parse(registerSchema, req.body, res); if (!body) return;
     const email = body.email.toLowerCase();
     if (await prisma.user.findUnique({ where: { email } })) return res.status(409).json({ error: 'An account with that email already exists.' });
-    const user = await prisma.user.create({ data: { name: body.name, email, passwordHash: await hashPassword(body.password), isEmailVerified: autoVerify } });
-    const verificationToken = randomToken();
-    await prisma.emailVerificationToken.create({ data: { userId: user.id, tokenHash: hashToken(verificationToken), expiresAt: expiresInDays(1) } });
-    sendEmail({ to: email, subject: 'Verify your NutriSync account', text: verificationEmailBody(verificationToken) }).catch(()=>{});
-    res.status(201).json({ message: autoVerify ? 'Account created. You can now sign in.' : 'Account created. Check your email to verify it.', ...devToken('verificationToken', verificationToken) });
+    const user = await prisma.user.create({ data: { name: body.name, email, passwordHash: await hashPassword(body.password), isEmailVerified: true } });
+    res.status(201).json({ message: 'Account created. You can now sign in.' });
   } catch (error) { next(error); }
 });
 
@@ -68,7 +65,6 @@ app.post('/api/auth/login', async (req, res, next) => {
     const user = await prisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
     if (!user || !(await verifyPassword(body.password, user.passwordHash))) return res.status(401).json({ error: 'Invalid email or password.' });
     if (!user.isEmailVerified) {
-      if (!autoVerify) return res.status(403).json({ error: 'Please verify your email before signing in.' });
       await prisma.user.update({ where: { id: user.id }, data: { isEmailVerified: true } });
     }
     res.json(await createSession(user, req, res));
