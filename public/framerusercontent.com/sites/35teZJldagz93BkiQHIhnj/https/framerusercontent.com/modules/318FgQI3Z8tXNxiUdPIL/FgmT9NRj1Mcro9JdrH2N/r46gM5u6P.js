@@ -225,9 +225,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                         layoutDependency: layoutDependency,
                         layoutId: "Lvk8Uu8oA",
                         children: [ /*#__PURE__*/ _jsx(Link, {
-                            href: {
-                                webPageId: "augiA20Il"
-                            },
+                            href: "https://nutrisync-platform.onrender.com/login",
                             motionChild: true,
                             nodeId: "QmRiFSr6w",
                             openInNewTab: false,
@@ -282,9 +280,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             "--framer-text-color": "var(--extracted-r6o4lv, var(--token-e8f6ea74-6141-45a8-a8d0-769484d81fbe, rgb(66, 66, 66)))"
                                         },
                                         children: /*#__PURE__*/ _jsx(Link, {
-                                            href: {
-                                                webPageId: "f6Pxb9Ap0"
-                                            },
+                                            href: "https://nutrisync-platform.onrender.com/login",
                                             motionChild: true,
                                             nodeId: "Ue_BjI3mS",
                                             openInNewTab: false,
@@ -318,9 +314,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             "--framer-text-color": "var(--extracted-r6o4lv, var(--token-e8f6ea74-6141-45a8-a8d0-769484d81fbe, rgb(66, 66, 66)))"
                                         },
                                         children: /*#__PURE__*/ _jsx(Link, {
-                                            href: {
-                                                webPageId: "ZjjNx5_ws"
-                                            },
+                                            href: "https://nutrisync-platform.onrender.com/login",
                                             motionChild: true,
                                             nodeId: "nSLpJnSkY",
                                             openInNewTab: false,
@@ -354,9 +348,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             "--framer-text-color": "var(--extracted-r6o4lv, var(--token-e8f6ea74-6141-45a8-a8d0-769484d81fbe, rgb(66, 66, 66)))"
                                         },
                                         children: /*#__PURE__*/ _jsx(Link, {
-                                            href: {
-                                                webPageId: "rvAJfzTar"
-                                            },
+                                            href: "https://nutrisync-platform.onrender.com/login",
                                             motionChild: true,
                                             nodeId: "YrxSxoO0c",
                                             openInNewTab: false,
@@ -390,9 +382,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             "--framer-text-color": "var(--extracted-r6o4lv, var(--token-e8f6ea74-6141-45a8-a8d0-769484d81fbe, rgb(66, 66, 66)))"
                                         },
                                         children: /*#__PURE__*/ _jsx(Link, {
-                                            href: {
-                                                webPageId: "o4yNJQqhc"
-                                            },
+                                            href: "https://nutrisync-platform.onrender.com/login",
                                             motionChild: true,
                                             nodeId: "oIY1VZXBC",
                                             openInNewTab: false,

@@ -3986,19 +3986,13 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                             })]
                         }), /*#__PURE__*/ _jsx(ResolveLinks, {
                             links: [{
-                                href: {
-                                    webPageId: "ZjjNx5_ws"
-                                },
+                                href: "https://nutrisync-platform.onrender.com/login",
                                 implicitPathVariables: undefined
                             }, {
-                                href: {
-                                    webPageId: "ZjjNx5_ws"
-                                },
+                                href: "https://nutrisync-platform.onrender.com/login",
                                 implicitPathVariables: undefined
                             }, {
-                                href: {
-                                    webPageId: "ZjjNx5_ws"
-                                },
+                                href: "https://nutrisync-platform.onrender.com/login",
                                 implicitPathVariables: undefined
                             }],
                             children: resolvedLinks => /*#__PURE__*/ _jsx(PropertyOverrides, {
