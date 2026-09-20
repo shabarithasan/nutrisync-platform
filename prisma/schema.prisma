@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id                    String                   @id @default(cuid())
+  email                 String                   @unique
+  passwordHash          String
+  name                  String
+  role                  Role                     @default(USER)
+  isEmailVerified       Boolean                  @default(false)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  sessions              Session[]
+  passwordResetTokens   PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  dietProfile           DietProfile?
+  dietPlans             DietPlan[]
+  mealEntries           MealEntry[]
+  nutritionHistory      NutritionHistory[]
+}
+
+model DietProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  age               Int
+  gender            String
+  heightCm          Float
+  currentWeightKg   Float
+  targetWeightKg    Float
+  activityLevel     String
+  healthConditions  String[] @default([])
+  healthDetails     String?
+  allergies         String?
+  foodsToAvoid      String?
+  goal              String
+  dietPreference    String
+  cuisinePreference String?
+  mealsPerDay       Int      @default(5)
+  likedFoods        String?
+  dislikedFoods     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DietPlan {
+  id            String   @id @default(cuid())
+  userId        String
+  calorieTarget Int
+  proteinTarget Int
+  carbTarget    Int
+  fatTarget     Int
+  meals         Json
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MealEntry {
+  id         String   @id @default(cuid())
+  userId     String
+  mealType   String
+  foodName   String
+  serving    String
+  calories   Int
+  protein    Float
+  carbs      Float
+  fat        Float
+  fiber      Float?
+  sugar      Float?
+  confidence Int?
+  imageUrl   String?
+  loggedAt   DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, loggedAt])
+}
+
+model Session {
+  id               String   @id @default(cuid())
+  userId           String
+  refreshTokenHash String
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model NutritionHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  age             Int
+  gender          String
+  heightCm        Float
+  weightKg        Float
+  activityLevel   String
+  goal            String
+  bmi             Float
+  bmiCategory     String
+  bmr             Float
+  tdee            Int
+  calorieTargetMin Int
+  calorieTargetMax Int
+  proteinMin      Int
+  proteinMax      Int
+  fatMin          Int
+  fatMax          Int
+  carbohydrateMin Int
+  carbohydrateMax Int
+  fiber           Int
+  waterMl         Float
+  waterLitres     Float
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
