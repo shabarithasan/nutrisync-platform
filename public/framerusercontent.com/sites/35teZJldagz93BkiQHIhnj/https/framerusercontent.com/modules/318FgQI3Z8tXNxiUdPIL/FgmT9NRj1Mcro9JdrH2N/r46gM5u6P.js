@@ -439,7 +439,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                         layoutId: "iLQTm0_im",
                                         variant: "NnkVR7pPY",
                                         width: "100%",
-                                        Zvyicx_bc: "/login",
+                                        Zvyicx_bc: "https://nutrisync-platform.onrender.com/login",
                                         ...addPropertyOverrides({
                                             aaLe3BYJb: {
                                                 dT71tAd3I: "Download"

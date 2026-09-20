@@ -255,7 +255,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             layoutId: "sSNvIMFEW",
                                             variant: "NnkVR7pPY",
                                             width: "100%",
-                                            Zvyicx_bc: "/login"
+                                            Zvyicx_bc: "https://nutrisync-platform.onrender.com/login"
                                         })
                                     })
                                 }), /*#__PURE__*/ _jsx(motion.div, {
