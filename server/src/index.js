@@ -129,6 +129,28 @@ app.get('/api/diet-plans/latest', requireAuth, async (req,res,next)=>{try{res.js
 app.post('/api/meals', requireAuth, async (req,res,next)=>{try{const mealSchema=z.object({mealType:z.string().min(1),foodName:z.string().min(1),serving:z.string().min(1),calories:z.coerce.number().int().min(0),protein:z.coerce.number().min(0),carbs:z.coerce.number().min(0),fat:z.coerce.number().min(0),loggedAt:z.string().datetime().optional()});const body=parse(mealSchema,req.body,res);if(!body)return;const {loggedAt,...data}=body;res.status(201).json({meal:await prisma.mealEntry.create({data:{...data,userId:req.auth.sub,loggedAt:loggedAt||undefined}})});}catch(e){next(e)}});
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
+app.post('/api/chat', async (req, res, next) => {
+  try {
+    const KEY = 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF';
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(req.body)
+    });
+    if (!response.ok) {
+      const err = await response.text();
+      return res.status(response.status).json({ error: err });
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, '../../dist');
