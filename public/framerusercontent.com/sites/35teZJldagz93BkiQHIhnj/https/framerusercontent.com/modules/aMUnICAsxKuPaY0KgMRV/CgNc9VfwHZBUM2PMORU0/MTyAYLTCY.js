@@ -84,7 +84,7 @@ const getProps = ({
     ...props
 }) => {
     return { ...props,
-        dT71tAd3I: title ? ? props.dT71tAd3I ? ? "Download for iPhone",
+        dT71tAd3I: title ? ? props.dT71tAd3I ? ? "Log in / Sign up",
         variant: humanReadableVariantMap[props.variant] ? ? props.variant ? ? "UIhoj7n9D",
         Zvyicx_bc: link ? ? props.Zvyicx_bc
     };
@@ -264,7 +264,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                         style: {
                                             "--framer-text-color": "var(--extracted-r6o4lv, var(--token-e258ed60-9c0a-4916-88a5-57988f16ef6f, rgb(255, 255, 255)))"
                                         },
-                                        children: "Download for iPhone"
+                                        children: "Log in / Sign up"
                                     })
                                 }),
                                 className: "framer-1fx6aj6",
@@ -285,7 +285,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             children: /*#__PURE__*/ _jsx(motion.p, {
                                                 className: "framer-styles-preset-1l3s2e",
                                                 "data-styles-preset": "uOJsmDyCf",
-                                                children: "Download for iPhone"
+                                                children: "Log in / Sign up"
                                             })
                                         })
                                     }
@@ -313,7 +313,7 @@ const css = ["@supports (aspect-ratio: 1) { body { --framer-aspect-ratio-support
  */
 const FramerMTyAYLTCY = withCSS(Component, css, "framer-mCWCz");
 export default FramerMTyAYLTCY;
-FramerMTyAYLTCY.displayName = "Download for iPhone Button";
+FramerMTyAYLTCY.displayName = "Log in / Sign up Button";
 FramerMTyAYLTCY.defaultProps = {
     height: 42,
     width: 196.5
@@ -326,7 +326,7 @@ addPropertyControls(FramerMTyAYLTCY, {
         type: ControlType.Enum
     },
     dT71tAd3I: {
-        defaultValue: "Download for iPhone",
+        defaultValue: "Log in / Sign up",
         displayTextArea: false,
         title: "Title",
         type: ControlType.String

@@ -271,7 +271,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                         "--framer-text-alignment": "center",
                                         "--framer-text-color": "var(--extracted-r6o4lv, var(--token-e8f6ea74-6141-45a8-a8d0-769484d81fbe, rgb(66, 66, 66)))"
                                     },
-                                    children: "The #1 rated nutrition app on the App Store — built to help you eat better, stay consistent, and see results."
+                                    children: "The #1 rated nutrition app  — built to help you eat better, stay consistent, and see results."
                                 })
                             }),
                             className: "framer-1b8yqpj",
@@ -305,7 +305,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                             rendersWithMotion: true,
                             scopeId: "NE3HsOnaV",
                             children: /*#__PURE__*/ _jsx(DownloadForIPhoneButton, {
-                                dT71tAd3I: "Download for iPhone",
+                                dT71tAd3I: "Log in / Sign up",
                                 height: "100%",
                                 id: "Cj_KJsqoC",
                                 layoutId: "Cj_KJsqoC",

@@ -609,7 +609,7 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                                             rendersWithMotion: true,
                                             scopeId: "augiA20Il",
                                             children: /*#__PURE__*/ _jsx(DownloadForIPhoneButton, {
-                                                dT71tAd3I: "Download for iPhone",
+                                                dT71tAd3I: "Log in / Sign up",
                                                 height: "100%",
                                                 id: "tH1eEuVLE",
                                                 layoutId: "tH1eEuVLE",
