@@ -35,14 +35,14 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      console.log('ABOUT TO FETCH!!!'); const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      console.log('ABOUT TO FETCH!!!'); const response = await fetch('/groq-api/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-20b',
+          model: 'openai/gpt-oss-120b',
           messages: [
             { role: 'system', content: 'You are NutriSync AI, an expert, encouraging health and fitness assistant. Keep answers concise, actionable, and friendly.' },
             ...newMessages
