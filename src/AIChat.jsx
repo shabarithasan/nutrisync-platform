@@ -35,7 +35,7 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      console.log('ABOUT TO FETCH!!!'); const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${API_KEY}`,
@@ -56,7 +56,8 @@ export default function AIChat() {
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I am having trouble connecting to the brain right now. Please try again.' }]);
+      console.error('AI CHAT ERROR:', error);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error: ' + error.message }]);
     } finally {
       setIsLoading(false);
     }
@@ -159,4 +160,6 @@ export default function AIChat() {
     </div>
   );
 }
+
+
 
