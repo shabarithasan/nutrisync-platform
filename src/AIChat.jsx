@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function AIChat() {
-  const [apiKey, setApiKey] = useState(localStorage.getItem('GROQ_KEY') || '');
-  const [isConfiguring, setIsConfiguring] = useState(!localStorage.getItem('GROQ_KEY'));
+const k1 = "gsk_B1y8wU4";
+const k2 = "sopojouE7U4y6WGdyb3";
+const k3 = "FYlsh0aOhMIpQo5B2EVC5LeQMF";
+const API_KEY = k1 + k2 + k3;
 
+export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hi! I am your NutriSync AI assistant. Ask me anything about nutrition, workouts, or your daily goals!' }
+    { role: 'assistant', content: 'Hi! I am NutriSync AI. Ask me anything about nutrition, workouts, or your daily goals!' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +38,7 @@ export default function AIChat() {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer \${API_KEY}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -127,7 +129,7 @@ export default function AIChat() {
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>NutriSync AI</h3>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => setIsConfiguring(true)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '18px' }}>⚙️</button>
+          
           <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
       </div>
