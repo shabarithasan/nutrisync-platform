@@ -224,13 +224,19 @@ const Component = /*#__PURE__*/ React.forwardRef(function(props, ref) {
                             })
                         }), /*#__PURE__*/ _jsx(ResolveLinks, {
                             links: [{
-                                href: "https://nutrisync-platform.onrender.com/login",
+                                href: {
+                                    webPageId: "augiA20Il"
+                                },
                                 implicitPathVariables: undefined
                             }, {
-                                href: "https://nutrisync-platform.onrender.com/login",
+                                href: {
+                                    webPageId: "augiA20Il"
+                                },
                                 implicitPathVariables: undefined
                             }, {
-                                href: "https://nutrisync-platform.onrender.com/login",
+                                href: {
+                                    webPageId: "augiA20Il"
+                                },
                                 implicitPathVariables: undefined
                             }],
                             children: resolvedLinks => /*#__PURE__*/ _jsx(ComponentViewportProvider, {
