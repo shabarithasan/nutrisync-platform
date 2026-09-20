@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -130,6 +132,19 @@ app.post('/api/diet-plans/generate', requireAuth, async (req,res,next)=>{try{con
 app.get('/api/diet-plans/latest', requireAuth, async (req,res,next)=>{try{res.json({plan:await prisma.dietPlan.findFirst({where:{userId:req.auth.sub},orderBy:{createdAt:'desc'}})});}catch(e){next(e)}});
 app.post('/api/meals', requireAuth, async (req,res,next)=>{try{const mealSchema=z.object({mealType:z.string().min(1),foodName:z.string().min(1),serving:z.string().min(1),calories:z.coerce.number().int().min(0),protein:z.coerce.number().min(0),carbs:z.coerce.number().min(0),fat:z.coerce.number().min(0),loggedAt:z.string().datetime().optional()});const body=parse(mealSchema,req.body,res);if(!body)return;const {loggedAt,...data}=body;res.status(201).json({meal:await prisma.mealEntry.create({data:{...data,userId:req.auth.sub,loggedAt:loggedAt||undefined}})});}catch(e){next(e)}});
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.join(__dirname, '../../dist');
+
+app.use(express.static(distPath));
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.use((error, req, res, next) => { console.error(error); res.status(500).json({ error: 'Unexpected server error.' }); });
 
 const port = Number(process.env.PORT || 4000);
