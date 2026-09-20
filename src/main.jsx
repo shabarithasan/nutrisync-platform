@@ -3,6 +3,21 @@ import AIChat from './AIChat.jsx';
 import LiveSensors from './LiveSensors.jsx';
 import MacOSDock from './MacOSDock.jsx';
 import React, { useMemo, useState, useEffect, Component } from 'react';
+
+import {
+  AreaChart,
+  LinearXAxis,
+  LinearXAxisTickSeries,
+  LinearXAxisTickLabel,
+  LinearYAxis,
+  LinearYAxisTickSeries,
+  AreaSeries,
+  Area,
+  Gradient,
+  GradientStop,
+  GridlineSeries,
+  Gridline
+} from 'reaviz';
 import { createRoot } from 'react-dom/client';
 import NutritionCalculator from './NutritionCalculator.jsx';
 import './styles.css';
