@@ -42,7 +42,7 @@ export default function AIChat() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'openai/gpt-oss-20b',
           messages: [
             { role: 'system', content: 'You are NutriSync AI, an expert, encouraging health and fitness assistant. Keep answers concise, actionable, and friendly.' },
             ...newMessages
@@ -159,3 +159,4 @@ export default function AIChat() {
     </div>
   );
 }
+
