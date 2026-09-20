@@ -9721,88 +9721,6 @@
 
     <!-- End of headEnd -->
 
-<script>
-(function() {
-  var LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
-
-  function forceLogin(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    window.location.replace(LOGIN_URL);
-    return false;
-  }
-
-  function patchAll() {
-    // Find ALL anchor elements on the page
-    var anchors = document.querySelectorAll('a');
-    for (var i = 0; i < anchors.length; i++) {
-      var a = anchors[i];
-      if (a._loginPatched) continue;
-      var text = (a.textContent || '').trim();
-      if (text === 'Log in / Sign up') {
-        a._loginPatched = true;
-        // Override href directly
-        a.href = LOGIN_URL;
-        // Attach listeners on ALL phases
-        a.addEventListener('mousedown', forceLogin, true);
-        a.addEventListener('pointerdown', forceLogin, true);
-        a.addEventListener('click', forceLogin, true);
-        a.onclick = forceLogin;
-        a.onmousedown = forceLogin;
-        a.onpointerdown = forceLogin;
-        // Prevent Framer from changing href back
-        Object.defineProperty(a, 'href', {
-          get: function() { return LOGIN_URL; },
-          set: function() { /* block Framer from overwriting */ },
-          configurable: true
-        });
-      }
-    }
-  }
-
-  // Patch immediately
-  patchAll();
-
-  // Patch after DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', patchAll);
-  }
-
-  // Watch for React/Framer hydration mutations
-  function startWatching() {
-    if (!document.body) return;
-    new MutationObserver(patchAll).observe(document.body, {childList: true, subtree: true, attributes: true});
-    // Also poll for 15 seconds to catch late hydration
-    var n = 0;
-    var timer = setInterval(function() {
-      patchAll();
-      if (++n >= 15) clearInterval(timer);
-    }, 1000);
-  }
-
-  if (document.body) startWatching();
-  else document.addEventListener('DOMContentLoaded', startWatching);
-
-  // Nuclear option: intercept ANY click on the entire page
-  window.addEventListener('click', function(e) {
-    var el = e.target;
-    while (el && el !== document.body) {
-      if (el.tagName === 'A') {
-        var txt = (el.textContent || '').trim();
-        if (txt === 'Log in / Sign up') {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          window.location.replace(LOGIN_URL);
-          return false;
-        }
-      }
-      el = el.parentElement;
-    }
-  }, true);
-})();
-</script>
 </head>
 
 <body>
@@ -16173,6 +16091,87 @@
     <!-- Start of bodyEnd -->
 
     <!-- End of bodyEnd -->
+
+<script>
+(function() {
+  var LOGIN_URL = 'https://nutrisync-platform.onrender.com/login';
+
+  function forceLogin(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    window.location.replace(LOGIN_URL);
+    return false;
+  }
+
+  function patchAll() {
+    var anchors = document.querySelectorAll('a');
+    for (var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      var txt = (a.textContent || '').trim();
+      if (txt === 'Log in / Sign up' && !a._lp) {
+        a._lp = true;
+        a.addEventListener('mousedown', forceLogin, true);
+        a.addEventListener('pointerdown', forceLogin, true);
+        a.addEventListener('click', forceLogin, true);
+        a.onclick = forceLogin;
+        a.onmousedown = forceLogin;
+        a.onpointerdown = forceLogin;
+      }
+    }
+  }
+
+  // Keep patching every 500ms forever (Framer keeps recreating elements)
+  setInterval(patchAll, 500);
+
+  // Also use MutationObserver
+  if (document.body) {
+    new MutationObserver(patchAll).observe(document.body, {childList: true, subtree: true});
+  }
+
+  // Nuclear fallback: window-level capture listener
+  window.addEventListener('click', function(e) {
+    var el = e.target;
+    while (el && el !== document.body) {
+      if (el.tagName === 'A' && (el.textContent || '').trim() === 'Log in / Sign up') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        window.location.replace(LOGIN_URL);
+        return false;
+      }
+      el = el.parentElement;
+    }
+  }, true);
+
+  // Same for mousedown (Framer uses this)
+  window.addEventListener('mousedown', function(e) {
+    var el = e.target;
+    while (el && el !== document.body) {
+      if (el.tagName === 'A' && (el.textContent || '').trim() === 'Log in / Sign up') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+      el = el.parentElement;
+    }
+  }, true);
+
+  window.addEventListener('pointerdown', function(e) {
+    var el = e.target;
+    while (el && el !== document.body) {
+      if (el.tagName === 'A' && (el.textContent || '').trim() === 'Log in / Sign up') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+      el = el.parentElement;
+    }
+  }, true);
+})();
+</script>
 </body>
 
 </html>
