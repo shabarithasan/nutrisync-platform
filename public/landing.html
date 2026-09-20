@@ -9720,7 +9720,23 @@
     <!-- Start of headEnd -->
 
     <!-- End of headEnd -->
-<script>window.addEventListener('click', function(e) { let el = e.target.closest('a'); if (el && el.getAttribute('href') && el.getAttribute('href').includes('/login')) { e.stopPropagation(); e.preventDefault(); window.location.assign('/login'); } }, true);</script></head>
+<script>
+['click','mousedown','pointerdown','mouseup','pointerup'].forEach(ev => window.addEventListener(ev, function(e) {
+  let el = e.target.closest('a') || e.target.closest('[data-reset="button"]');
+  if (el) {
+    let text = el.innerText || el.textContent || '';
+    let href = el.getAttribute('href') || '';
+    if (href.includes('/login') || text.includes('Log in')) {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if (ev === 'click' || ev === 'mouseup' || ev === 'pointerup') {
+        e.preventDefault();
+        window.location.href = '/login';
+      }
+    }
+  }
+}, true));
+</script></head>
 
 <body>
     <script async src="/events.framer.com/script?v=2" data-fid="251796e341529b36601f5495a43e4ca23d916637f341381f59162b826a2c8fd4" data-no-nt></script>
