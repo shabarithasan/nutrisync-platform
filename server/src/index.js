@@ -133,7 +133,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, '../../dist');
 
-app.use(express.static(distPath));
+app.use(express.static(distPath, { index: false }));
 app.use((req, res, next) => {
   if (req.method === 'GET' && req.path === '/') {
     // If they have a refreshToken, they are logged in, so serve the React app
