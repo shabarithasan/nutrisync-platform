@@ -10,7 +10,10 @@
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    window.location.href = window.LOGIN_URL;
+    // Use setTimeout to run AFTER Framer finishes its internal routing/pushState
+    setTimeout(function() {
+      window.location.href = window.LOGIN_URL;
+    }, 10);
     return false;
   };
   
