@@ -118,15 +118,12 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
       style={{
         height: `${contentHeight + padding * 2}px`,
         width: `${baseIconSize + padding * 2}px`,
-        background: 'rgba(255, 255, 255, 0.25)',
-        backdropFilter: 'blur(30px) saturate(1.5)',
-        WebkitBackdropFilter: 'blur(30px) saturate(1.5)',
-        borderRadius: `${Math.max(12, baseIconSize * 0.4)}px`,
-        border: '1px solid rgba(255, 255, 255, 0.4)',
-        boxShadow: `
-          0 ${Math.max(4, baseIconSize * 0.1)}px ${Math.max(16, baseIconSize * 0.4)}px rgba(0, 0, 0, 0.15),
-          inset 1px 0 0 rgba(255, 255, 255, 0.8)
-        `,
+        background: 'var(--card)',
+        backdropFilter: 'blur(24px) saturate(1.5)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
+        borderRadius: `${Math.max(16, baseIconSize * 0.5)}px`,
+        border: '1px solid var(--line)',
+        boxShadow: `0 8px 24px rgba(0, 0, 0, 0.08)`,
         padding: `${padding}px`,
         display: 'flex',
         flexDirection: 'column',
@@ -178,7 +175,7 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
                 height={scaledSize}
                 style={{
                   objectFit: 'contain',
-                  filter: `drop-shadow(0 ${scale > 1.2 ? Math.max(2, baseIconSize * 0.05) : Math.max(1, baseIconSize * 0.03)}px ${scale > 1.2 ? Math.max(4, baseIconSize * 0.1) : Math.max(2, baseIconSize * 0.06)}px rgba(0,0,0,${0.1 + (scale - 1) * 0.1}))`
+                  filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.15))`
                 }}
               />
               {openApps.includes(app.id) && (
