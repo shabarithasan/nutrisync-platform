@@ -17,6 +17,7 @@
     "@prisma/client": "^6.12.0",
     "@vitejs/plugin-react": "^4.3.4",
     "bcryptjs": "^3.0.2",
+    "clsx": "^2.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -25,14 +26,18 @@
     "framer-motion": "^13.4.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^1.48.0",
     "prisma": "^6.12.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reaviz": "^16.2.2",
+    "tailwind-merge": "^3.7.0",
     "vite": "^6.0.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@tailwindcss/vite": "^4.3.3",
+    "concurrently": "^9.1.2",
+    "tailwindcss": "^4.3.3"
   }
 }
