@@ -208,7 +208,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
       </header>
 
       {/* Form body */}
-      <main className="relative z-10 mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-12 sm:px-10 lg:px-12">
+      <main style={{ border: "5px solid red", minHeight: "400px", background: "yellow", width: "100%", opacity: 1, visibility: "visible", display: "flex", color: "black", zIndex: 9999 }} className="relative z-10 mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-12 sm:px-10 lg:px-12">
         <div className=" ">
           <h2 className="font-display text-[2.5rem] font-medium leading-[1.05] tracking-tight text-ink">
             Welcome <span className="font-light italic text-leaf-600">back</span>
@@ -434,3 +434,4 @@ export function LoginForm({ onAuth, apiBase = '' }) {
     </div>
   );
 }
+
