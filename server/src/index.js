@@ -161,8 +161,9 @@ app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0'); return res.sendFile(path.join(distPath, 'landing.html'));
   }
   if (req.method === 'GET' && !req.path.startsWith('/api/')) {
-    return res.sendFile(path.join(distPath, 'index.html'));
-  }
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      return res.sendFile(path.join(distPath, 'index.html'));
+    }
   next();
 });
 app.use((error, req, res, next) => { console.error(error); res.status(500).json({ error: 'Unexpected server error.' }); });
