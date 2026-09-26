@@ -25,7 +25,7 @@ import {
 } from 'reaviz';
 import { createRoot } from 'react-dom/client';
 import NutritionCalculator from './NutritionCalculator.jsx';
-import './styles.css';
+import './index.css';
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -530,4 +530,5 @@ function App(){const defaults={name:'',age:'',gender:'',height:'',weight:'',targ
 ]}
 onAppClick={(id) => { if(id==='theme') setDark(!dark); else setPage(id); }} openApps={[page]} /></div><main className="content">{content}</main>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /></div>}
 createRoot(document.getElementById('root')).render(<ErrorBoundary><App/></ErrorBoundary>);
+
 
