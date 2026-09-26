@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import type { FormEvent } from "react";
 import {
   Mail,
   Lock,
@@ -101,19 +101,18 @@ function FeatureTicker() {
 
 type Status = "idle" | "loading" | "success";
 
-export function LoginForm({ onAuth, apiBase = '' }) {
-  const [mode, setMode] = useState('login');
+export function LoginForm({ onAuth, apiBase = "" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(true);
   const [capsOn, setCapsOn] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState("idle");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [status, setStatus] = useState<Status>("idle");
   const [errorShake, setErrorShake] = useState(0);
 
   const validate = () => {
-    const e = {};
+    const e: { email?: string; password?: string } = {};
     if (!email.trim()) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Enter a valid email address";
     if (!password) e.password = "Password is required";
@@ -122,7 +121,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
     return Object.keys(e).length === 0;
   };
 
-  const onSubmit = async (ev) => {
+  const onSubmit = async (ev: FormEvent) => {
     ev.preventDefault();
     if (status !== "idle") return;
     if (!validate()) {
@@ -130,46 +129,24 @@ export function LoginForm({ onAuth, apiBase = '' }) {
       return;
     }
     setStatus("loading");
-    
-    const post = async (path, body) => {
-      try {
-        const r = await fetch(apiBase + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'include' });
-        const d = await r.json().catch(() => ({}));
-        return { ok: r.ok, d };
-      } catch {
-        return { ok: false, d: { error: 'Could not reach the API server. Make sure it is running.' } };
-      }
-    };
-    try {
-      let r = await post('/api/auth/login', { email, password });
-      if (mode === 'register') {
-        const reg = await post('/api/auth/register', { name: email.split('@')[0], email, password });
-        if (!reg.ok) {
-          setErrors({ email: reg.d.error || 'Registration failed.' });
+          try {
+        const r = await fetch(apiBase + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }), credentials: 'include' });
+        const data = await r.json();
+        if (!r.ok) {
+          setErrors({ email: data.error || 'Sign in failed.' });
           setStatus("idle");
           return;
         }
-        r = await post('/api/auth/login', { email, password });
-      }
-      
-      if (!r.ok) {
-        setErrors({ email: r.d.error || 'Sign in failed.' });
+        setStatus("success");
+        setTimeout(() => {
+          const authData = { user: data.user, accessToken: data.accessToken };
+          sessionStorage.setItem('nts-auth', JSON.stringify(authData));
+          if (onAuth) onAuth(authData);
+        }, 800);
+      } catch (e) {
+        setErrors({ email: 'Something went wrong while signing in. Please try again.' });
         setStatus("idle");
-        return;
       }
-      
-      setStatus("success");
-      setTimeout(() => {
-        const a = { user: r.d.user, accessToken: r.d.accessToken };
-        sessionStorage.setItem('nts-auth', JSON.stringify(a));
-        if (onAuth) onAuth(a);
-      }, 800);
-
-    } catch {
-      setErrors({ email: 'Something went wrong while signing in. Please try again.' });
-      setStatus("idle");
-    }
-
   };
 
   const fieldBase =
@@ -187,7 +164,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
       />
 
       {/* Top bar */}
-      <header className=" relative z-10 flex items-center justify-between px-6 pt-6 sm:px-10 lg:px-12">
+      <header className="animate-fade-up relative z-10 flex items-center justify-between px-6 pt-6 sm:px-10 lg:px-12">
         <div className="lg:hidden">
           <Logo compact />
         </div>
@@ -208,8 +185,8 @@ export function LoginForm({ onAuth, apiBase = '' }) {
       </header>
 
       {/* Form body */}
-      <main style={{ border: "5px solid red", minHeight: "400px", background: "yellow", width: "100%", opacity: 1, visibility: "visible", display: "flex", color: "black", zIndex: 9999 }} className="relative z-10 mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-12 sm:px-10 lg:px-12">
-        <div className=" ">
+      <main className="relative z-10 mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-12 sm:px-10 lg:px-12">
+        <div className="animate-fade-up delay-100">
           <h2 className="font-display text-[2.5rem] font-medium leading-[1.05] tracking-tight text-ink">
             Welcome <span className="font-light italic text-leaf-600">back</span>
           </h2>
@@ -220,7 +197,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </div>
 
         {/* Social auth */}
-        <div className="  mt-8 grid grid-cols-2 gap-3">
+        <div className="animate-fade-up delay-200 mt-8 grid grid-cols-2 gap-3">
           <button
             type="button"
             className="flex h-11 items-center justify-center gap-2.5 rounded-xl border border-ink/10 bg-white text-sm font-medium text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-lg hover:shadow-ink/5 active:translate-y-0"
@@ -238,7 +215,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </div>
 
         {/* Divider */}
-        <div className="  mt-7 flex items-center gap-4">
+        <div className="animate-fade-up delay-300 mt-7 flex items-center gap-4">
           <span className="h-px flex-1 bg-ink/10" />
           <span className="text-[0.7rem] font-medium uppercase tracking-[0.18em] text-ink-soft/70">
             or with email
@@ -247,7 +224,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} noValidate className="  mt-6 space-y-5">
+        <form onSubmit={onSubmit} noValidate className="animate-fade-up delay-400 mt-6 space-y-5">
           {/* Email */}
           <div>
             <label
@@ -382,7 +359,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
 
           {/* Success banner */}
           {status === "success" && (
-            <div className=" flex items-center gap-2.5 rounded-xl border border-leaf-500/30 bg-leaf-500/10 px-4 py-3">
+            <div className="animate-fade-up flex items-center gap-2.5 rounded-xl border border-leaf-500/30 bg-leaf-500/10 px-4 py-3">
               <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-leaf-600">
                 <Check className="h-3 w-3 text-white" />
               </span>
@@ -405,30 +382,40 @@ export function LoginForm({ onAuth, apiBase = '' }) {
             )}
           >
             {status === "idle" && (
-              <> {mode === "login" ? "Sign in" : "Create Account"} <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              <>
+                Sign in
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </>
             )}
             {status === "loading" && (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {mode === "login" ? "Signing you in..." : "Creating account..."}
+                Signing you in…
               </>
             )}
             {status === "success" && (
               <>
-                <Check className="h-4 w-4" /> {mode === "login" ? "Welcome back" : "Account created"} </>
+                <Check className="h-4 w-4" />
+                Welcome back
+              </>
             )}
           </button>
         </form>
 
         {/* Sign up */}
-        <p className="  mt-8 text-center text-sm text-ink-soft">
-          {mode === "login" ? (<>New to NutriSync?{" "}<a href="#" onClick={(e)=>{e.preventDefault(); setMode("register");}} className="group font-semibold text-forest-900 underline decoration-leaf-500/40 decoration-2 underline-offset-4 transition-colors hover:decoration-leaf-500">Create your free account</a></>) : (<>Already have an account?{" "}<a href="#" onClick={(e)=>{e.preventDefault(); setMode("login");}} className="group font-semibold text-forest-900 underline decoration-leaf-500/40 decoration-2 underline-offset-4 transition-colors hover:decoration-leaf-500">Sign in to your account</a></>)}
+        <p className="animate-fade-up delay-500 mt-8 text-center text-sm text-ink-soft">
+          New to NutriSync?{" "}
+          <a
+            href="#"
+            className="group font-semibold text-forest-900 underline decoration-leaf-500/40 decoration-2 underline-offset-4 transition-colors hover:decoration-leaf-500"
+          >
+            Create your free account
+          </a>
         </p>
       </main>
 
       {/* Feature ticker */}
-      <div className="animate-fade-in  relative z-10">
+      <div className="animate-fade-in delay-600 relative z-10">
         <FeatureTicker />
       </div>
     </div>
