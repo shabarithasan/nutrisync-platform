@@ -27,7 +27,7 @@ import { createRoot } from 'react-dom/client';
 import NutritionCalculator from './NutritionCalculator.jsx';
 import './styles.css';
 
-class ErrorBoundary extends Component {
+class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(error) { return { error }; }
   render() {
