@@ -1,9 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
-  const [mouseY, setMouseY] = useState(null);
-  const [currentScales, setCurrentScales] = useState(apps.map(() => 1));
+const MacOSDock = ({ apps = [], openApps = [], onAppClick, className = '' }) => {
+  const [currentScales, setCurrentScales] = useState([]);
   const [currentPositions, setCurrentPositions] = useState([]);
+  const [mouseX, setMouseX] = useState(null);
+  
   const dockRef = useRef(null);
   const iconRefs = useRef([]);
   const animationFrameRef = useRef(undefined);
@@ -33,10 +34,10 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
     if (mousePosition === null) return apps.map(() => minScale);
     return apps.map((_, index) => {
       const normalIconCenter = (index * (baseIconSize + baseSpacing)) + (baseIconSize / 2);
-      const minY = mousePosition - (effectWidth / 2);
-      const maxY = mousePosition + (effectWidth / 2);
-      if (normalIconCenter < minY || normalIconCenter > maxY) return minScale;
-      const theta = ((normalIconCenter - minY) / effectWidth) * 2 * Math.PI;
+      const minX = mousePosition - (effectWidth / 2);
+      const maxX = mousePosition + (effectWidth / 2);
+      if (normalIconCenter < minX || normalIconCenter > maxX) return minScale;
+      const theta = ((normalIconCenter - minX) / effectWidth) * 2 * Math.PI;
       const cappedTheta = Math.min(Math.max(theta, 0), 2 * Math.PI);
       const scaleFactor = (1 - Math.cos(cappedTheta)) / 2;
       return minScale + (scaleFactor * (maxScale - minScale));
@@ -44,12 +45,12 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
   }, [apps, baseIconSize, baseSpacing, effectWidth, maxScale, minScale]);
 
   const calculatePositions = useCallback((scales) => {
-    let currentY = 0;
+    let currentX = 0;
     return scales.map((scale) => {
-      const scaledHeight = baseIconSize * scale;
-      const centerY = currentY + (scaledHeight / 2);
-      currentY += scaledHeight + baseSpacing;
-      return centerY;
+      const scaledWidth = baseIconSize * scale;
+      const centerX = currentX + (scaledWidth / 2);
+      currentX += scaledWidth + baseSpacing;
+      return centerX;
     });
   }, [baseIconSize, baseSpacing]);
 
@@ -60,9 +61,9 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
   }, [apps, calculatePositions, minScale, config]);
 
   const animateToTarget = useCallback(() => {
-    const targetScales = calculateTargetMagnification(mouseY);
+    const targetScales = calculateTargetMagnification(mouseX);
     const targetPositions = calculatePositions(targetScales);
-    const lerpFactor = mouseY !== null ? 0.2 : 0.12;
+    const lerpFactor = mouseX !== null ? 0.2 : 0.12;
 
     setCurrentScales(prev => prev.map((curr, i) => curr + ((targetScales[i] - curr) * lerpFactor)));
     setCurrentPositions(prev => prev.map((curr, i) => curr + ((targetPositions[i] - curr) * lerpFactor)));
@@ -70,10 +71,10 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
     const needsUpdate = currentScales.some((s, i) => Math.abs(s - targetScales[i]) > 0.002) || 
                         currentPositions.some((p, i) => Math.abs(p - targetPositions[i]) > 0.1);
     
-    if (needsUpdate || mouseY !== null) {
+    if (needsUpdate || mouseX !== null) {
       animationFrameRef.current = requestAnimationFrame(animateToTarget);
     }
-  }, [mouseY, calculateTargetMagnification, calculatePositions, currentScales, currentPositions]);
+  }, [mouseX, calculateTargetMagnification, calculatePositions, currentScales, currentPositions]);
 
   useEffect(() => {
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
@@ -88,25 +89,24 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
     if (dockRef.current) {
       const rect = dockRef.current.getBoundingClientRect();
       const padding = Math.max(8, baseIconSize * 0.12);
-      setMouseY(e.clientY - rect.top - padding);
+      setMouseX(e.clientX - rect.left - padding);
     }
   }, [baseIconSize]);
 
-  const handleMouseLeave = useCallback(() => setMouseY(null), []);
+  const handleMouseLeave = useCallback(() => setMouseX(null), []);
 
   const handleAppClick = (appId, index) => {
     const el = iconRefs.current[index];
     if (el) {
-      const bounceWidth = Math.max(-8, -baseIconSize * 0.15);
+      const bounceHeight = Math.max(-12, -baseIconSize * 0.25);
       el.style.transition = 'transform 0.2s ease-out';
-      // Bounce along X axis since it's on the left
-      el.style.transform = `translateX(${bounceWidth}px)`;
-      setTimeout(() => el.style.transform = 'translateX(0px)', 200);
+      el.style.transform = `translateY(${bounceHeight}px)`;
+      setTimeout(() => el.style.transform = 'translateY(0px)', 200);
     }
     onAppClick(appId);
   };
 
-  const contentHeight = currentPositions.length > 0 
+  const contentWidth = currentPositions.length > 0 
     ? Math.max(...currentPositions.map((pos, i) => pos + (baseIconSize * currentScales[i]) / 2))
     : (apps.length * (baseIconSize + baseSpacing)) - baseSpacing;
   const padding = Math.max(8, baseIconSize * 0.12);
@@ -116,8 +116,8 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
       ref={dockRef}
       className={`macos-dock ${className}`}
       style={{
-        height: `${contentHeight + padding * 2}px`,
-        width: `${baseIconSize + padding * 2}px`,
+        width: `${contentWidth + padding * 2}px`,
+        height: `${baseIconSize + padding * 2}px`,
         background: 'var(--card)',
         backdropFilter: 'blur(24px) saturate(1.5)',
         WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
@@ -126,7 +126,7 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
         boxShadow: `0 8px 24px rgba(0, 0, 0, 0.08)`,
         padding: `${padding}px`,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
@@ -138,8 +138,8 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
       <div 
         style={{
           position: 'relative',
-          width: `${baseIconSize}px`,
-          height: '100%'
+          height: `${baseIconSize}px`,
+          width: '100%'
         }}
       >
         {apps.map((app, index) => {
@@ -157,14 +157,14 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
                 position: 'absolute',
                 cursor: 'pointer',
                 display: 'flex',
-                flexDirection: 'row',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'flex-start',
-                top: `${position - scaledSize / 2}px`,
-                left: '0px',
-                height: `${scaledSize}px`,
+                left: `${position - scaledSize / 2}px`,
+                bottom: '0px',
                 width: `${scaledSize}px`,
-                transformOrigin: 'left center',
+                height: `${scaledSize}px`,
+                transformOrigin: 'center bottom',
                 zIndex: Math.round(scale * 10)
               }}
             >
@@ -175,20 +175,20 @@ const MacOSDock = ({ apps, onAppClick, openApps = [], className = '' }) => {
                 height={scaledSize}
                 style={{
                   objectFit: 'contain',
-                  filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.15))`
+                  filter: `drop-shadow(0 4px 6px rgba(0,0,0,0.2))`
                 }}
               />
               {openApps.includes(app.id) && (
                 <div 
                   style={{
                     position: 'absolute',
-                    left: `${Math.max(-4, -baseIconSize * 0.1)}px`,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: `${Math.max(3, baseIconSize * 0.06)}px`,
-                    height: `${Math.max(3, baseIconSize * 0.06)}px`,
+                    bottom: `${Math.min(-4, -baseIconSize * 0.1)}px`,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: `${Math.max(4, baseIconSize * 0.06)}px`,
+                    height: `${Math.max(4, baseIconSize * 0.06)}px`,
                     borderRadius: '50%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                    backgroundColor: 'var(--brand)',
                   }}
                 />
               )}
