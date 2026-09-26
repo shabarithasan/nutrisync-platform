@@ -187,7 +187,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
       />
 
       {/* Top bar */}
-      <header className="animate-fade-up relative z-10 flex items-center justify-between px-6 pt-6 sm:px-10 lg:px-12">
+      <header className=" relative z-10 flex items-center justify-between px-6 pt-6 sm:px-10 lg:px-12">
         <div className="lg:hidden">
           <Logo compact />
         </div>
@@ -209,7 +209,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
 
       {/* Form body */}
       <main className="relative z-10 mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center px-6 py-12 sm:px-10 lg:px-12">
-        <div className="animate-fade-up delay-100">
+        <div className=" ">
           <h2 className="font-display text-[2.5rem] font-medium leading-[1.05] tracking-tight text-ink">
             Welcome <span className="font-light italic text-leaf-600">back</span>
           </h2>
@@ -220,7 +220,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </div>
 
         {/* Social auth */}
-        <div className="animate-fade-up delay-200 mt-8 grid grid-cols-2 gap-3">
+        <div className="  mt-8 grid grid-cols-2 gap-3">
           <button
             type="button"
             className="flex h-11 items-center justify-center gap-2.5 rounded-xl border border-ink/10 bg-white text-sm font-medium text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-lg hover:shadow-ink/5 active:translate-y-0"
@@ -238,7 +238,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </div>
 
         {/* Divider */}
-        <div className="animate-fade-up delay-300 mt-7 flex items-center gap-4">
+        <div className="  mt-7 flex items-center gap-4">
           <span className="h-px flex-1 bg-ink/10" />
           <span className="text-[0.7rem] font-medium uppercase tracking-[0.18em] text-ink-soft/70">
             or with email
@@ -247,7 +247,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={onSubmit} noValidate className="animate-fade-up delay-400 mt-6 space-y-5">
+        <form onSubmit={onSubmit} noValidate className="  mt-6 space-y-5">
           {/* Email */}
           <div>
             <label
@@ -382,7 +382,7 @@ export function LoginForm({ onAuth, apiBase = '' }) {
 
           {/* Success banner */}
           {status === "success" && (
-            <div className="animate-fade-up flex items-center gap-2.5 rounded-xl border border-leaf-500/30 bg-leaf-500/10 px-4 py-3">
+            <div className=" flex items-center gap-2.5 rounded-xl border border-leaf-500/30 bg-leaf-500/10 px-4 py-3">
               <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-leaf-600">
                 <Check className="h-3 w-3 text-white" />
               </span>
@@ -422,13 +422,13 @@ export function LoginForm({ onAuth, apiBase = '' }) {
         </form>
 
         {/* Sign up */}
-        <p className="animate-fade-up delay-500 mt-8 text-center text-sm text-ink-soft">
+        <p className="  mt-8 text-center text-sm text-ink-soft">
           {mode === "login" ? (<>New to NutriSync?{" "}<a href="#" onClick={(e)=>{e.preventDefault(); setMode("register");}} className="group font-semibold text-forest-900 underline decoration-leaf-500/40 decoration-2 underline-offset-4 transition-colors hover:decoration-leaf-500">Create your free account</a></>) : (<>Already have an account?{" "}<a href="#" onClick={(e)=>{e.preventDefault(); setMode("login");}} className="group font-semibold text-forest-900 underline decoration-leaf-500/40 decoration-2 underline-offset-4 transition-colors hover:decoration-leaf-500">Sign in to your account</a></>)}
         </p>
       </main>
 
       {/* Feature ticker */}
-      <div className="animate-fade-in delay-600 relative z-10">
+      <div className="animate-fade-in  relative z-10">
         <FeatureTicker />
       </div>
     </div>
