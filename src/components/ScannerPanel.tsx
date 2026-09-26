@@ -12,7 +12,10 @@ import {
 import { Card, CardHead } from "./Charts";
 import { cn } from "../utils/cn";
 
-export function ScannerPanel({ m, upd, todayKey, apiBase }) {
+import { useLog, todayKey, apiBase } from "../main";
+
+export function ScannerPanel() {
+  const { m, upd } = useLog();
   const [stage, setStage] = useState("ready"); // 'ready', 'captured', 'analyzing', 'done', 'error'
   const [img, setImg] = useState("");
   const [foods, setFoods] = useState([]);
