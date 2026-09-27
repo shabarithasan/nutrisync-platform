@@ -20,8 +20,8 @@ export function ModernOnboarding({ profile = {}, onComplete }) {
     height: profile.height || '',
     weight: profile.weight || '',
     targetWeight: profile.targetWeight || '',
-    activityLevel: profile.activityLevel || '',
-    primaryGoal: profile.primaryGoal || ''
+    activity: profile.activity || '',
+    goal: profile.goal || ''
   });
   
   const updateData = (field, value) => {
@@ -30,7 +30,7 @@ export function ModernOnboarding({ profile = {}, onComplete }) {
 
   const isStep1Valid = formData.age > 0 && formData.gender !== '';
   const isStep2Valid = formData.height > 0 && formData.weight > 0;
-  const isStep3Valid = formData.targetWeight > 0 && formData.activityLevel !== '' && formData.primaryGoal !== '';
+  const isStep3Valid = formData.targetWeight > 0 && formData.activity !== '' && formData.goal !== '';
 
   const handleNext = () => setStep(prev => prev + 1);
   const handlePrev = () => setStep(prev => prev - 1);
@@ -209,17 +209,21 @@ export function ModernOnboarding({ profile = {}, onComplete }) {
                   <div>
                     <label className="block text-sm font-semibold text-ink-500 mb-2">Primary Goal</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {['Lose Weight', 'Maintain', 'Gain Weight'].map(g => (
+                      {[
+                        { label: 'Lose Weight', value: 'loss' },
+                        { label: 'Maintain', value: 'maintain' },
+                        { label: 'Gain Weight', value: 'gain' }
+                      ].map(g => (
                         <button
-                          key={g}
-                          onClick={() => updateData('primaryGoal', g)}
+                          key={g.value}
+                          onClick={() => updateData('goal', g.value)}
                           className={`py-3 px-4 rounded-xl border font-medium text-sm transition-all ${
-                            formData.primaryGoal === g 
+                            formData.goal === g.value 
                               ? 'bg-orange-500 text-white border-orange-500 shadow-md'
                               : 'bg-white/70 border-orange-200 text-ink-500 hover:bg-orange-50'
                           }`}
                         >
-                          {g}
+                          {g.label}
                         </button>
                       ))}
                     </div>
@@ -228,15 +232,16 @@ export function ModernOnboarding({ profile = {}, onComplete }) {
                   <div>
                     <label className="block text-sm font-semibold text-ink-500 mb-2">Activity Level</label>
                     <select
-                      value={formData.activityLevel}
-                      onChange={(e) => updateData('activityLevel', e.target.value)}
+                      value={formData.activity}
+                      onChange={(e) => updateData('activity', e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-orange-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all font-medium text-ink-900"
                     >
                       <option value="" disabled>Select your activity level</option>
-                      <option value="Sedentary">Sedentary (Little or no exercise)</option>
-                      <option value="Light">Light (Exercise 1-3 days/week)</option>
-                      <option value="Moderate">Moderate (Exercise 3-5 days/week)</option>
-                      <option value="Active">Active (Exercise 6-7 days/week)</option>
+                      <option value="sedentary">Sedentary (Little or no exercise)</option>
+                      <option value="light">Light (Exercise 1-3 days/week)</option>
+                      <option value="moderate">Moderate (Exercise 3-5 days/week)</option>
+                      <option value="active">Active (Exercise 6-7 days/week)</option>
+                      <option value="very_active">Very Active (Intense exercise every day)</option>
                     </select>
                   </div>
                 </div>
