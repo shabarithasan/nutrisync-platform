@@ -60,6 +60,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   const [water, setWater] = useState(0);
   const [meals, setMeals] = useState([]);
   const [workouts, setWorkouts] = useState([]);
+  const [steps, setSteps] = useState(0);
   
   useEffect(() => {
     if (page === 'overview') {
@@ -69,6 +70,18 @@ export function ModernDashboard({ profile, page, setPage, children }) {
       if(m) setMeals(JSON.parse(m));
       const wk = localStorage.getItem('nts-workouts');
       if(wk) setWorkouts(JSON.parse(wk));
+      
+      const loadSteps = () => {
+        try {
+          const logs = JSON.parse(localStorage.getItem('nts-log') || '{}');
+          const today = new Date().toISOString().split('T')[0];
+          setSteps(logs[today]?.steps || 0);
+        } catch { setSteps(0); }
+      };
+      
+      loadSteps();
+      window.addEventListener('nts-log-updated', loadSteps);
+      return () => window.removeEventListener('nts-log-updated', loadSteps);
     }
   }, [page]);
 
@@ -227,6 +240,9 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                 <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Water</span><span className="font-bold text-ink-900">{waterGlasses} / {Math.max(6, Math.round(weight * 35 / 250))} glasses</span></div>
                 <div className="h-1.5 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{width: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%`}} /></div>
                 <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Meals Logged</span><span className="font-bold text-ink-900">{meals.length} today</span></div>
+                
+                <div className="flex justify-between items-center text-xs mt-2"><span className="font-semibold text-ink-700">Steps</span><span className="font-bold text-ink-900">{steps.toLocaleString()} / 10,000</span></div>
+                <div className="h-1.5 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-blue-400 rounded-full transition-all duration-700" style={{width: `${Math.min(100, (steps/10000)*100)}%`}} /></div>
               </div>
             </GlassCard>
             

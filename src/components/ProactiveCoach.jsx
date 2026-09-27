@@ -151,7 +151,7 @@ export function ProactiveCoach({ profile }) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.5, type: 'spring', bounce: 0.4 }}
-          className="fixed bottom-6 right-6 z-50 max-w-sm w-full"
+          className="fixed bottom-24 right-6 z-50 max-w-sm w-full"
         >
           <GlassCard className="p-5 relative group">
             <button

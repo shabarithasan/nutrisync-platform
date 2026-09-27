@@ -3,7 +3,15 @@ import React, { useState, useEffect, useRef } from 'react';
 export default function LiveSensors({ upd, m }) {
   const [active, setActive] = useState(false);
   const [granted, setGranted] = useState(false);
-  const [steps, setSteps] = useState(0);
+  const [steps, setSteps] = useState(() => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const logs = JSON.parse(localStorage.getItem('nts-log') || '{}');
+      return (logs[today] && logs[today].steps) || 0;
+    } catch {
+      return 0;
+    }
+  });
   const [posture, setPosture] = useState('Good');
   const [tilt, setTilt] = useState(0);
 
@@ -29,18 +37,29 @@ export default function LiveSensors({ upd, m }) {
   useEffect(() => {
     if (!active) return;
     let lastMag = 0;
-    let lastTime = 0;
+    let lastTime = Date.now();
 
     const handleMotion = (e) => {
       const acc = e.accelerationIncludingGravity || e.acceleration;
       if (!acc) return;
       const mag = Math.sqrt((acc.x || 0)**2 + (acc.y || 0)**2 + (acc.z || 0)**2);
       
-      // Simple step detection
-      if (mag > 11.5 && lastMag <= 11.5) {
+      // Step detection: higher threshold, longer debounce to ignore shakes
+      if (mag > 13.5 && lastMag <= 13.5) {
         const now = Date.now();
-        if (now - lastTime > 300) {
-          setSteps(s => s + 1);
+        if (now - lastTime > 600) { // 600ms minimum between steps
+          setSteps(s => {
+            const newSteps = s + 1;
+            try {
+              const today = new Date().toISOString().split('T')[0];
+              const logs = JSON.parse(localStorage.getItem('nts-log') || '{}');
+              if (!logs[today]) logs[today] = {};
+              logs[today].steps = newSteps;
+              localStorage.setItem('nts-log', JSON.stringify(logs));
+              window.dispatchEvent(new Event('nts-log-updated'));
+            } catch (err) {}
+            return newSteps;
+          });
           lastTime = now;
         }
       }
@@ -49,8 +68,6 @@ export default function LiveSensors({ upd, m }) {
 
     const handleOrientation = (e) => {
       if (e.beta === null) return;
-      // beta is front-to-back tilt. 0 is flat, 90 is straight up.
-      // If user is looking down at phone, beta is usually > 60
       setTilt(Math.round(e.beta));
       if (e.beta > 70) {
         setPosture('Text Neck! ⚠️');
@@ -62,11 +79,10 @@ export default function LiveSensors({ upd, m }) {
     window.addEventListener('devicemotion', handleMotion);
     window.addEventListener('deviceorientation', handleOrientation);
 
-    // Parallax effect on body
     const handleParallax = (e) => {
       if (!e.gamma || !e.beta) return;
-      document.documentElement.style.setProperty('--rot-x', `\${e.beta / 10}deg`);
-      document.documentElement.style.setProperty('--rot-y', `\${e.gamma / 10}deg`);
+      document.documentElement.style.setProperty('--rot-x', `${e.beta / 10}deg`);
+      document.documentElement.style.setProperty('--rot-y', `${e.gamma / 10}deg`);
     };
     window.addEventListener('deviceorientation', handleParallax);
 
@@ -79,7 +95,7 @@ export default function LiveSensors({ upd, m }) {
 
   if (!active) {
     return (
-      <div style={{ position: 'fixed', bottom: '100px', right: '24px', zIndex: 10000 }}>
+      <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 10000 }}>
         <button 
           onClick={requestPermissions}
           style={{
@@ -96,7 +112,7 @@ export default function LiveSensors({ upd, m }) {
 
   return (
     <div style={{ 
-      position: 'fixed', bottom: '100px', right: '24px', zIndex: 10000,
+      position: 'fixed', top: '24px', right: '24px', zIndex: 10000,
       background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(20px)',
       border: '1px solid rgba(255, 255, 255, 0.4)', borderRadius: '24px',
       padding: '20px', width: '220px', boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
