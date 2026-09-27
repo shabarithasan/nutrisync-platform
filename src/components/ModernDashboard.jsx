@@ -3,9 +3,11 @@ import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Apple, Activity, Target, Lightbulb, Users, Settings,
   Search, Bell, MoreHorizontal, ChevronRight, Droplet, Flame, ArrowUpRight,
-  Camera, BarChart2, User
+  Camera, BarChart2, User, Salad, Heart
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { MotivationalQuote } from './MotivationalQuote';
+import { HealthCircle } from './HealthCircle';
 
 /* --- Components --- */
 
@@ -95,6 +97,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   const sidebarLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', id: 'overview' },
     { icon: Camera, label: 'Scanner', id: 'scan' },
+    { icon: Salad, label: 'Diet Plans', id: 'diet' },
     { icon: Activity, label: 'Workouts', id: 'progress' },
     { icon: Droplet, label: 'Hydration', id: 'water' },
     { icon: BarChart2, label: 'Analytics', id: 'reports' },
@@ -155,7 +158,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
         <header className="flex justify-between items-end mb-10">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <h1 className="text-3xl lg:text-4xl font-bold text-ink-900 tracking-tight mb-2">
-              Good Morning, {profile?.name?.split(' ')[0] || 'User'}!
+              {new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 17 ? 'Good Afternoon' : 'Good Evening'}, {profile?.name?.split(' ')[0] || 'there'}! 👋
             </h1>
             <p className="text-ink-500 font-medium">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
           </motion.div>
@@ -172,25 +175,76 @@ export function ModernDashboard({ profile, page, setPage, children }) {
 
         {page === 'overview' ? (
           /* Dashboard Grid */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 auto-rows-min">
+          <div className="space-y-6">
+            {/* Motivational Quote Banner */}
+            <MotivationalQuote className="w-full" />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 auto-rows-min">
+            
+            {/* Row 0: Health Circle */}
+            <GlassCard delay={0.05} className="col-span-1 lg:col-span-4 p-6 flex flex-col items-center justify-center">
+              <HealthCircle profile={profile} size={140} />
+            </GlassCard>
+
+            <GlassCard delay={0.08} className="col-span-1 lg:col-span-4 p-6 flex flex-col justify-center">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <Heart className="w-5 h-5 text-emerald-500" />
+                </div>
+                <h3 className="font-bold text-ink-900">Quick Actions</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setPage('scan')} className="px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold text-emerald-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <Camera className="w-3.5 h-3.5" /> Scan Food
+                </button>
+                <button onClick={() => setPage('diet')} className="px-3 py-2.5 bg-amber-50 hover:bg-amber-100 rounded-xl text-xs font-bold text-amber-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <Salad className="w-3.5 h-3.5" /> Diet Plan
+                </button>
+                <button onClick={() => setPage('progress')} className="px-3 py-2.5 bg-blue-50 hover:bg-blue-100 rounded-xl text-xs font-bold text-blue-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <Activity className="w-3.5 h-3.5" /> Workouts
+                </button>
+                <button onClick={() => setPage('water')} className="px-3 py-2.5 bg-cyan-50 hover:bg-cyan-100 rounded-xl text-xs font-bold text-cyan-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <Droplet className="w-3.5 h-3.5" /> Hydrate
+                </button>
+              </div>
+            </GlassCard>
+
+            <GlassCard delay={0.1} className="col-span-1 lg:col-span-4 p-6 flex flex-col justify-between">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-orange-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-ink-900">Daily Targets</h3>
+                  <p className="text-[10px] text-ink-500 font-medium">Based on your profile</p>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Calories</span><span className="font-bold text-ink-900">{targetCals} kcal</span></div>
+                <div className="h-1.5 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{width: `${Math.min(100, (consumedCals/targetCals)*100)}%`}} /></div>
+                <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Water</span><span className="font-bold text-ink-900">{waterGlasses} / {Math.max(6, Math.round(weight * 35 / 250))} glasses</span></div>
+                <div className="h-1.5 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{width: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%`}} /></div>
+                <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Meals Logged</span><span className="font-bold text-ink-900">{meals.length} today</span></div>
+              </div>
+            </GlassCard>
             
             {/* Row 1: 4 Cards */}
-            <GlassCard delay={0.1} className="col-span-1 lg:col-span-5 p-6">
+            <GlassCard delay={0.15} className="col-span-1 lg:col-span-5 p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bold text-ink-900">Today's Macros</h3>
-                <MoreHorizontal className="w-5 h-5 text-ink-400" />
+                <span className="text-xs font-semibold text-ink-400">{consumedCals > 0 ? 'From logged meals' : 'No meals logged yet'}</span>
               </div>
               <div className="flex justify-between items-center px-2">
                 <div className="flex flex-col items-center gap-2">
-                  <Ring value={120} max={150} color="#10b981" size={80} strokeWidth={8} label="120g" sublabel="150g" />
+                  <Ring value={meals.reduce((s,m) => s+(m.p||0), 0)} max={Math.round(targetCals*0.3/4)} color="#10b981" size={80} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.p||0), 0)}g`} sublabel={`${Math.round(targetCals*0.3/4)}g`} />
                   <span className="text-xs font-semibold text-ink-900">Protein</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <Ring value={210} max={280} color="#f59e0b" size={80} strokeWidth={8} label="210g" sublabel="280g" />
+                  <Ring value={meals.reduce((s,m) => s+(m.c||0), 0)} max={Math.round(targetCals*0.45/4)} color="#f59e0b" size={80} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.c||0), 0)}g`} sublabel={`${Math.round(targetCals*0.45/4)}g`} />
                   <span className="text-xs font-semibold text-ink-900">Carbs</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <Ring value={65} max={75} color="#f97316" size={80} strokeWidth={8} label="65g" sublabel="75g" />
+                  <Ring value={meals.reduce((s,m) => s+(m.f||0), 0)} max={Math.round(targetCals*0.25/9)} color="#f97316" size={80} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.f||0), 0)}g`} sublabel={`${Math.round(targetCals*0.25/9)}g`} />
                   <span className="text-xs font-semibold text-ink-900">Fats</span>
                 </div>
               </div>
@@ -379,6 +433,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
               </div>
             </div>
             
+          </div>
           </div>
         ) : (
           <GlassCard className="p-8 min-h-[600px] relative z-10 bg-white/70">
