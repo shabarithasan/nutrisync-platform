@@ -58,6 +58,7 @@ export function ModernScanner() {
       resultText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(resultText);
       setAiResult(parsed);
+        setIsFallback(data.isFallback || false);
       setStatus('complete');
     } catch (err) {
       console.error(err);
