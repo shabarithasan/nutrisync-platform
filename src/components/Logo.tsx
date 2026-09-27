@@ -1,60 +1,34 @@
 import { cn } from "../utils/cn";
 
+/**
+ * NutriSync mark — solid emerald tile with a crisp leaf glyph.
+ * Reads cleanly on both dark and light surfaces.
+ */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 32 32"
       fill="none"
-      className={cn("h-9 w-9", className)}
+      className={cn("h-7 w-7", className)}
       aria-hidden="true"
     >
-      {/* Rounded square backdrop */}
-      <rect
-        x="1.5"
-        y="1.5"
-        width="37"
-        height="37"
-        rx="11"
-        className="fill-forest-900"
-      />
-      <rect
-        x="1.5"
-        y="1.5"
-        width="37"
-        height="37"
-        rx="11"
-        stroke="url(#logoStroke)"
-        strokeWidth="1.25"
-      />
+      <rect width="32" height="32" rx="9" className="fill-brand-600" />
       {/* Leaf */}
       <path
-        d="M20 29.5c0-6.5 3.2-11.4 9.5-13.5-.4 7.6-3.6 12.4-9.5 13.5Z"
-        className="fill-lime-glow"
+        d="M16 23.5c0-4.9 2.4-8.6 7.2-10.2-.3 5.8-2.7 9.4-7.2 10.2Z"
+        className="fill-white"
       />
       <path
-        d="M20 29.5C13.9 28.4 10.6 23.7 10.2 16c6.4 2.1 9.8 7 9.8 13.5Z"
-        className="fill-leaf-500"
+        d="M16 23.5c-4.6-.8-7.1-4.3-7.4-10.1 4.9 1.6 7.4 5.3 7.4 10.1Z"
+        className="fill-white/55"
       />
       {/* Stem */}
       <path
-        d="M20 30V13.5"
-        stroke="#F7F8F2"
-        strokeWidth="1.6"
+        d="M16 24V11"
+        stroke="white"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
-      <defs>
-        <linearGradient
-          id="logoStroke"
-          x1="2"
-          y1="2"
-          x2="38"
-          y2="38"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#C9F169" stopOpacity="0.9" />
-          <stop offset="1" stopColor="#1FA45F" stopOpacity="0.9" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }
@@ -72,15 +46,15 @@ export function Logo({
       className="group inline-flex items-center gap-2.5"
       aria-label="NutriSync home"
     >
-      <LogoMark className="h-9 w-9 transition-transform duration-500 group-hover:rotate-[8deg]" />
+      <LogoMark className="h-8 w-8 transition-transform duration-300 group-hover:rotate-[6deg]" />
       <span
         className={cn(
           "font-display font-semibold tracking-tight",
-          compact ? "text-lg" : "text-[1.35rem]",
-          dark ? "text-cream" : "text-ink"
+          compact ? "text-lg" : "text-[1.3rem]",
+          dark ? "text-white" : "text-ink-900"
         )}
       >
-        Nutri<span className={dark ? "text-lime-glow" : "text-leaf-600"}>Sync</span>
+        Nutri<span className={dark ? "text-brand-500" : "text-brand-700"}>Sync</span>
       </span>
     </a>
   );
