@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Droplet, Plus, Target, Award, Calendar } from 'lucide-react';
+import { Droplet, Plus, Target, Award, Calendar, Flame } from 'lucide-react';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
