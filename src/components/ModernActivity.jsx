@@ -38,7 +38,19 @@ export function ModernActivity() {
   const [schedule, setSchedule] = useState(() => {
     try {
       const saved = localStorage.getItem('nts-gym-schedule');
-      return saved ? JSON.parse(saved) : {};
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Object.keys(parsed).length > 0) return parsed;
+      }
+      return {
+        Monday: { type: 'Cardio', time: 'Morning (6-9am)', duration: 30, notes: 'Morning jog' },
+        Tuesday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 45, notes: 'Upper body' },
+        Wednesday: { type: 'Rest Day', time: '', duration: 0, notes: 'Active recovery' },
+        Thursday: { type: 'HIIT', time: 'Morning (6-9am)', duration: 30, notes: 'Full body intervals' },
+        Friday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 45, notes: 'Lower body' },
+        Saturday: { type: 'Cycling', time: 'Morning (6-9am)', duration: 60, notes: 'Long ride' },
+        Sunday: { type: 'Rest Day', time: '', duration: 0, notes: 'Relax and stretch' }
+      };
     } catch {
       return {};
     }
