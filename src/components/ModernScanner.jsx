@@ -88,6 +88,15 @@ export function ModernScanner() {
     alert(`Logged ${newMeal.title} successfully!`);
   };
  // idle | scanning | complete
+  
+  // Calculate percentages
+  let pPct = 0, cPct = 0, fPct = 0;
+  if (aiResult && aiResult.cal > 0) {
+    pPct = Math.round((aiResult.protein * 4 / aiResult.cal) * 100);
+    cPct = Math.round((aiResult.carbs * 4 / aiResult.cal) * 100);
+    fPct = Math.round((aiResult.fat * 9 / aiResult.cal) * 100);
+  }
+
   const fileInputRef = useRef(null);
 
   const handleDrag = (e) => {
@@ -219,7 +228,7 @@ export function ModernScanner() {
       <div className={`w-full lg:w-[340px] flex flex-col gap-4 transition-all duration-500 ${status === 'complete' ? 'opacity-100 translate-x-0' : 'opacity-50 pointer-events-none translate-x-4'}`}>
         <div className="bg-white/60 backdrop-blur-xl border border-white/80 rounded-3xl p-6 shadow-xl shadow-ink-900/5">
            <h3 className="text-xs font-bold text-ink-400 tracking-widest uppercase mb-1">AI Analysis Results</h3>
-           <h2 className="text-2xl font-bold text-ink-900 tracking-tight">Avocado Toast & Egg</h2>
+           <h2 className="text-2xl font-bold text-ink-900 tracking-tight">{aiResult?.title || "Unknown"}</h2>
            <p className="text-sm font-medium text-ink-500 mt-1 flex items-center gap-2">
               <FileText className="w-4 h-4" /> 98% Confidence Match
            </p>
@@ -232,12 +241,12 @@ export function ModernScanner() {
                    </div>
                    <div>
                      <h4 className="text-sm font-bold text-ink-900">Protein</h4>
-                     <p className="text-xs text-ink-500">Eggs, seeds</p>
+                     <p className="text-xs text-ink-500">Estimated</p>
                    </div>
                 </div>
                 <div className="text-right">
-                   <span className="block text-lg font-bold text-ink-900">22.4g</span>
-                   <span className="text-xs font-semibold text-emerald-500">38%</span>
+                   <span className="block text-lg font-bold text-ink-900">{aiResult?.protein || 0}g</span>
+                   <span className="text-xs font-semibold text-emerald-500">{pPct}%</span>
                 </div>
               </div>
 
@@ -248,12 +257,12 @@ export function ModernScanner() {
                    </div>
                    <div>
                      <h4 className="text-sm font-bold text-ink-900">Carbs</h4>
-                     <p className="text-xs text-ink-500">Sourdough</p>
+                     <p className="text-xs text-ink-500">Estimated</p>
                    </div>
                 </div>
                 <div className="text-right">
-                   <span className="block text-lg font-bold text-ink-900">34.2g</span>
-                   <span className="text-xs font-semibold text-blue-500">42%</span>
+                   <span className="block text-lg font-bold text-ink-900">{aiResult?.carbs || 0}g</span>
+                   <span className="text-xs font-semibold text-blue-500">{cPct}%</span>
                 </div>
               </div>
 
@@ -264,12 +273,12 @@ export function ModernScanner() {
                    </div>
                    <div>
                      <h4 className="text-sm font-bold text-ink-900">Fats</h4>
-                     <p className="text-xs text-ink-500">Avocado, oil</p>
+                     <p className="text-xs text-ink-500">Estimated</p>
                    </div>
                 </div>
                 <div className="text-right">
-                   <span className="block text-lg font-bold text-ink-900">18.6g</span>
-                   <span className="text-xs font-semibold text-orange-500">20%</span>
+                   <span className="block text-lg font-bold text-ink-900">{aiResult?.fat || 0}g</span>
+                   <span className="text-xs font-semibold text-orange-500">{fPct}%</span>
                 </div>
               </div>
            </div>
@@ -277,14 +286,14 @@ export function ModernScanner() {
 
         <div className="bg-white/60 backdrop-blur-xl border border-white/80 rounded-3xl p-6 shadow-xl shadow-ink-900/5">
            <div className="flex justify-between items-end mb-4">
-              <h3 className="text-xl font-bold text-ink-900">389 <span className="text-sm text-ink-500">kcal</span></h3>
+              <h3 className="text-xl font-bold text-ink-900">{aiResult?.cal || 0} <span className="text-sm text-ink-500">kcal</span></h3>
               <span className="text-xs font-semibold text-ink-500">Total Est. Calories</span>
            </div>
            {/* Progress bar composition */}
            <div className="flex h-3 w-full rounded-full overflow-hidden gap-0.5">
-             <div className="h-full bg-emerald-500" style={{ width: '38%' }} />
-             <div className="h-full bg-blue-500" style={{ width: '42%' }} />
-             <div className="h-full bg-orange-500" style={{ width: '20%' }} />
+             <div className="h-full bg-emerald-500" style={{ width: `${pPct}%` }} />
+             <div className="h-full bg-blue-500" style={{ width: `${cPct}%` }} />
+             <div className="h-full bg-orange-500" style={{ width: `${fPct}%` }} />
            </div>
            
            <button className="w-full mt-6 py-3.5 bg-ink-900 text-white rounded-xl font-bold shadow-lg shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95">
