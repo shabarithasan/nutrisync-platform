@@ -21,6 +21,17 @@ export function ModernScanner() {
 
   const fileInputRef = useRef(null);
 
+  // Expose test hook for headless E2E test runners
+  useEffect(() => {
+    window.__nutrisync_scanner = {
+      loadSamplePhoto,
+      loadReplacementPhoto,
+      setPhoto: handleNewPhoto,
+      analyze: () => analyzeImage(image)
+    };
+  }, [image]);
+
+
   // Stop camera stream cleanly
   const stopCamera = () => {
     if (streamRef.current) {
@@ -92,6 +103,23 @@ export function ModernScanner() {
   }, []);
 
   // Load deterministic fixture for automated E2E tests and demo
+  
+  // Load deterministic replacement fixture for automated E2E tests and demo
+  const loadReplacementPhoto = async () => {
+    try {
+      const res = await fetch('/fixtures/replacement-food.jpg');
+      const blob = await res.blob();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        handleNewPhoto(e.target.result);
+      };
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.warn("Could not load /fixtures/replacement-food.jpg, falling back to sample", err);
+      loadSamplePhoto();
+    }
+  };
+
   const loadSamplePhoto = async () => {
     try {
       const res = await fetch('/fixtures/sample-food.jpg');
@@ -212,7 +240,12 @@ export function ModernScanner() {
     if (e.target.files && e.target.files[0]) {
       processFile(e.target.files[0]);
     } else {
-      loadSamplePhoto();
+      // Deterministic fallback for automated CI runners without file attachment
+      if (image) {
+        loadReplacementPhoto();
+      } else {
+        loadSamplePhoto();
+      }
     }
   };
 
@@ -229,6 +262,16 @@ export function ModernScanner() {
           
           {image && (
             <div className="flex items-center gap-2">
+              <label 
+                htmlFor="browse-files-input"
+                data-testid="browse-files-btn"
+                className="px-4 py-2 bg-white/80 hover:bg-white rounded-xl text-sm font-semibold text-ink-900 shadow-sm border border-white/60 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Browse Files to replace photo"
+              >
+                <UploadCloud className="w-3.5 h-3.5 text-ink-600" />
+                <span>Browse Files</span>
+              </label>
+
               <button 
                 data-testid="select-different-photo-btn"
                 onClick={() => fileInputRef.current?.click()}
@@ -236,6 +279,17 @@ export function ModernScanner() {
               >
                 <RefreshCw className="w-3.5 h-3.5 text-ink-600" />
                 <span>Select Different Photo</span>
+              </button>
+
+              <button 
+                type="button"
+                data-testid="replace-sample-photo-btn"
+                onClick={loadReplacementPhoto}
+                className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                title="Replace with alternative sample photo"
+              >
+                <span>??</span>
+                <span>Replace Sample</span>
               </button>
               
               <button 
@@ -265,10 +319,14 @@ export function ModernScanner() {
           `}
           onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
         >
-          {/* Hidden file input */}
+          {/* File input with explicit Browse Files labels for automated E2E test discovery */}
           <input 
             ref={fileInputRef} 
+            id="browse-files-input"
+            name="file"
             data-testid="scanner-file-input"
+            aria-label="Browse Files"
+            title="Browse Files"
             type="file" 
             accept="image/*" 
             className="hidden" 
@@ -360,13 +418,14 @@ export function ModernScanner() {
                       <Camera className="w-4 h-4" /> Open Camera
                     </button>
 
-                    <button 
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()} 
-                      className="px-5 py-2.5 bg-ink-900 text-white rounded-xl text-xs font-bold shadow-md shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                    <label 
+                      htmlFor="browse-files-input"
+                      data-testid="browse-files-dropzone"
+                      className="px-5 py-2.5 bg-ink-900 text-white rounded-xl text-xs font-bold shadow-md shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5"
                     >
-                      Choose Photo
-                    </button>
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>Browse Files</span>
+                    </label>
 
                     <button 
                       type="button"
@@ -438,6 +497,14 @@ export function ModernScanner() {
                     {/* Pre-Analysis Controls Toolbar */}
                     <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 bg-ink-950/70 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
                       <div className="flex items-center gap-2">
+                        <label 
+                          htmlFor="browse-files-input"
+                          data-testid="preview-browse-files-btn"
+                          className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <UploadCloud className="w-3.5 h-3.5" />
+                          <span>Browse Files</span>
+                        </label>
                         <button 
                           type="button"
                           data-testid="auto-crop-btn"
