@@ -15,13 +15,13 @@ const GlassCard = ({ children, className = "", delay = 0 }) => (
 export function ModernOnboarding({ profile = {}, onComplete }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    age: profile.age || '',
-    gender: profile.gender || '',
-    height: profile.height || '',
-    weight: profile.weight || '',
-    targetWeight: profile.targetWeight || '',
-    activity: profile.activity || '',
-    goal: profile.goal || ''
+    age: profile.age || '30',
+    gender: profile.gender || 'Male',
+    height: profile.height || '170',
+    weight: profile.weight || '70',
+    targetWeight: profile.targetWeight || '65',
+    activity: profile.activity || 'moderate',
+    goal: profile.goal || 'loss'
   });
   
   const updateData = (field, value) => {

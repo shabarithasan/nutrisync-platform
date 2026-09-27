@@ -36,25 +36,31 @@ export function SyncManager({ session }) {
             
             for (const key of SYNC_KEYS) {
               if (cloudData[key]) {
-                const cloudVal = JSON.stringify(cloudData[key]);
-                const localVal = localStorage.getItem(key);
+                let shouldOverwrite = true;
                 
-                // Keep the newer one? For simplicity now, Cloud wins on first load
-                // unless local has data and cloud is empty
-                if (cloudVal !== localVal) {
-                  localStorage.setItem(key, cloudVal);
-                  changesMade = true;
+                // Prevent overwriting a completed local profile with an incomplete cloud profile
+                if (key === 'nutrisync-profile') {
+                  const localProfile = localVal ? JSON.parse(localVal) : {};
+                  if (localProfile.activity && !cloudData[key].activity) {
+                    shouldOverwrite = false;
+                  }
+                }
+
+                if (shouldOverwrite) {
+                  const cloudVal = JSON.stringify(cloudData[key]);
+                  
+                  if (cloudVal !== localVal) {
+                    localStorage.setItem(key, cloudVal);
+                    changesMade = true;
+                  }
                 }
               }
             }
             
             // Reload page if we just synced down new data for the first time
             if (changesMade && !isInitialSyncDone.current) {
-               // We could reload, or just let React state handle what it can.
-               // Since we are at the root level, many things won't auto-update without a refresh
-               // if they read from localStorage initially. Let's force a reload for a clean state.
                console.log('Cloud sync downloaded new data.');
-               window.location.reload();
+               window.dispatchEvent(new Event('storage'));
             }
           }
         }
