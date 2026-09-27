@@ -157,7 +157,7 @@ app.post('/api/vision', async (req, res, next) => {
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.8-flash',
         contents: [
             textPrompt,
             { inlineData: { data: base64Image, mimeType: 'image/jpeg' } }
