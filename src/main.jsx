@@ -11,6 +11,9 @@ import { ReportsEnhanced } from './components/ReportsEnhanced';
 import { ModernDashboard } from './components/ModernDashboard';
 import { ModernScanner } from './components/ModernScanner';
 import { ModernReports } from './components/ModernReports';
+import { ModernActivity } from './components/ModernActivity';
+import { ModernGoals } from './components/ModernGoals';
+import { ModernSettings } from './components/ModernSettings';
 
 import {
   AreaChart,
@@ -521,7 +524,7 @@ const AuthPage = ({ onAuth }) => {
     </div>
   );
 };
-function App(){const defaults={name:'',age:'',gender:'',height:'',weight:'',targetWeight:'',activity:'',health:'Normal',healthDetails:'',allergies:'',avoid:'',goal:'loss',diet:'',mealsPerDay:'',cuisine:'',plan:'monthly'};const [page,setPage]=useState('overview'),[dark,setDark]=useState(false),[route,setRoute]=useState(()=>location.hash.startsWith('#admin')?'admin':'app');useEffect(()=>{const f=()=>setRoute(location.hash.startsWith('#admin')?'admin':'app');window.addEventListener('hashchange',f);return ()=>window.removeEventListener('hashchange',f)},[]);const [profile,setProfile]=useState(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem('nutrisync-profile'))}}catch{return defaults}}),[auth,setAuth]=useState(()=>{try{return JSON.parse(sessionStorage.getItem('nts-auth'))}catch{return null}}),[loading,setLoading]=useState(false);if(route==='admin')return <AdminApp/>;if(!auth)return <AuthPage onAuth={a=>{setAuth(a);setProfile(p=>({...p,name:a.user.name}))}}/>;const content={overview:null,progress:<Progress profile={profile}/>,water:<Water profile={profile}/>,scan:<ModernScanner />,reports:<ModernReports />,calculator:<><BMIGauge profile={profile}/><NutritionCalculator profile={profile}/></>}[page];return <><ModernDashboard profile={profile} page={page} setPage={setPage}>{content}</ModernDashboard>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /></>;}
+function App(){const defaults={name:'',age:'',gender:'',height:'',weight:'',targetWeight:'',activity:'',health:'Normal',healthDetails:'',allergies:'',avoid:'',goal:'loss',diet:'',mealsPerDay:'',cuisine:'',plan:'monthly'};const [page,setPage]=useState('overview'),[dark,setDark]=useState(false),[route,setRoute]=useState(()=>location.hash.startsWith('#admin')?'admin':'app');useEffect(()=>{const f=()=>setRoute(location.hash.startsWith('#admin')?'admin':'app');window.addEventListener('hashchange',f);return ()=>window.removeEventListener('hashchange',f)},[]);const [profile,setProfile]=useState(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem('nutrisync-profile'))}}catch{return defaults}}),[auth,setAuth]=useState(()=>{try{return JSON.parse(sessionStorage.getItem('nts-auth'))}catch{return null}}),[loading,setLoading]=useState(false);if(route==='admin')return <AdminApp/>;if(!auth)return <AuthPage onAuth={a=>{setAuth(a);setProfile(p=>({...p,name:a.user.name}))}}/>;const content={overview:null,progress:<ModernActivity />,water:<ModernGoals />,scan:<ModernScanner />,reports:<ModernReports />,calculator:<ModernSettings profile={profile} />}[page];return <><ModernDashboard profile={profile} page={page} setPage={setPage}>{content}</ModernDashboard>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /></>;}
 createRoot(document.getElementById('root')).render(<ErrorBoundary><App/></ErrorBoundary>);
 
 
