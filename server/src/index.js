@@ -18,7 +18,7 @@ const app = express();
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 const allowedOrigins = new Set([clientOrigin, 'http://localhost:5173', 'http://127.0.0.1:5173']);
 const isLocalOrigin = origin => /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin);
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(cors({ origin: (origin, cb) => cb(null, !origin || allowedOrigins.has(origin) || (process.env.NODE_ENV !== 'production' && isLocalOrigin(origin))), credentials: true }));
 app.use(express.json({ limit: '15mb' }));
 app.use(cookieParser());

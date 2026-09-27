@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Heart, Watch, Circle, Smartphone, Loader2, CheckCircle2, X } from 'lucide-react';
+import QRCode from 'qrcode';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
@@ -24,6 +25,25 @@ export function ModernIntegrations() {
   const [connectedIds, setConnectedIds] = useState([]);
   const [connectingId, setConnectingId] = useState(null);
   const [liveSteps, setLiveSteps] = useState(0);
+  const [qrDataUrl, setQrDataUrl] = useState('');
+
+  // Generate QR code locally into base64 data URL
+  useEffect(() => {
+    const targetUrl = typeof window !== 'undefined' && window.location.origin 
+      ? window.location.origin 
+      : 'https://nutrisync-platform.onrender.com';
+
+    QRCode.toDataURL(targetUrl, {
+      width: 256,
+      margin: 2,
+      color: {
+        dark: '#0f172a',
+        light: '#ffffff'
+      }
+    })
+      .then(url => setQrDataUrl(url))
+      .catch(err => console.error('Failed to generate local QR code', err));
+  }, []);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -204,12 +224,19 @@ export function ModernIntegrations() {
                 To track your live steps, scan this QR code with your phone's camera. Log into NutriSync on your phone, click "Connect", and your steps will magically sync back to this screen!
               </p>
               
-              <div className="p-4 bg-white border-2 border-ink-100 rounded-2xl shadow-sm mb-6">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://nutrisync-platform.onrender.com"
-                  alt="Scan with phone" 
-                  className="w-48 h-48 mx-auto"
-                />
+              <div className="p-4 bg-white border-2 border-ink-100 rounded-2xl shadow-sm mb-6 flex items-center justify-center min-h-[210px]">
+                {qrDataUrl ? (
+                  <img 
+                    src={qrDataUrl}
+                    alt="Scan with phone" 
+                    className="w-48 h-48 mx-auto rounded-lg"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-48 h-48 text-ink-400">
+                    <Loader2 className="w-8 h-8 animate-spin mb-2 text-emerald-500" />
+                    <span className="text-xs">Generating QR...</span>
+                  </div>
+                )}
               </div>
 
               <button 
