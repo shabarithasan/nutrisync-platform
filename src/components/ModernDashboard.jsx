@@ -333,18 +333,18 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                   <ChevronRight className="w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors" />
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-bold text-ink-900 tracking-tight">1,650</span>
-                  <span className="text-sm font-semibold text-ink-400">/ 2,100 kcal</span>
+                  <span className="text-3xl font-bold text-ink-900 tracking-tight">{consumedCals.toLocaleString()}</span>
+                  <span className="text-sm font-semibold text-ink-400">/ {targetCals.toLocaleString()} kcal</span>
                 </div>
               </div>
-              {/* Sparkline Mock */}
+              {/* Sparkline Visual Filler */}
               <div className="h-16 mt-4 w-full flex items-end">
                 <svg viewBox="0 0 100 30" className="w-full h-full preserve-aspect-ratio-none overflow-visible">
                   <path d="M0,25 Q10,10 20,20 T40,15 T60,25 T80,5 T100,10" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M0,30 Q15,20 25,30 T50,20 T75,30 T100,15" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
                 </svg>
               </div>
-              <p className="text-xs font-medium text-ink-500 mt-2">Remaining: <strong className="text-ink-900">450 kcal</strong></p>
+              <p className="text-xs font-medium text-ink-500 mt-2">Remaining: <strong className="text-ink-900">{Math.max(0, targetCals - consumedCals).toLocaleString()} kcal</strong></p>
             </GlassCard>
 
             <GlassCard delay={0.3} className="col-span-1 lg:col-span-2 p-6 flex flex-col justify-between group">
@@ -357,18 +357,18 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                 </div>
                 <div className="flex items-end justify-between mt-4">
                   <div>
-                    <span className="text-2xl font-bold text-ink-900">{waterGlasses}<span className="text-sm text-ink-400">/10</span></span>
-                    <p className="text-[10px] font-medium text-ink-500 mt-1">1500/2000ml</p>
+                    <span className="text-2xl font-bold text-ink-900">{waterGlasses}<span className="text-sm text-ink-400">/{Math.max(6, Math.round(weight * 35 / 250))}</span></span>
+                    <p className="text-[10px] font-medium text-ink-500 mt-1">{waterGlasses * 250}/{Math.max(6, Math.round(weight * 35 / 250)) * 250}ml</p>
                   </div>
                   <div className="w-10 h-14 bg-blue-100 rounded-b-lg rounded-t-sm border-2 border-blue-200 relative overflow-hidden">
                     <motion.div 
-                      initial={{ height: "0%" }} animate={{ height: "75%" }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+                      initial={{ height: "0%" }} animate={{ height: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
                       className="absolute bottom-0 left-0 right-0 bg-blue-400"
                     />
                   </div>
                 </div>
                 <div className="h-1.5 w-full bg-ink-900/5 rounded-full mt-4 overflow-hidden">
-                   <motion.div initial={{ width: "0%" }} animate={{ width: "75%" }} transition={{ duration: 1, delay: 0.5 }} className="h-full bg-blue-400 rounded-full" />
+                   <motion.div initial={{ width: "0%" }} animate={{ width: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%` }} transition={{ duration: 1, delay: 0.5 }} className="h-full bg-blue-400 rounded-full" />
                 </div>
             </GlassCard>
 
@@ -376,7 +376,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                <ChevronRight className="absolute top-6 right-6 w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors" />
                <h3 className="font-bold text-ink-900 absolute top-6 left-6">Steps</h3>
                <div className="mt-6">
-                 <Ring value={8742} max={10000} color="#10b981" size={110} strokeWidth={10} label="8,742" sublabel="10,000" />
+                 <Ring value={steps} max={10000} color="#10b981" size={110} strokeWidth={10} label={steps.toLocaleString()} sublabel="10,000" />
                </div>
             </GlassCard>
 
@@ -472,16 +472,16 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                    </div>
                    <div className="space-y-3">
                      <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Sleep</span><span className="text-ink-500">{Math.round(activeCals / 100 + 5)} hrs</span></div>
-                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 w-[85%] rounded-full"/></div>
+                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Workouts</span><span className="text-ink-500">{workouts.length} done</span></div>
+                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(100, (workouts.length / 4) * 100)}%` }}/></div>
                      </div>
                      <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Cardio</span><span className="text-ink-500">{Math.round(activeCals / 10)} min</span></div>
-                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-orange-500 w-[60%] rounded-full"/></div>
+                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Active Cals</span><span className="text-ink-500">{activeCals} kcal</span></div>
+                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min(100, (activeCals / 500) * 100)}%` }}/></div>
                      </div>
                      <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Fiber</span><span className="text-ink-500">{Math.round(consumedCals / 50)}g</span></div>
-                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[95%] rounded-full"/></div>
+                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Steps</span><span className="text-ink-500">{steps}</span></div>
+                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(100, (steps / 10000) * 100)}%` }}/></div>
                      </div>
                    </div>
                 </GlassCard>
