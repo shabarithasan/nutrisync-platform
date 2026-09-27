@@ -15,6 +15,7 @@ const GlassCard = ({ children, className = "", delay = 0 }) => (
 
 export function ModernActivity() {
   const [showModal, setShowModal] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
   const [workouts, setWorkouts] = useState(() => {
     const saved = localStorage.getItem('nts-workouts');
     return saved ? JSON.parse(saved) : [
@@ -121,7 +122,7 @@ export function ModernActivity() {
           
           <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
              {workouts.map(w => (
-               <div key={w.id} className="bg-white/60 p-4 rounded-2xl border border-white/80 hover:bg-white hover:shadow-md transition-all cursor-pointer group">
+               <div key={w.id} onClick={() => setSelectedWorkout(w)} className="bg-white/60 p-4 rounded-2xl border border-white/80 hover:bg-white hover:shadow-md transition-all cursor-pointer group">
                  <div className="flex gap-4 items-center mb-3">
                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${w.type === 'run' ? 'bg-orange-100' : 'bg-purple-100'}`}>
                      {w.type === 'run' ? <Activity className="w-6 h-6 text-orange-500" /> : <span className="text-2xl">?????</span>}
@@ -182,6 +183,49 @@ export function ModernActivity() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Workout Detail Modal */}
+      <AnimatePresence>
+        {selectedWorkout && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-md overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-emerald-400 to-teal-500 opacity-20"></div>
+              
+              <div className="relative flex justify-between items-start mb-6">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg ${selectedWorkout.type === 'run' ? 'bg-orange-100' : 'bg-purple-100'}`}>
+                  {selectedWorkout.type === 'run' ? <Activity className="w-8 h-8 text-orange-500" /> : <span className="text-3xl">?????</span>}
+                </div>
+                <button onClick={() => setSelectedWorkout(null)} className="p-2 hover:bg-ink-900/5 rounded-full bg-white/50 backdrop-blur-md"><X className="w-5 h-5 text-ink-500" /></button>
+              </div>
+
+              <div className="relative mb-8">
+                <h2 className="text-3xl font-extrabold text-ink-900 mb-1">{selectedWorkout.title}</h2>
+                <p className="text-sm font-medium text-ink-500 flex items-center gap-1"><MapPin className="w-4 h-4"/> {selectedWorkout.loc}</p>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="bg-ink-900/5 rounded-2xl p-4 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-ink-900">{selectedWorkout.km || '--'}</span>
+                  <span className="text-[10px] font-bold text-ink-500 uppercase tracking-wider">Distance</span>
+                </div>
+                <div className="bg-orange-500/10 rounded-2xl p-4 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-orange-600">{selectedWorkout.cal}</span>
+                  <span className="text-[10px] font-bold text-orange-500/70 uppercase tracking-wider">Calories</span>
+                </div>
+                <div className="bg-blue-500/10 rounded-2xl p-4 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-blue-600">{selectedWorkout.min}</span>
+                  <span className="text-[10px] font-bold text-blue-500/70 uppercase tracking-wider">Minutes</span>
+                </div>
+              </div>
+              
+              <button onClick={() => setSelectedWorkout(null)} className="w-full py-4 bg-ink-900 text-white font-bold rounded-xl shadow-lg hover:bg-ink-800 transition-colors">
+                Close Detail
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
