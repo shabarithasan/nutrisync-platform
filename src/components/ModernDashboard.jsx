@@ -101,6 +101,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
     { icon: Activity, label: 'Workouts', id: 'progress' },
     { icon: Droplet, label: 'Hydration', id: 'water' },
     { icon: Watch, label: 'Devices', id: 'integrations' },
+    { icon: Users, label: 'Community', id: 'social' },
     { icon: BarChart2, label: 'Analytics', id: 'reports' },
     { icon: User, label: 'Profile', id: 'calculator' },
   ];
