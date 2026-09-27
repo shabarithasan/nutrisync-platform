@@ -8,6 +8,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { MotivationalQuote } from './MotivationalQuote';
 import { HealthCircle } from './HealthCircle';
+import { ModernSearch } from './ModernSearch';
 
 /* --- Components --- */
 
@@ -64,6 +65,18 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Global Cmd+K listener
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   useEffect(() => {
     if (page === 'overview') {
@@ -231,63 +244,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
         </header>
 
         {/* Search Modal (Global Overlay) */}
-        <AnimatePresence>
-          {isSearchOpen && (
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 bg-ink-900/20 backdrop-blur-sm"
-              onClick={() => setIsSearchOpen(false)}
-            >
-              <motion.div 
-                initial={{ opacity: 0, y: -20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                className="w-full max-w-2xl bg-white/90 backdrop-blur-3xl border border-white/60 shadow-2xl rounded-2xl overflow-hidden"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex items-center px-6 py-4 border-b border-ink-100 bg-white/50">
-                  <Search className="w-5 h-5 text-ink-400 mr-3" />
-                  <input 
-                    type="text" autoFocus
-                    placeholder="Search meals, workouts, diet plans, features..."
-                    className="flex-1 bg-transparent border-none outline-none text-ink-900 placeholder:text-ink-300 text-lg font-medium"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <button onClick={() => setIsSearchOpen(false)} className="p-1 rounded-full hover:bg-ink-100 text-ink-400 transition-colors">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="p-2 max-h-96 overflow-y-auto">
-                  {searchQuery.trim() === '' ? (
-                    <div className="p-8 text-center text-ink-400">
-                      <p className="font-medium mb-1">Quick Navigation</p>
-                      <div className="flex flex-wrap justify-center gap-2 mt-4">
-                        {sidebarLinks.filter(l => l.id !== 'overview').map(link => (
-                          <button key={link.id} onClick={() => { setPage(link.id); setIsSearchOpen(false); }} className="px-3 py-1.5 bg-ink-50 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 text-ink-600">
-                            <link.icon className="w-4 h-4" /> {link.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-4 space-y-2">
-                      {sidebarLinks.filter(l => l.label.toLowerCase().includes(searchQuery.toLowerCase())).map(link => (
-                        <div key={link.id} onClick={() => { setPage(link.id); setIsSearchOpen(false); }} className="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-50 cursor-pointer transition-colors group">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600"><link.icon className="w-4 h-4" /></div>
-                          <div className="flex-1 font-semibold text-ink-900 group-hover:text-emerald-700">{link.label}</div>
-                          <ChevronRight className="w-4 h-4 text-emerald-400" />
-                        </div>
-                      ))}
-                      {/* Note: In a real app we would map over meals/workouts here */}
-                      <div className="px-4 py-8 text-center">
-                        <p className="text-ink-400 font-medium">Press Enter to search entire database for "{searchQuery}"</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <ModernSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} setPage={setPage} />
 
         {page === 'overview' ? (
           /* Dashboard Grid */
