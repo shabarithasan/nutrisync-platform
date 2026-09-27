@@ -33,10 +33,10 @@
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "reaviz": "^16.2.2",
+        "recharts": "^3.10.1",
         "tailwind-merge": "^3.7.0",
         "tailwindcss": "^4.3.3",
         "vite": "^6.0.5",
         "zod": "^3.24.1"
     }
 }
-
