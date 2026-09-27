@@ -79,40 +79,42 @@ const generateAdvice = (targets, current) => {
   const { targetCals, targetProtein } = targets;
   const { consumedCals, consumedProtein, consumedWater } = current;
 
+  // Check if they worked out today
+  const workoutsStr = localStorage.getItem('nts-workout-history');
+  let hasWorkedOut = false;
+  if (workoutsStr) {
+    try {
+      const workouts = JSON.parse(workoutsStr);
+      const todayStr = new Date().toLocaleDateString();
+      hasWorkedOut = workouts.some(w => new Date(w.date).toLocaleDateString() === todayStr);
+    } catch (e) {}
+  }
+
+  const tips = [];
+
+  // Urgent Water nags
+  if (consumedWater === 0) tips.push("You haven't logged ANY water today! Hydration is critical. Go drink a glass right now.");
+  else if (consumedWater < 8) tips.push(`You've only had ${consumedWater} glasses of water today. Grab your water bottle and take a big sip!`);
+
+  // Urgent Workout nags
+  if (!hasWorkedOut) {
+    if (hour < 12) tips.push("Morning! You haven't done your workout yet. A quick session will give you energy for the whole day!");
+    else if (hour < 18) tips.push("Afternoon slump? A quick 15-minute workout or walk is exactly what you need right now!");
+    else tips.push("It's getting late and you haven't worked out yet! Even a quick stretching session counts. Get moving!");
+  }
+
+  // Macro nags
   const remainingCals = targetCals - consumedCals;
   const remainingProtein = targetProtein - consumedProtein;
-
-  // Urgent: Morning and no water
-  if (hour < 10 && consumedWater === 0) {
-    return "Good morning! You haven't logged any water yet. Drink a glass right now to kickstart your metabolism.";
+  if (remainingProtein > 20 && remainingCals > 150) tips.push(`You're ${remainingProtein.toFixed(0)}g short on protein today. How about a quick protein shake?`);
+  if (remainingCals > 500) tips.push(`You still have ${remainingCals.toFixed(0)} calories to eat today to reach your goals. Grab a healthy snack!`);
+  
+  if (tips.length > 0) {
+    // Return a random tip from the applicable ones
+    return tips[Math.floor(Math.random() * tips.length)];
   }
 
-  // Urgent: Exceeding calories
-  if (consumedCals > targetCals + 100) {
-    return "You've hit your calorie limit for today. Focus on water and light activity for the rest of the evening.";
-  }
-
-  // Midday and no food
-  if (hour >= 12 && hour < 16 && consumedCals < 200) {
-    return "It's past noon and you barely logged any meals. Remember to fuel your body for sustained energy!";
-  }
-
-  // Late afternoon / evening and low protein
-  if (hour >= 16 && remainingProtein > 20 && remainingCals > 150) {
-    return `Hey! You're ${remainingProtein.toFixed(0)}g short on protein but have some calories left. A quick Greek yogurt or protein shake would be perfect!`;
-  }
-
-  // Night time and everything looks good
-  if (hour >= 20 && remainingCals > -200 && remainingCals < 300 && remainingProtein < 15) {
-    return "Incredible job today! You're perfectly on track with your macros. Rest up!";
-  }
-
-  // General fallback
-  if (remainingCals > 500) {
-    return `You have ${remainingCals.toFixed(0)} calories left for the day. Make sure you're eating enough to reach your goals.`;
-  }
-
-  return "Keep up the great work! You're doing amazing today.";
+  return "Incredible job today! You hit your water, worked out, and nailed your macros. You are crushing it!";
 };
 
 export function ProactiveCoach({ profile }) {
@@ -120,17 +122,25 @@ export function ProactiveCoach({ profile }) {
   const [advice, setAdvice] = useState("");
 
   useEffect(() => {
-    // Wait 4-5 seconds before showing
-    const timer = setTimeout(() => {
+    // Show first time after 4 seconds
+    const showAdvice = () => {
       const targets = calculateTargets(profile);
       const current = getTodayData();
       const message = generateAdvice(targets, current);
       
       setAdvice(message);
       setIsVisible(true);
-    }, 4500);
+    };
 
-    return () => clearTimeout(timer);
+    const initialTimer = setTimeout(showAdvice, 4500);
+
+    // Repeatedly show advice every 45 seconds to aggressively motivate user
+    const intervalTimer = setInterval(showAdvice, 45000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalTimer);
+    };
   }, [profile]);
 
   useEffect(() => {
