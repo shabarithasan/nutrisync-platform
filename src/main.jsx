@@ -18,6 +18,7 @@ import { ModernDietPlan } from './components/ModernDietPlan';
 import { ModernOnboarding } from './components/ModernOnboarding';
 import { SyncManager } from './components/SyncManager';
 import { ModernIntegrations } from './components/ModernIntegrations';
+import { ProactiveCoach } from './components/ProactiveCoach';
 
 import {
   AreaChart,
@@ -533,7 +534,7 @@ const handleUpdateProfile = (newP) => { setProfile(newP); localStorage.setItem('
 if(!auth)return <><AuthPage onAuth={a=>{setAuth(a);setProfile(p=>({...p,name:a.user.name}))}}/><AIChat /></>;
 const isProfileComplete = profile.age && profile.gender && profile.height && profile.weight && profile.activity;
 if(!isProfileComplete)return <><SyncManager session={auth} /><ModernOnboarding profile={profile} onComplete={handleUpdateProfile} /><AIChat /></>;
-const content={overview:null,progress:<ModernActivity />,water:<ModernGoals />,scan:<ModernScanner />,diet:<ModernDietPlan />,integrations:<ModernIntegrations />,reports:<ModernReports />,calculator:<ModernSettings profile={profile} onUpdateProfile={handleUpdateProfile} dark={dark} setDark={setDark} onLogout={handleLogout} />}[page];return <><SyncManager session={auth} /><ModernDashboard profile={profile} page={page} setPage={setPage}>{content}</ModernDashboard>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /></>;}
+const content={overview:null,progress:<ModernActivity />,water:<ModernGoals />,scan:<ModernScanner />,diet:<ModernDietPlan />,integrations:<ModernIntegrations />,reports:<ModernReports />,calculator:<ModernSettings profile={profile} onUpdateProfile={handleUpdateProfile} dark={dark} setDark={setDark} onLogout={handleLogout} />}[page];return <><SyncManager session={auth} /><ModernDashboard profile={profile} page={page} setPage={setPage}>{content}</ModernDashboard>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /><ProactiveCoach profile={profile} /></>;}
 createRoot(document.getElementById('root')).render(<ErrorBoundary><App/></ErrorBoundary>);
 
 
