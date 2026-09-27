@@ -2,7 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Apple, Activity, Target, Lightbulb, Users, Settings,
-  Search, Bell, MoreHorizontal, ChevronRight, Droplet, Flame, ArrowUpRight
+  Search, Bell, MoreHorizontal, ChevronRight, Droplet, Flame, ArrowUpRight,
+  Camera, BarChart2, User
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -66,11 +67,11 @@ export function ModernDashboard({ profile, page, setPage, children }) {
 
   const sidebarLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', id: 'overview' },
-    { icon: Apple, label: 'Nutrition', id: 'scan' },
-    { icon: Activity, label: 'Activity', id: 'progress' },
-    { icon: Target, label: 'Goals', id: 'water' },
-    { icon: Lightbulb, label: 'Insights', id: 'reports' },
-    { icon: Settings, label: 'Settings', id: 'calculator' },
+    { icon: Camera, label: 'Scanner', id: 'scan' },
+    { icon: Activity, label: 'Workouts', id: 'progress' },
+    { icon: Droplet, label: 'Hydration', id: 'water' },
+    { icon: BarChart2, label: 'Analytics', id: 'reports' },
+    { icon: User, label: 'Profile', id: 'calculator' },
   ];
 
   return (
