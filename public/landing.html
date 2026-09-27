@@ -16099,6 +16099,129 @@
     <!-- End of bodyEnd -->
 
 
+
+<!-- AI Assistant Injection -->
+<style>
+  #__framer-badge-container, .__framer-badge, #__framer-badge { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+  
+  #ai-chat-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10001;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  #ai-chat-button {
+    width: 60px; height: 60px; border-radius: 30px;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    border: none; box-shadow: 0 12px 24px rgba(139, 92, 246, 0.4);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: #fff; transition: transform 0.2s;
+  }
+  #ai-chat-button:hover { transform: scale(1.1); }
+  
+  #ai-chat-window {
+    display: none;
+    width: 360px; height: 540px; max-width: calc(100vw - 48px);
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(30px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.5); border-radius: 24px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.2); flex-direction: column;
+    overflow: hidden;
+  }
+  #ai-chat-header {
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: #fff;
+    padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+  }
+  #ai-chat-header button { background: none; border: none; color: white; cursor: pointer; font-size: 16px; opacity: 0.8; }
+  #ai-chat-header button:hover { opacity: 1; }
+  
+  #ai-chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .ai-msg {
+    padding: 10px 14px; border-radius: 16px; max-width: 85%; font-size: 14px; line-height: 1.4;
+  }
+  .ai-msg.user { background: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .ai-msg.bot { background: white; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  
+  #ai-chat-input-area {
+    padding: 16px; background: rgba(255,255,255,0.5); border-top: 1px solid rgba(0,0,0,0.05);
+  }
+  #ai-chat-form { display: flex; gap: 8px; }
+  #ai-chat-input {
+    flex: 1; padding: 12px 16px; border: 1px solid rgba(0,0,0,0.1); border-radius: 24px;
+    outline: none; font-size: 14px; background: white;
+  }
+  #ai-chat-submit {
+    background: #3b82f6; color: white; border: none; width: 44px; height: 44px;
+    border-radius: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+</style>
+<div id="ai-chat-widget">
+  <button id="ai-chat-button">?</button>
+  <div id="ai-chat-window">
+    <div id="ai-chat-header">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:bold;">? NutriSync AI</div>
+      <button id="ai-chat-close">?</button>
+    </div>
+    <div id="ai-chat-messages">
+      <div class="ai-msg bot">Hi! I'm your NutriSync AI. Log in to get personalized insights, or ask me anything here!</div>
+    </div>
+    <div id="ai-chat-input-area">
+      <form id="ai-chat-form">
+        <input id="ai-chat-input" placeholder="Ask about nutrition..." autocomplete="off" />
+        <button id="ai-chat-submit" type="submit">?</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const btn = document.getElementById('ai-chat-button');
+  const win = document.getElementById('ai-chat-window');
+  const cls = document.getElementById('ai-chat-close');
+  const form = document.getElementById('ai-chat-form');
+  const inp = document.getElementById('ai-chat-input');
+  const msgs = document.getElementById('ai-chat-messages');
+
+  btn.onclick = () => { btn.style.display = 'none'; win.style.display = 'flex'; };
+  cls.onclick = () => { win.style.display = 'none'; btn.style.display = 'flex'; };
+
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const val = inp.value.trim();
+    if(!val) return;
+    
+    inp.value = '';
+    msgs.innerHTML += `<div class="ai-msg user">${val}</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+    
+    // Typing indicator
+    const tid = 'typing-' + Date.now();
+    msgs.innerHTML += `<div id="${tid}" class="ai-msg bot" style="opacity:0.6">Thinking...</div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'openai/gpt-oss-120b',
+          messages: [{role: 'user', content: val}]
+        })
+      });
+      const data = await res.json();
+      document.getElementById(tid).remove();
+      const reply = data.choices[0].message.content;
+      msgs.innerHTML += `<div class="ai-msg bot">${reply.replace(/\n/g, '<br/>')}</div>`;
+    } catch(err) {
+      document.getElementById(tid).remove();
+      msgs.innerHTML += `<div class="ai-msg bot" style="color:red">Error connecting to AI. Please log in!</div>`;
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+</script>
+<!-- End AI Assistant -->
+
 </body>
 
 </html>
