@@ -158,7 +158,7 @@ app.post('/api/vision', async (req, res, next) => {
           model: 'openai/gpt-oss-120b',
           messages: [{
             role: 'user',
-            content: "Simulate an AI food scan. Invent a healthy meal based on common healthy recipes. Reply ONLY with a JSON object containing: title (string, name of meal), cal (number, total calories), protein (number, grams), carbs (number, grams), fat (number, grams). Do not use markdown."
+            content: "Simulate an AI food scan failure due to lack of vision capabilities. Reply ONLY with a JSON object containing EXACTLY: {\"title\": \"Vision AI Offline (Rate Limited)\", \"cal\": 0, \"protein\": 0, \"carbs\": 0, \"fat\": 0}. Do not use markdown or add anything else."
           }]
         })
       });
