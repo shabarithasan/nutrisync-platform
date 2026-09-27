@@ -11,7 +11,8 @@ import {
   Sun,
   Moon,
   Apple,
-  Check
+  Check,
+  ShoppingCart
 } from 'lucide-react';
 import { MotivationalQuote } from './MotivationalQuote';
 
@@ -76,11 +77,14 @@ const MEAL_DATABASE = [
   { id: 's10', type: 'Snack', name: 'Roasted Chickpeas', calories: 130, protein: 6, carbs: 20, fat: 3, ingredients: ['Chickpeas', 'Olive oil', 'Spices'], tags: ['vegan', 'vegetarian'], time: '03:30 PM' }
 ];
 
+import { ModernGroceryList } from './ModernGroceryList';
+
 export function ModernDietPlan() {
   const [profile, setProfile] = useState(null);
   const [dailyNeeds, setDailyNeeds] = useState(null);
   const [weeklyPlan, setWeeklyPlan] = useState([]);
   const [currentDayIndex, setCurrentDayIndex] = useState(new Date().getDay()); // 0 = Sunday, 1 = Monday, etc.
+  const [isGroceryOpen, setIsGroceryOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -269,13 +273,22 @@ export function ModernDietPlan() {
           </h1>
           <p className="text-ink-500 font-medium">Daily Target: {dailyNeeds.calories} kcal</p>
         </div>
-        <button 
-          onClick={handleRegenerate}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/80 hover:bg-emerald-50 text-emerald-600 font-semibold border border-emerald-100 shadow-sm transition-all active:scale-95"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Regenerate Plan
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsGroceryOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ink-900 hover:bg-ink-800 text-white font-semibold shadow-sm transition-all active:scale-95"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Grocery List
+          </button>
+          <button 
+            onClick={handleRegenerate}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/80 hover:bg-emerald-50 text-emerald-600 font-semibold border border-emerald-100 shadow-sm transition-all active:scale-95"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Regenerate
+          </button>
+        </div>
       </div>
 
       <MotivationalQuote />
@@ -426,6 +439,11 @@ export function ModernDietPlan() {
           </div>
         </div>
       </GlassCard>
+      <ModernGroceryList 
+        isOpen={isGroceryOpen} 
+        onClose={() => setIsGroceryOpen(false)} 
+        weeklyPlan={weeklyPlan} 
+      />
     </div>
   );
 }
