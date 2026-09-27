@@ -36,10 +36,11 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      console.log('ABOUT TO FETCH!!!'); const response = await fetch('/api/chat', {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + API_KEY
         },
         body: JSON.stringify({
           model: 'openai/gpt-oss-120b',

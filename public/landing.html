@@ -16201,9 +16201,12 @@
     msgs.scrollTop = msgs.scrollHeight;
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF'
+        },
         body: JSON.stringify({
           model: 'openai/gpt-oss-120b',
           messages: [{role: 'user', content: val}]
@@ -16211,8 +16214,12 @@
       });
       const data = await res.json();
       document.getElementById(tid).remove();
-      const reply = data.choices[0].message.content;
-      msgs.innerHTML += `<div class="ai-msg bot">${reply.replace(/\n/g, '<br/>')}</div>`;
+      if (data.choices && data.choices[0]) {
+        const reply = data.choices[0].message.content;
+        msgs.innerHTML += `<div class="ai-msg bot">${reply.replace(/\n/g, '<br/>')}</div>`;
+      } else {
+        msgs.innerHTML += `<div class="ai-msg bot" style="color:red">Error connecting to AI. Please log in!</div>`;
+      }
     } catch(err) {
       document.getElementById(tid).remove();
       msgs.innerHTML += `<div class="ai-msg bot" style="color:red">Error connecting to AI. Please log in!</div>`;
