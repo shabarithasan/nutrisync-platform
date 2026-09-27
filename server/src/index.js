@@ -169,6 +169,7 @@ app.post('/api/vision', async (req, res, next) => {
       }
       
       const fbData = await fbResponse.json();
+      fbData.isFallback = true;
       return res.json(fbData);
     }
     

@@ -29,6 +29,7 @@ export function ModernScanner() {
   const [dragActive, setDragActive] = useState(false);
   const [image, setImage] = useState(null);
   const [status, setStatus] = useState('idle');
+    const [isFallback, setIsFallback] = useState(false);
 
     
   const [aiResult, setAiResult] = useState(null);
@@ -228,6 +229,13 @@ export function ModernScanner() {
       <div className={`w-full lg:w-[340px] flex flex-col gap-4 transition-all duration-500 ${status === 'complete' ? 'opacity-100 translate-x-0' : 'opacity-50 pointer-events-none translate-x-4'}`}>
         <div className="bg-white/60 backdrop-blur-xl border border-white/80 rounded-3xl p-6 shadow-xl shadow-ink-900/5">
            <h3 className="text-xs font-bold text-ink-400 tracking-widest uppercase mb-1">AI Analysis Results</h3>
+             {isFallback && (
+               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                 <p className="text-xs text-red-600 font-bold">?? Rate Limit Exceeded</p>
+                 <p className="text-[10px] text-red-500 mt-1">Free Vision AI is currently busy. This is a generic AI guess, not a real image analysis.</p>
+               </div>
+             )}
+
            <h2 className="text-2xl font-bold text-ink-900 tracking-tight">{aiResult?.title || "Unknown"}</h2>
            <p className="text-sm font-medium text-ink-500 mt-1 flex items-center gap-2">
               <FileText className="w-4 h-4" /> 98% Confidence Match
