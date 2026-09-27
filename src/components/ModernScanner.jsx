@@ -170,22 +170,22 @@ export function ModernScanner() {
             {!image ? (
               <motion.div 
                 key="upload" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center justify-center text-center p-8 pointer-events-none"
+                className="flex flex-col items-center justify-center text-center p-8"
               >
-                <div className="w-20 h-20 bg-white shadow-xl shadow-ink-900/5 rounded-2xl flex items-center justify-center mb-6">
+                <div className="w-20 h-20 bg-white shadow-xl shadow-ink-900/5 rounded-2xl flex items-center justify-center mb-6 pointer-events-none">
                   <UploadCloud className="w-10 h-10 text-emerald-500" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-bold text-ink-900">Drag & drop your food photo here</h3>
-                <p className="text-ink-500 font-medium mt-2 max-w-sm">
+                <h3 className="text-lg font-bold text-ink-900 pointer-events-none">Drag & drop your food photo here</h3>
+                <p className="text-ink-500 font-medium mt-2 max-w-sm pointer-events-none">
                   Or click to browse from your device. Supported formats: JPG, PNG, HEIC.
                 </p>
                 <div className="flex gap-4 mt-8">
-                  <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 text-xs font-semibold text-ink-700">
+                  <button onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 hover:bg-white text-xs font-semibold text-ink-700 transition-colors shadow-sm cursor-pointer relative z-10">
                     <ImageIcon className="w-4 h-4" /> Auto-crop
-                  </span>
-                  <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 text-xs font-semibold text-ink-700">
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); document.getElementById('cameraInput')?.click(); }} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 hover:bg-emerald-500 hover:text-white text-xs font-semibold text-ink-700 transition-colors shadow-sm cursor-pointer relative z-10">
                     <Camera className="w-4 h-4" /> Lighting adjust
-                  </span>
+                  </button>
                 </div>
               </motion.div>
             ) : (
