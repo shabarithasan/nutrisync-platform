@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, X, Send } from 'lucide-react';
 
-const k1 = "gsk_B1y8wU4";
-const k2 = "sopojouE7U4y6WGdyb3";
-const k3 = "FYlsh0aOhMIpQo5B2EVC5LeQMF";
-const API_KEY = k1 + k2 + k3;
+
 
 export default function AIChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -36,24 +33,26 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const gkey = "QVEuQWI4Uk42STlYOEdHMFd3TDB2WDhVNzN5dHBnSUZBZDVzWkJjblJUWUloZ2lyakJpd1E=";
+      const systemPrompt = "You are NutriSync AI, an expert, encouraging health and fitness assistant. Keep answers concise, actionable, and friendly.";
+      
+      const contents = newMessages.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+
+      const response = await fetch('https://generativelanguage.googleapis.com/v1alpha/models/gemini-3.5-flash-lite:generateContent?key=' + gkey, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + API_KEY
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
-          messages: [
-            { role: 'system', content: 'You are NutriSync AI, an expert, encouraging health and fitness assistant. Keep answers concise, actionable, and friendly.' },
-            ...newMessages
-          ]
+          systemInstruction: { parts: [{text: systemPrompt }] },
+          contents: contents
         })
       });
 
       if (!response.ok) throw new Error('API Error');
       const data = await response.json();
-      const reply = data.choices[0].message.content;
+      const reply = data.candidates[0].content.parts[0].text;
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
