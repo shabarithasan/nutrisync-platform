@@ -34,7 +34,7 @@ const TIME_SLOTS = ['Morning (6-9am)', 'Midday (11am-1pm)', 'Afternoon (3-5pm)',
 const DURATIONS = [15, 30, 45, 60, 90];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export function ModernActivity() {
+export function ModernActivity({ profile }) {
   const [schedule, setSchedule] = useState(() => {
     try {
       const saved = localStorage.getItem('nts-gym-schedule');
@@ -146,6 +146,56 @@ export function ModernActivity() {
     return acc;
   }, { workouts: 0, minutes: 0, calories: 0 });
 
+  const generateSmartSchedule = () => {
+    if (!profile) return;
+    const { goal = 'loss', activity = 'moderate' } = profile;
+    
+    let plan = {};
+    if (goal === 'loss') {
+      plan = {
+        Monday: { type: 'HIIT', time: 'Morning (6-9am)', duration: 30, notes: 'Max calorie burn' },
+        Tuesday: { type: 'Cardio', time: 'Evening (6-9pm)', duration: 45, notes: 'Steady state' },
+        Wednesday: { type: 'Strength', time: 'Morning (6-9am)', duration: 45, notes: 'Preserve muscle' },
+        Thursday: { type: 'Rest Day', time: '', duration: 0, notes: 'Active recovery' },
+        Friday: { type: 'HIIT', time: 'Morning (6-9am)', duration: 30, notes: 'Full body intervals' },
+        Saturday: { type: 'Cardio', time: 'Morning (6-9am)', duration: 60, notes: 'Long endurance' },
+        Sunday: { type: 'Rest Day', time: '', duration: 0, notes: 'Rest' }
+      };
+    } else if (goal === 'gain') {
+      plan = {
+        Monday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 60, notes: 'Chest & Triceps' },
+        Tuesday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 60, notes: 'Back & Biceps' },
+        Wednesday: { type: 'Rest Day', time: '', duration: 0, notes: 'Rest and recover' },
+        Thursday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 60, notes: 'Legs & Core' },
+        Friday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 60, notes: 'Shoulders & Arms' },
+        Saturday: { type: 'Yoga', time: 'Morning (6-9am)', duration: 30, notes: 'Mobility work' },
+        Sunday: { type: 'Rest Day', time: '', duration: 0, notes: 'Rest' }
+      };
+    } else {
+      plan = {
+        Monday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 45, notes: 'Upper body' },
+        Tuesday: { type: 'Cardio', time: 'Morning (6-9am)', duration: 30, notes: 'Jogging' },
+        Wednesday: { type: 'Yoga', time: 'Evening (6-9pm)', duration: 45, notes: 'Flexibility' },
+        Thursday: { type: 'Strength', time: 'Evening (6-9pm)', duration: 45, notes: 'Lower body' },
+        Friday: { type: 'HIIT', time: 'Morning (6-9am)', duration: 30, notes: 'Sweat session' },
+        Saturday: { type: 'Rest Day', time: '', duration: 0, notes: 'Rest' },
+        Sunday: { type: 'Rest Day', time: '', duration: 0, notes: 'Rest' }
+      };
+    }
+    
+    // Scale durations based on activity level
+    const durationMultiplier = activity === 'sedentary' || activity === 'light' ? 0.75 : activity === 'very_active' ? 1.5 : 1;
+    
+    Object.keys(plan).forEach(day => {
+      if (plan[day].duration > 0) {
+        // Round to nearest 15 mins
+        plan[day].duration = Math.max(15, Math.round((plan[day].duration * durationMultiplier) / 15) * 15);
+      }
+    });
+
+    setSchedule(plan);
+  };
+
   return (
     <div className="h-full w-full flex flex-col relative overflow-y-auto pb-10">
       <div className="mb-6">
@@ -157,6 +207,12 @@ export function ModernActivity() {
           <h2 className="text-2xl font-bold text-ink-900 tracking-tight">Gym Time & Workouts</h2>
           <p className="text-ink-500 font-medium mt-1">Plan your week, track your progress.</p>
         </div>
+        <button 
+          onClick={generateSmartSchedule}
+          className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg active:scale-95"
+        >
+          <Zap className="w-4 h-4" fill="currentColor" /> Generate Smart Plan
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
