@@ -206,7 +206,7 @@ export function ModernIntegrations() {
               
               <div className="p-4 bg-white border-2 border-ink-100 rounded-2xl shadow-sm mb-6">
                 <img 
-                  src="https://quickchart.io/qr?text=https://nutrisync-platform.onrender.com&size=200" 
+                  src="https://image-charts.com/chart?chs=200x200&cht=qr&chl=https%3A%2F%2Fnutrisync-platform.onrender.com&choe=UTF-8"
                   alt="Scan with phone" 
                   className="w-48 h-48 mx-auto"
                 />

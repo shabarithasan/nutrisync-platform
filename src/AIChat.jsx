@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Sparkles, X, Send } from 'lucide-react';
 
 const k1 = "gsk_B1y8wU4";
 const k2 = "sopojouE7U4y6WGdyb3";
@@ -72,13 +73,13 @@ export default function AIChat() {
           background: 'linear-gradient(135deg, #8b5cf6, #3b82f6)',
           border: 'none', boxShadow: '0 12px 24px rgba(139, 92, 246, 0.4)',
           cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '28px', color: '#fff', transition: 'transform 0.2s',
+          color: '#fff', transition: 'transform 0.2s',
           animation: 'slideUpCard 0.5s cubic-bezier(0.16,1,0.3,1)'
         }}
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
-        ✨
+        <Sparkles size={28} />
       </button>
     );
   }
@@ -99,10 +100,12 @@ export default function AIChat() {
         padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '20px' }}>✨</span>
+          <Sparkles size={20} />
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>NutriSync AI</h3>
         </div>
-        <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '24px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+        <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          <X size={24} />
+        </button>
       </div>
 
       {/* Messages Area */}
@@ -153,7 +156,7 @@ export default function AIChat() {
             transition: 'background 0.2s', boxShadow: '0 4px 12px rgba(59,130,246,0.2)'
           }}
         >
-          ➤
+          <Send size={18} />
         </button>
       </form>
     </div>
