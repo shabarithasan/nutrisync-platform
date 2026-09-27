@@ -132,51 +132,75 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.post('/api/vision', async (req, res, next) => {
   try {
-    const KEY = process.env.OPENROUTER_API_KEY;
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen/qwen3.8-27b:free', // Forced Qwen because Gemma free strips images
-        messages: req.body.messages
-      })
+    // Check if the user is using the Gemini API Key
+    const GEMINI_KEY = process.env.GEMINI_API_KEY;
+    const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+    
+    // Extract base64 from the frontend request
+    // Frontend sends: messages[0].content = [ {type: 'text', text: '...'}, {type: 'image_url', image_url: {url: 'data:image/jpeg;base64,...'}} ]
+    const contentArr = req.body.messages?.[0]?.content;
+    let base64Image = '';
+    let textPrompt = '';
+    
+    if (Array.isArray(contentArr)) {
+        contentArr.forEach(c => {
+            if (c.type === 'text') textPrompt = c.text;
+            if (c.type === 'image_url' && c.image_url?.url) {
+                // Strip the data:image/xxx;base64, prefix
+                base64Image = c.image_url.url.split(',')[1] || c.image_url.url;
+            }
+        });
+    }
+
+    if (!base64Image) {
+        return res.status(400).json({ error: 'No image provided' });
+    }
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+            textPrompt,
+            { inlineData: { data: base64Image, mimeType: 'image/jpeg' } }
+        ]
     });
     
-    if (!response.ok) {
-      console.warn("OpenRouter failed, falling back to Groq:", await response.text());
-      const GROQ_KEY = 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF';
-      const fbResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + GROQ_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
-          messages: [{
-            role: 'user',
-            content: "Simulate an AI food scan failure due to lack of vision capabilities. Reply ONLY with a JSON object containing EXACTLY: {\"title\": \"Vision AI Offline (Rate Limited)\", \"cal\": 0, \"protein\": 0, \"carbs\": 0, \"fat\": 0}. Do not use markdown or add anything else."
-          }]
-        })
-      });
-      
-      if (!fbResponse.ok) {
-         const fbErr = await fbResponse.text();
-         return res.status(fbResponse.status).json({ error: fbErr });
-      }
-      
-      const fbData = await fbResponse.json();
-      fbData.isFallback = true;
-      return res.json(fbData);
-    }
+    // Mock the OpenRouter response format so the frontend doesn't break
+    const resultText = response.text || '';
     
-    const data = await response.json();
-    res.json(data);
+    return res.json({
+        choices: [
+            {
+                message: {
+                    content: resultText
+                }
+            }
+        ]
+    });
   } catch (error) {
-    next(error);
+    console.error("Gemini Vision failed:", error);
+    // Fallback to Groq
+    try {
+        const GROQ_KEY = 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF';
+        const fbResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + GROQ_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'openai/gpt-oss-120b',
+                messages: [{
+                    role: 'user',
+                    content: "Simulate an AI food scan failure due to lack of vision capabilities. Reply ONLY with a JSON object containing EXACTLY: {\"title\": \"Vision AI Offline (Rate Limited)\", \"cal\": 0, \"protein\": 0, \"carbs\": 0, \"fat\": 0}. Do not use markdown or add anything else."
+                }]
+            })
+        });
+        const fbData = await fbResponse.json();
+        fbData.isFallback = true;
+        return res.json(fbData);
+    } catch(fbErr) {
+        next(fbErr);
+    }
   }
 });
 
