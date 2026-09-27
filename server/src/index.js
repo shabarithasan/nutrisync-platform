@@ -140,7 +140,7 @@ app.post('/api/vision', async (req, res, next) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free',
+        model: 'qwen/qwen3.8-27b:free', // Forced Qwen because Gemma free strips images
         messages: req.body.messages
       })
     });
