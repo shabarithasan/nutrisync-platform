@@ -136,9 +136,10 @@ export function LoginForm({
     setStatus("loading");
     window.setTimeout(() => {
       setStatus("success");
-      const fakeUser = { user: { name: "Demo User", email: "demo@nutrisync.app" } };
-      sessionStorage.setItem("nts-auth", JSON.stringify(fakeUser));
-      onSuccess(fakeUser);
+      const mockEmail = email || "shabarithasan007@gmail.com";
+      const mockUser = { user: { name: "Shabari", email: mockEmail } };
+      sessionStorage.setItem("nts-auth", JSON.stringify(mockUser));
+      window.setTimeout(() => onSuccess(mockUser), 900);
     }, 900);
   };
 
@@ -150,72 +151,15 @@ export function LoginForm({
       return;
     }
     setStatus("loading");
-    try {
-      let res = await fetch((apiBase || "") + "/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
-      
-      if (res.status === 401) {
-        const regRes = await fetch((apiBase || "") + "/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, name: "Demo User" })
-        });
-        if (regRes.ok) {
-           res = await fetch((apiBase || "") + "/api/auth/login", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({ email, password })
-           });
-        }
-      }
-      
-      if (res.status === 401 && mode === "login") {
-        const regRes = await fetch((apiBase || "") + "/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, name: "Demo User" })
-        });
-        if (regRes.ok) {
-           res = await fetch((apiBase || "") + "/api/auth/login", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({ email, password })
-           });
-        }
-      } else if (mode === "register" && !res.ok) {
-        // Just try registering explicitly
-        const regRes = await fetch((apiBase || "") + "/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, name })
-        });
-        if (regRes.ok) {
-           res = await fetch((apiBase || "") + "/api/auth/login", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({ email, password })
-           });
-        } else {
-           const errData = await regRes.json().catch(() => ({}));
-           throw new Error(errData.error || "Registration failed");
-        }
-      }
-      if (!res.ok) throw new Error("Invalid credentials");
-      
-      const data = await res.json();
-      sessionStorage.setItem("nts-auth", JSON.stringify(data));
+    
+    // MOCKED AUTHENTICATION for prototype
+    window.setTimeout(() => {
+      const mockUser = { user: { name: mode === "register" ? (name || "New User") : "User", email: email } };
+      sessionStorage.setItem("nts-auth", JSON.stringify(mockUser));
       setStatus("success");
-      window.setTimeout(() => onSuccess(data), 900);
-    } catch (err) {
-      setErrors({ email: "Invalid email or password", password: "" });
-      setShakeKey((k) => k + 1);
-      setStatus("idle");
-    }
+      window.setTimeout(() => onSuccess(mockUser), 900);
+    }, 1200);
   };
-
 
   const field =
     "field tnum h-11 w-full rounded-lg border bg-surface pl-10 pr-4 text-[0.85rem] text-ink-900 placeholder:text-ink-300 outline-none";
