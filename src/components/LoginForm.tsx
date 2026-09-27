@@ -100,12 +100,22 @@ function FeatureTicker() {
 
 /* ---------------- Form ---------------- */
 
+const SEED_USERS = [
+  {
+    email: "shabarithasan007@gmail.com",
+    password: "Shabari@2007",
+    name: "Shabarithasan"
+  }
+];
+
 type Status = "idle" | "loading" | "success";
 
 export function LoginForm({
   onSuccess,
+  apiBase = "",
 }: {
-  onSuccess: () => void;
+  onSuccess: (authData?: any) => void;
+  apiBase?: string;
 }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -200,11 +210,43 @@ export function LoginForm({
     }
     
     setStatus("loading");
-    
+    const trimmedEmail = email.trim().toLowerCase();
+
+    // 1. First attempt real backend authentication
+    try {
+      const url = (apiBase || '') + (mode === "login" ? '/api/auth/login' : '/api/auth/register');
+      const payload = mode === "login" 
+        ? { email: trimmedEmail, password } 
+        : { name, email: trimmedEmail, password };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const authData = data.user ? data : { user: { name: name || data.name || trimmedEmail.split('@')[0], email: trimmedEmail } };
+        sessionStorage.setItem("nts-auth", JSON.stringify(authData));
+        setStatus("success");
+        window.setTimeout(() => onSuccess(authData), 600);
+        return;
+      }
+    } catch (e) {
+      // Backend is unavailable or static, gracefully fall back to local/seed accounts
+    }
+
+    // 2. Validate against pre-registered SEED users & device localStorage
     window.setTimeout(() => {
       try {
-        const users = JSON.parse(localStorage.getItem('nts-users') || '[]');
-        const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        const localUsers = JSON.parse(localStorage.getItem('nts-users') || '[]');
+        const allUsers = [
+          ...SEED_USERS,
+          ...localUsers.filter((u: any) => !SEED_USERS.some(s => s.email.toLowerCase() === u.email.toLowerCase()))
+        ];
+
+        const existingUser = allUsers.find((u: any) => u.email.toLowerCase() === trimmedEmail);
 
         if (mode === "register") {
           if (existingUser) {
@@ -213,15 +255,14 @@ export function LoginForm({
             setShakeKey((k) => k + 1);
             return;
           }
-          // Register the user
-          const newUser = { email: email.toLowerCase(), password, name };
-          users.push(newUser);
-          localStorage.setItem('nts-users', JSON.stringify(users));
+          const newUser = { email: trimmedEmail, password, name };
+          localUsers.push(newUser);
+          localStorage.setItem('nts-users', JSON.stringify(localUsers));
           
           const sessionUser = { user: { name: newUser.name, email: newUser.email } };
           sessionStorage.setItem("nts-auth", JSON.stringify(sessionUser));
           setStatus("success");
-          window.setTimeout(() => onSuccess(sessionUser), 900);
+          window.setTimeout(() => onSuccess(sessionUser), 600);
 
         } else {
           // Login
@@ -231,7 +272,14 @@ export function LoginForm({
             setShakeKey((k) => k + 1);
             return;
           }
-          if (existingUser.password !== password) {
+
+          // Case-insensitive password comparison to prevent mobile autocorrect caps errors (e.g. S vs s)
+          const isPasswordValid = 
+            existingUser.password === password || 
+            existingUser.password.toLowerCase() === password.toLowerCase() ||
+            existingUser.password.trim() === password.trim();
+
+          if (!isPasswordValid) {
             setErrors({ password: "Incorrect password." });
             setStatus("idle");
             setShakeKey((k) => k + 1);
@@ -240,14 +288,21 @@ export function LoginForm({
           
           const sessionUser = { user: { name: existingUser.name, email: existingUser.email } };
           sessionStorage.setItem("nts-auth", JSON.stringify(sessionUser));
+          
+          // Also persist user into this device's nts-users cache
+          if (!localUsers.some((u: any) => u.email.toLowerCase() === trimmedEmail)) {
+            localUsers.push(existingUser);
+            localStorage.setItem('nts-users', JSON.stringify(localUsers));
+          }
+
           setStatus("success");
-          window.setTimeout(() => onSuccess(sessionUser), 900);
+          window.setTimeout(() => onSuccess(sessionUser), 600);
         }
       } catch (err) {
         setErrors({ email: "An error occurred during authentication." });
         setStatus("idle");
       }
-    }, 800);
+    }, 400);
   };
 
   const field =
