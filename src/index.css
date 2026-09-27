@@ -368,3 +368,7 @@ body {
     box-shadow 0.15s ease;
 }
 
+
+
+/* Hide framer badges */
+#__framer-badge, .framer-badge { display: none !important; opacity: 0 !important; visibility: hidden !important; }
