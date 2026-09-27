@@ -131,16 +131,9 @@ export function LoginForm({
     return Object.keys(e).length === 0;
   };
 
-    
-  const handleSocialLogin = () => {
-    setStatus("loading");
-    window.setTimeout(() => {
-      setStatus("success");
-      const mockEmail = email || "shabarithasan007@gmail.com";
-      const mockUser = { user: { name: "Shabari", email: mockEmail } };
-      sessionStorage.setItem("nts-auth", JSON.stringify(mockUser));
-      window.setTimeout(() => onSuccess(mockUser), 900);
-    }, 900);
+  const handleSocialLogin = (provider) => {
+    setErrors({ email: `${provider} authentication is disabled in this environment. Please use email and password to sign up or log in.` });
+    setShakeKey((k) => k + 1);
   };
 
   const onSubmit = async (ev: FormEvent) => {
@@ -150,15 +143,56 @@ export function LoginForm({
       setShakeKey((k) => k + 1);
       return;
     }
+    
     setStatus("loading");
     
-    // MOCKED AUTHENTICATION for prototype
     window.setTimeout(() => {
-      const mockUser = { user: { name: mode === "register" ? (name || "New User") : "User", email: email } };
-      sessionStorage.setItem("nts-auth", JSON.stringify(mockUser));
-      setStatus("success");
-      window.setTimeout(() => onSuccess(mockUser), 900);
-    }, 1200);
+      try {
+        const users = JSON.parse(localStorage.getItem('nts-users') || '[]');
+        const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+        if (mode === "register") {
+          if (existingUser) {
+            setErrors({ email: "An account with this email already exists." });
+            setStatus("idle");
+            setShakeKey((k) => k + 1);
+            return;
+          }
+          // Register the user
+          const newUser = { email: email.toLowerCase(), password, name };
+          users.push(newUser);
+          localStorage.setItem('nts-users', JSON.stringify(users));
+          
+          const sessionUser = { user: { name: newUser.name, email: newUser.email } };
+          sessionStorage.setItem("nts-auth", JSON.stringify(sessionUser));
+          setStatus("success");
+          window.setTimeout(() => onSuccess(sessionUser), 900);
+
+        } else {
+          // Login
+          if (!existingUser) {
+            setErrors({ email: "No account found with this email. Please sign up." });
+            setStatus("idle");
+            setShakeKey((k) => k + 1);
+            return;
+          }
+          if (existingUser.password !== password) {
+            setErrors({ password: "Incorrect password." });
+            setStatus("idle");
+            setShakeKey((k) => k + 1);
+            return;
+          }
+          
+          const sessionUser = { user: { name: existingUser.name, email: existingUser.email } };
+          sessionStorage.setItem("nts-auth", JSON.stringify(sessionUser));
+          setStatus("success");
+          window.setTimeout(() => onSuccess(sessionUser), 900);
+        }
+      } catch (err) {
+        setErrors({ email: "An error occurred during authentication." });
+        setStatus("idle");
+      }
+    }, 800);
   };
 
   const field =
@@ -212,11 +246,11 @@ export function LoginForm({
         {/* Social */}
         <div className="animate-fade-up d-2 mt-7 grid grid-cols-2 gap-2.5">
           <button
-            type="button" onClick={handleSocialLogin} className="elev-1 flex h-10 items-center justify-center gap-2.5 rounded-lg border border-ink-900/[0.08] bg-surface text-[0.82rem] font-semibold text-ink-900 transition-all duration-150 hover:border-ink-900/[0.16] hover:elev-2 active:scale-[0.99]"
+            type="button" onClick={() => handleSocialLogin("Google")} className="elev-1 flex h-10 items-center justify-center gap-2.5 rounded-lg border border-ink-900/[0.08] bg-surface text-[0.82rem] font-semibold text-ink-900 transition-all duration-150 hover:border-ink-900/[0.16] hover:elev-2 active:scale-[0.99]"
           >
             <GoogleIcon /> Google </button>
           <button
-            type="button" onClick={handleSocialLogin} className="elev-1 flex h-10 items-center justify-center gap-2.5 rounded-lg border border-ink-900/[0.08] bg-surface text-[0.82rem] font-semibold text-ink-900 transition-all duration-150 hover:border-ink-900/[0.16] hover:elev-2 active:scale-[0.99]"
+            type="button" onClick={() => handleSocialLogin("Apple")} className="elev-1 flex h-10 items-center justify-center gap-2.5 rounded-lg border border-ink-900/[0.08] bg-surface text-[0.82rem] font-semibold text-ink-900 transition-all duration-150 hover:border-ink-900/[0.16] hover:elev-2 active:scale-[0.99]"
           >
             <AppleIcon /> Apple </button>
         </div>
