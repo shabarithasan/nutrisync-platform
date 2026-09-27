@@ -16157,76 +16157,7 @@
     border-radius: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
 </style>
-<div id="ai-chat-widget">
-  <button id="ai-chat-button"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></button>
-  <div id="ai-chat-window">
-    <div id="ai-chat-header">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:bold;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> NutriSync AI</div>
-      <button id="ai-chat-close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-    </div>
-    <div id="ai-chat-messages">
-      <div class="ai-msg bot">Hi! I'm your NutriSync AI. Log in to get personalized insights, or ask me anything here!</div>
-    </div>
-    <div id="ai-chat-input-area">
-      <form id="ai-chat-form">
-        <input id="ai-chat-input" placeholder="Ask about nutrition..." autocomplete="off" />
-        <button id="ai-chat-submit" type="submit"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
-      </form>
-    </div>
-  </div>
-</div>
-<script>
-  const btn = document.getElementById('ai-chat-button');
-  const win = document.getElementById('ai-chat-window');
-  const cls = document.getElementById('ai-chat-close');
-  const form = document.getElementById('ai-chat-form');
-  const inp = document.getElementById('ai-chat-input');
-  const msgs = document.getElementById('ai-chat-messages');
 
-  btn.onclick = () => { btn.style.display = 'none'; win.style.display = 'flex'; };
-  cls.onclick = () => { win.style.display = 'none'; btn.style.display = 'flex'; };
-
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-    const val = inp.value.trim();
-    if(!val) return;
-    
-    inp.value = '';
-    msgs.innerHTML += `<div class="ai-msg user">${val}</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-    
-    // Typing indicator
-    const tid = 'typing-' + Date.now();
-    msgs.innerHTML += `<div id="${tid}" class="ai-msg bot" style="opacity:0.6">Thinking...</div>`;
-    msgs.scrollTop = msgs.scrollHeight;
-
-    try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF'
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
-          messages: [{role: 'user', content: val}]
-        })
-      });
-      const data = await res.json();
-      document.getElementById(tid).remove();
-      if (data.choices && data.choices[0]) {
-        const reply = data.choices[0].message.content;
-        msgs.innerHTML += `<div class="ai-msg bot">${reply.replace(/\n/g, '<br/>')}</div>`;
-      } else {
-        msgs.innerHTML += `<div class="ai-msg bot" style="color:red">Error connecting to AI. Please log in!</div>`;
-      }
-    } catch(err) {
-      document.getElementById(tid).remove();
-      msgs.innerHTML += `<div class="ai-msg bot" style="color:red">Error connecting to AI. Please log in!</div>`;
-    }
-    msgs.scrollTop = msgs.scrollHeight;
-  };
-</script>
 <!-- End AI Assistant -->
 
 </body>
