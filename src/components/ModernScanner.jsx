@@ -30,36 +30,30 @@ export function ModernScanner() {
   const [image, setImage] = useState(null);
   const [status, setStatus] = useState('idle');
 
-  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini-api-key') || '');
+    
   const [aiResult, setAiResult] = useState(null);
 
   const analyzeImage = async (base64Image) => {
-    if (!apiKey) {
-      alert("Please enter a Gemini API Key to enable AI Vision.");
-      setStatus('idle');
-      return;
-    }
-    
     setStatus('scanning');
     try {
-      const base64Data = base64Image.split(',')[1];
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch('/api/vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: "Analyze this food image. Reply ONLY with a JSON object containing: title (string, name of meal), cal (number, total calories), protein (number, grams), carbs (number, grams), fat (number, grams). Do not use markdown formatting like ```json." },
-              { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'text', text: "Analyze this food image. Reply ONLY with a JSON object containing: title (string, name of meal), cal (number, total calories), protein (number, grams), carbs (number, grams), fat (number, grams). Do not use markdown formatting like ```json." },
+              { type: 'image_url', image_url: { url: base64Image } }
             ]
           }]
         })
       });
       
       const data = await response.json();
-      if (data.error) throw new Error(data.error.message);
+      if (data.error) throw new Error(JSON.stringify(data.error));
       
-      let resultText = data.candidates[0].content.parts[0].text;
+      let resultText = data.choices[0].message.content;
       resultText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
       const parsed = JSON.parse(resultText);
       setAiResult(parsed);
