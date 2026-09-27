@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Settings, Bell, Moon, Shield, LogOut, ChevronRight, Save, X, Plus, RotateCcw, Droplets, Flame, Dumbbell, Activity, TrendingUp, TrendingDown, Minus, Target } from 'lucide-react';
+import { User, Settings, Bell, Moon, Shield, LogOut, ChevronRight, Save, X, Plus, RotateCcw, Droplets, Flame, Dumbbell, Activity, TrendingUp, TrendingDown, Minus, Target, Sliders, Sparkles } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { MotivationalQuote } from './MotivationalQuote';
+import { CalorieCalculator, NutritionCalculator } from './Calculators';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
@@ -29,6 +30,7 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
   const [isEditing, setIsEditing] = useState(false);
   const [showBmiModal, setShowBmiModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showCalculatorModal, setShowCalculatorModal] = useState(false);
   
   const [form, setForm] = useState({ 
     name: profile?.name || '', 
@@ -352,6 +354,14 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
                     <p className="text-xs font-medium text-ink-500 mt-0.5">For muscle maintenance</p>
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCalculatorModal(true)}
+                  className="w-full mt-2 py-3 bg-ink-900/5 hover:bg-ink-900/10 text-ink-900 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border border-ink-900/5 cursor-pointer"
+                >
+                  <Sliders className="w-3.5 h-3.5 text-orange-500" /> Open Precision Calculators
+                </button>
               </div>
             </GlassCard>
           </div>
@@ -505,6 +515,50 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
                   <span className="font-bold text-ink-900">Clear all local data</span>
                   <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="px-4 py-2 bg-red-500/10 text-red-600 font-bold text-xs rounded-lg hover:bg-red-500/20 transition-colors">Delete</button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Precision Calculators Modal */}
+      <AnimatePresence>
+        {showCalculatorModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-md p-4 overflow-y-auto"
+            onClick={() => setShowCalculatorModal(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }} 
+              animate={{ scale: 1, y: 0 }} 
+              exit={{ scale: 0.95, y: 20 }} 
+              className="bg-white/90 backdrop-blur-3xl rounded-[32px] shadow-2xl p-6 md:p-8 w-full max-w-5xl my-8 relative border border-white/80"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-ink-900">Precision Metabolic & Nutrition Calculators</h3>
+                  <p className="text-xs md:text-sm text-ink-500 font-medium mt-0.5">Scientifically calculate your daily calorie burn, optimal deficit, and macro balance.</p>
+                </div>
+                <button 
+                  onClick={() => setShowCalculatorModal(false)} 
+                  className="p-2.5 hover:bg-ink-900/5 text-ink-400 hover:text-ink-900 bg-ink-50 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CalorieCalculator 
+                  profile={profile} 
+                />
+                <NutritionCalculator 
+                  initialCalories={recCalories} 
+                  weight={weight} 
+                />
               </div>
             </motion.div>
           </motion.div>
