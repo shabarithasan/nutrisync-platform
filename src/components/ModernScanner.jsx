@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, CheckCircle2, Image as ImageIcon, Camera, Activity, FileText, RefreshCw, Sun, Crop, Check } from 'lucide-react';
+import { UploadCloud, CheckCircle2, Image as ImageIcon, Camera, Activity, FileText, RefreshCw, Sun, Crop, Check, X, SwitchCamera } from 'lucide-react';
 
 export function ModernScanner() {
   const [dragActive, setDragActive] = useState(false);
@@ -13,7 +13,83 @@ export function ModernScanner() {
   const [isCropped, setIsCropped] = useState(false);
   const [lightingAdjusted, setLightingAdjusted] = useState(false);
 
+  // Live Camera state
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
   const fileInputRef = useRef(null);
+
+  // Stop camera stream cleanly
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    setIsCameraActive(false);
+    setCameraError(null);
+  };
+
+  // Start live camera stream
+  const startCamera = async () => {
+    setCameraError(null);
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera API is not supported by your browser environment.");
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
+      
+      streamRef.current = stream;
+      setIsCameraActive(true);
+      
+      // Allow DOM to render the video tag before attaching stream
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(e => console.warn("Video play interrupted:", e));
+        }
+      }, 100);
+    } catch (err) {
+      console.warn("Live camera access failed, falling back to file picker:", err);
+      setCameraError("Camera unavailable or permission denied. Opening photo selector...");
+      fileInputRef.current?.click();
+    }
+  };
+
+  // Snap photo from the active video feed
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    stopCamera();
+    handleNewPhoto(dataUrl);
+  };
+
+  // Cleanup camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   // Load deterministic fixture for automated E2E tests and demo
   const loadSamplePhoto = async () => {
@@ -27,13 +103,11 @@ export function ModernScanner() {
       reader.readAsDataURL(blob);
     } catch (err) {
       console.warn("Could not load /fixtures/sample-food.jpg, generating fallback data URL", err);
-      // Fallback base64 transparent 1x1 if file fetch fails
       handleNewPhoto("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
     }
   };
 
   const handleNewPhoto = (dataUrl) => {
-    // Selecting a different photo replaces previous scan and refreshes results panel to placeholder
     setImage(dataUrl);
     setAiResult(null);
     setIsCropped(false);
@@ -138,7 +212,6 @@ export function ModernScanner() {
     if (e.target.files && e.target.files[0]) {
       processFile(e.target.files[0]);
     } else {
-      // Deterministic fallback for automated CI runners without file attachment
       loadSamplePhoto();
     }
   };
@@ -151,7 +224,7 @@ export function ModernScanner() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-ink-900 tracking-tight">AI Food Scanner</h2>
-            <p className="text-ink-500 font-medium mt-1">Upload a photo for instant macro analysis.</p>
+            <p className="text-ink-500 font-medium mt-1">Capture or upload a photo for instant macro analysis.</p>
           </div>
           
           {image && (
@@ -166,6 +239,15 @@ export function ModernScanner() {
               </button>
               
               <button 
+                data-testid="open-camera-again-btn"
+                onClick={startCamera}
+                className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-sm font-semibold text-emerald-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Camera</span>
+              </button>
+
+              <button 
                 data-testid="scan-another-btn"
                 onClick={() => { setImage(null); setAiResult(null); setStatus('idle'); }}
                 className="px-4 py-2 bg-white/50 hover:bg-white rounded-xl text-sm font-semibold text-ink-600 hover:text-ink-900 transition-colors cursor-pointer"
@@ -179,11 +261,11 @@ export function ModernScanner() {
         <div 
           className={`flex-1 relative rounded-3xl border-2 border-dashed overflow-hidden transition-all duration-300 flex flex-col items-center justify-center
             ${dragActive ? 'border-emerald-500 bg-emerald-50/50' : 'border-ink-900/15 bg-white/30'}
-            ${image ? 'border-transparent bg-transparent' : 'hover:bg-white/50 hover:border-ink-900/30'}
+            ${image || isCameraActive ? 'border-transparent bg-transparent' : 'hover:bg-white/50 hover:border-ink-900/30'}
           `}
           onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
         >
-          {/* Hidden inputs */}
+          {/* Hidden file input */}
           <input 
             ref={fileInputRef} 
             data-testid="scanner-file-input"
@@ -192,156 +274,216 @@ export function ModernScanner() {
             className="hidden" 
             onChange={handleChange} 
           />
-          <input 
-            type="file" 
-            accept="image/*" 
-            capture="environment" 
-            className="hidden" 
-            id="cameraInput" 
-            onChange={handleChange} 
-          />
-          
-          <AnimatePresence mode="wait">
-            {!image ? (
-              <motion.div 
-                key="upload" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center justify-center text-center p-8 w-full max-w-lg"
-              >
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-20 h-20 bg-white shadow-xl shadow-ink-900/5 rounded-2xl flex items-center justify-center mb-6 cursor-pointer hover:scale-105 transition-transform"
+
+          {/* Live Camera Viewfinder Overlay */}
+          {isCameraActive ? (
+            <div className="absolute inset-0 w-full h-full bg-black flex flex-col justify-between p-5 z-30">
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+
+              {/* Viewfinder Header */}
+              <div className="relative z-10 w-full flex justify-between items-center text-white">
+                <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold border border-white/20">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                  <span>Live Camera Viewfinder</span>
+                </div>
+                
+                <button 
+                  type="button"
+                  onClick={stopCamera}
+                  className="p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-md border border-white/20 transition-all cursor-pointer"
+                  title="Close Camera"
                 >
-                  <UploadCloud className="w-10 h-10 text-emerald-500" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-lg font-bold text-ink-900">Drag & drop your food photo here</h3>
-                <p className="text-ink-500 font-medium mt-2 max-w-sm text-sm">
-                  Or click to browse from your device. Supported formats: JPG, PNG, HEIC.
-                </p>
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* Upload & Sample CTA Buttons */}
-                <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-                  <button 
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()} 
-                    className="px-5 py-2.5 bg-ink-900 text-white rounded-xl text-xs font-bold shadow-md shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+              {/* Target Focus Box */}
+              <div className="relative z-10 self-center w-64 h-64 border-2 border-dashed border-emerald-400/80 rounded-3xl pointer-events-none flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+                <span className="text-white/80 text-xs font-semibold bg-black/50 px-3 py-1 rounded-lg backdrop-blur-sm">
+                  Point at your food
+                </span>
+              </div>
+
+              {/* Camera Shutter Trigger Bar */}
+              <div className="relative z-10 w-full flex items-center justify-center gap-6 pb-2">
+                <button 
+                  type="button"
+                  data-testid="capture-camera-photo"
+                  onClick={capturePhoto}
+                  className="w-16 h-16 rounded-full bg-white p-1 shadow-2xl hover:scale-105 active:scale-90 transition-transform flex items-center justify-center cursor-pointer border-4 border-emerald-500"
+                  title="Capture Photo"
+                >
+                  <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow-inner">
+                    <Camera className="w-6 h-6" />
+                  </div>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              {!image ? (
+                <motion.div 
+                  key="upload" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                  className="flex flex-col items-center justify-center text-center p-8 w-full max-w-lg"
+                >
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-20 h-20 bg-white shadow-xl shadow-ink-900/5 rounded-2xl flex items-center justify-center mb-6 cursor-pointer hover:scale-105 transition-transform"
                   >
-                    Choose Photo
-                  </button>
-                  <button 
-                    type="button"
-                    data-testid="use-sample-photo"
-                    onClick={loadSamplePhoto} 
-                    className="px-5 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 hover:bg-emerald-600 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>??</span> Use Sample Photo
-                  </button>
-                </div>
+                    <UploadCloud className="w-10 h-10 text-emerald-500" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-lg font-bold text-ink-900">Drag & drop your food photo here</h3>
+                  <p className="text-ink-500 font-medium mt-2 max-w-sm text-sm">
+                    Or open camera to take a picture live, or browse from your device.
+                  </p>
 
-                {/* Pill Controls */}
-                <div className="flex items-center gap-3 mt-6">
-                  <button 
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()} 
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/60 hover:bg-white text-xs font-semibold text-ink-700 transition-all shadow-sm cursor-pointer"
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" /> Auto-crop
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => document.getElementById('cameraInput')?.click()} 
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/60 hover:bg-white text-xs font-semibold text-ink-700 transition-all shadow-sm cursor-pointer"
-                  >
-                    <Camera className="w-3.5 h-3.5" /> Lighting adjust
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 w-full h-full p-3 flex flex-col">
-                <div className="relative flex-1 w-full rounded-2xl overflow-hidden shadow-lg border border-white/40 bg-black/5">
-                  <img 
-                    src={image} 
-                    alt="Food Preview" 
-                    className="w-full h-full object-cover transition-all duration-300"
-                    style={{
-                      filter: lightingAdjusted ? 'brightness(1.18) contrast(1.06)' : 'none',
-                      transform: isCropped ? 'scale(1.08)' : 'scale(1.0)'
-                    }}
-                  />
-                  
-                  {/* Status Badges */}
-                  {status === 'complete' && (
-                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white/50 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      <span className="text-xs font-bold text-ink-900">100% Analyzed</span>
-                    </motion.div>
-                  )}
-
-                  {/* Scanning Animation Overlays */}
-                  {status === 'scanning' && (
-                    <>
-                      <div className="absolute inset-0 bg-ink-900/25 backdrop-blur-[2px]" />
-                      <motion.div 
-                        initial={{ top: '0%' }} animate={{ top: '100%' }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                        className="absolute left-0 right-0 h-1 bg-emerald-400 shadow-[0_0_20px_5px_rgba(16,185,129,0.5)] z-10"
-                      />
-                      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="absolute top-[30%] left-[20%] w-[40%] h-[30%] border-2 border-dashed border-white/70 rounded-xl" />
-                      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-[20%] right-[10%] w-[35%] h-[25%] border-2 border-dashed border-orange-400/70 rounded-xl" />
-                      
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
-                        <Activity className="w-5 h-5 text-emerald-500 animate-pulse" />
-                        <span className="font-bold text-ink-900">AI Analyzing Image...</span>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Pre-Analysis Controls Toolbar (Always available before and after analysis) */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 bg-ink-950/70 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
-                    <div className="flex items-center gap-2">
-                      <button 
-                        type="button"
-                        data-testid="auto-crop-btn"
-                        onClick={() => setIsCropped(!isCropped)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                          isCropped ? 'bg-emerald-500 text-white shadow-md' : 'bg-white/20 text-white hover:bg-white/30'
-                        }`}
-                      >
-                        <Crop className="w-3.5 h-3.5" />
-                        <span>Auto-crop</span>
-                        {isCropped && <Check className="w-3 h-3 ml-0.5" />}
-                      </button>
-
-                      <button 
-                        type="button"
-                        data-testid="lighting-adjust-btn"
-                        onClick={() => setLightingAdjusted(!lightingAdjusted)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                          lightingAdjusted ? 'bg-emerald-500 text-white shadow-md' : 'bg-white/20 text-white hover:bg-white/30'
-                        }`}
-                      >
-                        <Sun className="w-3.5 h-3.5" />
-                        <span>Lighting adjust</span>
-                        {lightingAdjusted && <Check className="w-3 h-3 ml-0.5" />}
-                      </button>
+                  {cameraError && (
+                    <div className="mt-4 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 font-medium">
+                      {cameraError}
                     </div>
+                  )}
 
-                    <div className="flex items-center gap-2">
-                      {status !== 'scanning' && (
+                  {/* Primary CTA Buttons */}
+                  <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+                    <button 
+                      type="button"
+                      data-testid="open-camera-btn"
+                      onClick={startCamera} 
+                      className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Camera className="w-4 h-4" /> Open Camera
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()} 
+                      className="px-5 py-2.5 bg-ink-900 text-white rounded-xl text-xs font-bold shadow-md shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                    >
+                      Choose Photo
+                    </button>
+
+                    <button 
+                      type="button"
+                      data-testid="use-sample-photo"
+                      onClick={loadSamplePhoto} 
+                      className="px-4 py-2.5 bg-white border border-ink-900/10 text-ink-700 hover:bg-ink-50 rounded-xl text-xs font-bold shadow-sm transition-all hover:-translate-y-0.5 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>??</span> Sample Photo
+                    </button>
+                  </div>
+
+                  {/* Pill Controls */}
+                  <div className="flex items-center gap-3 mt-6">
+                    <button 
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()} 
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/60 hover:bg-white text-xs font-semibold text-ink-700 transition-all shadow-sm cursor-pointer"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5" /> Auto-crop
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={startCamera} 
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/60 hover:bg-white text-xs font-semibold text-ink-700 transition-all shadow-sm cursor-pointer"
+                    >
+                      <Camera className="w-3.5 h-3.5" /> Lighting adjust
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 w-full h-full p-3 flex flex-col">
+                  <div className="relative flex-1 w-full rounded-2xl overflow-hidden shadow-lg border border-white/40 bg-black/5">
+                    <img 
+                      src={image} 
+                      alt="Food Preview" 
+                      className="w-full h-full object-cover transition-all duration-300"
+                      style={{
+                        filter: lightingAdjusted ? 'brightness(1.18) contrast(1.06)' : 'none',
+                        transform: isCropped ? 'scale(1.08)' : 'scale(1.0)'
+                      }}
+                    />
+                    
+                    {/* Status Badges */}
+                    {status === 'complete' && (
+                      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white/50 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span className="text-xs font-bold text-ink-900">100% Analyzed</span>
+                      </motion.div>
+                    )}
+
+                    {/* Scanning Animation Overlays */}
+                    {status === 'scanning' && (
+                      <>
+                        <div className="absolute inset-0 bg-ink-900/25 backdrop-blur-[2px]" />
+                        <motion.div 
+                          initial={{ top: '0%' }} animate={{ top: '100%' }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                          className="absolute left-0 right-0 h-1 bg-emerald-400 shadow-[0_0_20px_5px_rgba(16,185,129,0.5)] z-10"
+                        />
+                        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="absolute top-[30%] left-[20%] w-[40%] h-[30%] border-2 border-dashed border-white/70 rounded-xl" />
+                        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-[20%] right-[10%] w-[35%] h-[25%] border-2 border-dashed border-orange-400/70 rounded-xl" />
+                        
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+                          <Activity className="w-5 h-5 text-emerald-500 animate-pulse" />
+                          <span className="font-bold text-ink-900">AI Analyzing Image...</span>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Pre-Analysis Controls Toolbar */}
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 bg-ink-950/70 backdrop-blur-md p-2.5 rounded-2xl border border-white/20">
+                      <div className="flex items-center gap-2">
                         <button 
                           type="button"
-                          data-testid="start-analysis-btn"
-                          onClick={() => analyzeImage(image)}
-                          className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                          data-testid="auto-crop-btn"
+                          onClick={() => setIsCropped(!isCropped)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                            isCropped ? 'bg-emerald-500 text-white shadow-md' : 'bg-white/20 text-white hover:bg-white/30'
+                          }`}
                         >
-                          <Activity className="w-3.5 h-3.5" />
-                          <span>{status === 'complete' ? 'Re-analyze' : 'Start Analysis'}</span>
+                          <Crop className="w-3.5 h-3.5" />
+                          <span>Auto-crop</span>
+                          {isCropped && <Check className="w-3 h-3 ml-0.5" />}
                         </button>
-                      )}
+
+                        <button 
+                          type="button"
+                          data-testid="lighting-adjust-btn"
+                          onClick={() => setLightingAdjusted(!lightingAdjusted)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                            lightingAdjusted ? 'bg-emerald-500 text-white shadow-md' : 'bg-white/20 text-white hover:bg-white/30'
+                          }`}
+                        >
+                          <Sun className="w-3.5 h-3.5" />
+                          <span>Lighting adjust</span>
+                          {lightingAdjusted && <Check className="w-3 h-3 ml-0.5" />}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {status !== 'scanning' && (
+                          <button 
+                            type="button"
+                            data-testid="start-analysis-btn"
+                            onClick={() => analyzeImage(image)}
+                            className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Activity className="w-3.5 h-3.5" />
+                            <span>{status === 'complete' ? 'Re-analyze' : 'Start Analysis'}</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
         </div>
       </div>
 
@@ -357,7 +499,7 @@ export function ModernScanner() {
              </div>
            )}
 
-           {/* Food Title: Displays 'Unknown' placeholder before scan */}
+           {/* Food Title */}
            <h2 data-testid="food-title" className="text-2xl font-bold text-ink-900 tracking-tight">
              {aiResult?.title || "Unknown"}
            </h2>
