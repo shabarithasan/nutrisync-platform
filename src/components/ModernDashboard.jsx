@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Apple, Activity, Target, Lightbulb, Users, Settings,
   Search, Bell, MoreHorizontal, ChevronRight, Droplet, Flame, ArrowUpRight,
-  Camera, BarChart2, User, Salad, Heart, Watch
+  Camera, BarChart2, User, Salad, Heart, Watch, X, CheckCircle2
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { MotivationalQuote } from './MotivationalQuote';
@@ -61,6 +61,9 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   const [meals, setMeals] = useState([]);
   const [workouts, setWorkouts] = useState([]);
   const [steps, setSteps] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   useEffect(() => {
     if (page === 'overview') {
@@ -177,16 +180,114 @@ export function ModernDashboard({ profile, page, setPage, children }) {
             </h1>
             <p className="text-ink-500 font-medium">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-4">
-            <button className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-xl border border-white flex items-center justify-center text-ink-900 shadow-sm hover:bg-white transition-colors">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-4 relative">
+            <button 
+              onClick={() => { setIsSearchOpen(true); setIsNotifOpen(false); }}
+              className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-xl border border-white flex items-center justify-center text-ink-900 shadow-sm hover:bg-white transition-colors"
+            >
               <Search className="w-5 h-5" />
             </button>
-            <button className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-xl border border-white flex items-center justify-center text-ink-900 shadow-sm hover:bg-white transition-colors relative">
+            <button 
+              onClick={() => { setIsNotifOpen(!isNotifOpen); setIsSearchOpen(false); }}
+              className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-xl border border-white flex items-center justify-center text-ink-900 shadow-sm hover:bg-white transition-colors relative"
+            >
               <Bell className="w-5 h-5" />
               <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></span>
             </button>
+
+            {/* Notifications Dropdown */}
+            <AnimatePresence>
+              {isNotifOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute top-16 right-0 w-80 bg-white/90 backdrop-blur-3xl border border-white/60 shadow-2xl rounded-2xl overflow-hidden z-50"
+                >
+                  <div className="p-4 border-b border-ink-100 flex justify-between items-center bg-white/50">
+                    <h3 className="font-bold text-ink-900">Notifications</h3>
+                    <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-bold">2 New</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    <div className="p-4 border-b border-ink-50 hover:bg-emerald-50/50 cursor-pointer transition-colors flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0"><CheckCircle2 className="w-5 h-5" /></div>
+                      <div>
+                        <h4 className="text-sm font-bold text-ink-900">AI Diet Plan Ready</h4>
+                        <p className="text-xs text-ink-500 mt-0.5">Your personalized weekly meal plan has been generated successfully.</p>
+                      </div>
+                    </div>
+                    <div className="p-4 hover:bg-orange-50/50 cursor-pointer transition-colors flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shrink-0"><Target className="w-5 h-5" /></div>
+                      <div>
+                        <h4 className="text-sm font-bold text-ink-900">Goal Update</h4>
+                        <p className="text-xs text-ink-500 mt-0.5">You're 30% closer to your target weight this month! Keep it up.</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </header>
+
+        {/* Search Modal (Global Overlay) */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-start justify-center pt-24 px-4 bg-ink-900/20 backdrop-blur-sm"
+              onClick={() => setIsSearchOpen(false)}
+            >
+              <motion.div 
+                initial={{ opacity: 0, y: -20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                className="w-full max-w-2xl bg-white/90 backdrop-blur-3xl border border-white/60 shadow-2xl rounded-2xl overflow-hidden"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex items-center px-6 py-4 border-b border-ink-100 bg-white/50">
+                  <Search className="w-5 h-5 text-ink-400 mr-3" />
+                  <input 
+                    type="text" autoFocus
+                    placeholder="Search meals, workouts, diet plans, features..."
+                    className="flex-1 bg-transparent border-none outline-none text-ink-900 placeholder:text-ink-300 text-lg font-medium"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button onClick={() => setIsSearchOpen(false)} className="p-1 rounded-full hover:bg-ink-100 text-ink-400 transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="p-2 max-h-96 overflow-y-auto">
+                  {searchQuery.trim() === '' ? (
+                    <div className="p-8 text-center text-ink-400">
+                      <p className="font-medium mb-1">Quick Navigation</p>
+                      <div className="flex flex-wrap justify-center gap-2 mt-4">
+                        {sidebarLinks.filter(l => l.id !== 'overview').map(link => (
+                          <button key={link.id} onClick={() => { setPage(link.id); setIsSearchOpen(false); }} className="px-3 py-1.5 bg-ink-50 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 text-ink-600">
+                            <link.icon className="w-4 h-4" /> {link.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 space-y-2">
+                      {sidebarLinks.filter(l => l.label.toLowerCase().includes(searchQuery.toLowerCase())).map(link => (
+                        <div key={link.id} onClick={() => { setPage(link.id); setIsSearchOpen(false); }} className="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-50 cursor-pointer transition-colors group">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600"><link.icon className="w-4 h-4" /></div>
+                          <div className="flex-1 font-semibold text-ink-900 group-hover:text-emerald-700">{link.label}</div>
+                          <ChevronRight className="w-4 h-4 text-emerald-400" />
+                        </div>
+                      ))}
+                      {/* Note: In a real app we would map over meals/workouts here */}
+                      <div className="px-4 py-8 text-center">
+                        <p className="text-ink-400 font-medium">Press Enter to search entire database for "{searchQuery}"</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {page === 'overview' ? (
           /* Dashboard Grid */
