@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Apple, Activity, Target, Lightbulb, Users, Settings,
@@ -55,6 +55,33 @@ const Ring = ({ value, max, color, size, strokeWidth, label, sublabel, trackColo
 /* --- Main Dashboard --- */
 
 export function ModernDashboard({ profile, page, setPage, children }) {
+  const [water, setWater] = useState(0);
+  const [meals, setMeals] = useState([]);
+  const [workouts, setWorkouts] = useState([]);
+  
+  useEffect(() => {
+    if (page === 'overview') {
+      const w = parseInt(localStorage.getItem('nts-water-modern')) || 0;
+      setWater(w);
+      const m = localStorage.getItem('nts-meals');
+      if(m) setMeals(JSON.parse(m));
+      const wk = localStorage.getItem('nts-workouts');
+      if(wk) setWorkouts(JSON.parse(wk));
+    }
+  }, [page]);
+
+  const weight = Number(profile?.weight) || 70;
+  const height = Number(profile?.height) || 175;
+  const age = Number(profile?.age) || 30;
+  const isMale = profile?.gender === 'Male';
+  const bmr = (10 * weight) + (6.25 * height) - (5 * age) + (isMale ? 5 : -161);
+  const targetCals = Math.round(bmr * 1.55) || 2400;
+  
+  const consumedCals = meals.reduce((sum, meal) => sum + (meal.cal || 0), 0);
+  const activeCals = workouts.reduce((sum, wk) => sum + (wk.cal || 0), 0);
+  
+  const waterGlasses = Math.floor(water / 250);
+
   const trendData = [
     { day: 'Mon', c: 80, f: 50 },
     { day: 'Tue', c: 180, f: 120 },
@@ -200,7 +227,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                 </div>
                 <div className="flex items-end justify-between mt-4">
                   <div>
-                    <span className="text-2xl font-bold text-ink-900">6<span className="text-sm text-ink-400">/8</span></span>
+                    <span className="text-2xl font-bold text-ink-900">{waterGlasses}<span className="text-sm text-ink-400">/10</span></span>
                     <p className="text-[10px] font-medium text-ink-500 mt-1">1500/2000ml</p>
                   </div>
                   <div className="w-10 h-14 bg-blue-100 rounded-b-lg rounded-t-sm border-2 border-blue-200 relative overflow-hidden">
@@ -267,7 +294,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                 <div className="flex gap-6">
                    {/* Mini Pie */}
                    <div className="w-24 shrink-0 flex flex-col items-center">
-                      <Ring value={470} max={1000} color="#f59e0b" trackColor="#10b981" size={80} strokeWidth={8} label="470" sublabel="kcal" />
+                      <Ring value={consumedCals} max={targetCals} color="#f59e0b" trackColor="#10b981" size={80} strokeWidth={8} label={consumedCals.toString()} sublabel="kcal" />
                       <div className="mt-3 space-y-1">
                         <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"/> <span className="text-[10px] font-bold text-ink-500">P/C</span></div>
                         <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500"/> <span className="text-[10px] font-bold text-ink-500">F/F</span></div>
@@ -275,32 +302,24 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                    </div>
                    
                    {/* List */}
+                   
                    <div className="flex-1 flex flex-col justify-center gap-3">
-                      <div className="flex items-center p-3 rounded-2xl bg-white/50 border border-white/60 hover:bg-white/80 transition-colors cursor-pointer group">
-                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-lg shadow-inner mr-3 group-hover:scale-110 transition-transform">??</div>
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold text-ink-500">Breakfast</p>
-                          <p className="text-sm font-bold text-ink-900">Oatmeal & Fruit</p>
+                      {meals.length === 0 ? (
+                        <div className="text-center text-sm font-semibold text-ink-400 py-4">No meals logged yet. Use the Scanner!</div>
+                      ) : meals.slice(0, 3).map(meal => (
+                        <div key={meal.id} className="flex items-center p-3 rounded-2xl bg-white/50 border border-white/60 hover:bg-white/80 transition-colors cursor-pointer group">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-lg shadow-inner mr-3 group-hover:scale-110 transition-transform">??</div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-ink-900">{meal.title}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-ink-900">{meal.cal} kcal</p>
+                            <p className="text-[10px] font-semibold text-ink-400">{meal.time}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-ink-900">410 kcal</p>
-                          <p className="text-[10px] font-semibold text-ink-400">6:00 am</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center p-3 rounded-2xl bg-white/50 border border-white/60 hover:bg-white/80 transition-colors cursor-pointer group">
-                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-lg shadow-inner mr-3 group-hover:scale-110 transition-transform">??</div>
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold text-ink-500">Lunch</p>
-                          <p className="text-sm font-bold text-ink-900">Chicken Salad</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-ink-900">580 kcal</p>
-                          <p className="text-[10px] font-semibold text-ink-400">12:30 pm</p>
-                        </div>
-                      </div>
+                      ))}
                    </div>
-                </div>
-              </GlassCard>
+</div></GlassCard>
 
               {/* Bottom 2 mini cards */}
               <div className="grid grid-cols-2 gap-6 h-full">

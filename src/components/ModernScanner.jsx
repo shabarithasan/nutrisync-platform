@@ -52,6 +52,17 @@ export function ModernScanner() {
     reader.readAsDataURL(file);
   };
 
+  
+  const handleLogMeal = () => {
+    const saved = localStorage.getItem('nts-meals');
+    const meals = saved ? JSON.parse(saved) : [];
+    meals.unshift({ id: Date.now(), title: "Avocado Toast & Egg", cal: 410, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+    localStorage.setItem('nts-meals', JSON.stringify(meals));
+    setImage(null);
+    setStatus('idle');
+    alert("Meal logged successfully!");
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();

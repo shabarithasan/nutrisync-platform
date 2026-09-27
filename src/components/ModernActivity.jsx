@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Activity, Flame, Heart, Timer, MapPin, ChevronRight, Play, X, Plus } from 'lucide-react';
@@ -15,10 +15,14 @@ const GlassCard = ({ children, className = "", delay = 0 }) => (
 
 export function ModernActivity() {
   const [showModal, setShowModal] = useState(false);
-  const [workouts, setWorkouts] = useState([
-    { id: 1, title: 'Morning Run', loc: 'Central Park', km: 5.2, cal: 320, min: 28, type: 'run' },
-    { id: 2, title: 'Vinyasa Yoga', loc: 'Living Room', km: null, cal: 180, min: 45, type: 'yoga' }
-  ]);
+  const [workouts, setWorkouts] = useState(() => {
+    const saved = localStorage.getItem('nts-workouts');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, title: 'Morning Run', loc: 'Central Park', km: 5.2, cal: 320, min: 28, type: 'run' },
+      { id: 2, title: 'Vinyasa Yoga', loc: 'Living Room', km: null, cal: 180, min: 45, type: 'yoga' }
+    ];
+  });
+  useEffect(() => localStorage.setItem('nts-workouts', JSON.stringify(workouts)), [workouts]);
   const [form, setForm] = useState({ title: '', cal: '', min: '' });
 
   const handleAdd = () => {
