@@ -143,6 +143,13 @@ export function ModernScanner() {
     setStatus('preview');
   };
 
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   const analyzeImage = async (base64Image) => {
     if (!base64Image) return;
     setStatus('scanning');
@@ -172,7 +179,7 @@ export function ModernScanner() {
       setStatus('complete');
     } catch (err) {
       console.error("AI Analysis failed:", err);
-      alert("AI Analysis failed: " + err.message);
+      showToast("AI Analysis failed: " + err.message, "error");
       setStatus('preview');
     }
   };
@@ -196,7 +203,7 @@ export function ModernScanner() {
     setImage(null);
     setAiResult(null);
     setStatus('idle');
-    alert(`Logged ${newMeal.title} (${newMeal.cal} kcal) to Diary!`);
+    showToast(`Logged ${newMeal.title} (${newMeal.cal} kcal) to Diary!`, "success");
   };
 
   // Macro percentages calculation
@@ -250,6 +257,7 @@ export function ModernScanner() {
   };
 
   return (
+    <>
     <div className="h-full w-full flex flex-col lg:flex-row gap-8">
       
       {/* Upload / Scanner Zone */}
@@ -658,5 +666,41 @@ export function ModernScanner() {
       </div>
 
     </div>
+    <AnimatePresence>
+      {toast && (
+        <motion.div
+          initial={{ opacity: 0, y: -50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -20, scale: 0.95 }}
+          transition={{ duration: 0.4, type: 'spring', bounce: 0.4 }}
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-3xl bg-ink-900/90 border border-ink-800 text-white flex items-center gap-4 min-w-[320px] max-w-[90vw]"
+        >
+          {toast.type === 'error' ? (
+            <div className="w-10 h-10 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+              <X className="w-5 h-5" />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+          )}
+          <div className="flex-1">
+            <h4 className="font-bold text-sm mb-0.5 text-white">
+              {toast.type === 'error' ? 'Analysis Failed' : 'Success'}
+            </h4>
+            <p className="text-sm font-medium text-ink-300">
+              {toast.message}
+            </p>
+          </div>
+          <button 
+            onClick={() => setToast(null)}
+            className="p-1.5 hover:bg-white/10 rounded-full transition-colors shrink-0"
+          >
+            <X className="w-4 h-4 text-ink-400" />
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }
