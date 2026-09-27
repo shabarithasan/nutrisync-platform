@@ -183,6 +183,7 @@ app.post('/api/vision', async (req, res, next) => {
     });
   } catch (error) {
     console.error("Gemini Vision failed:", error);
+    return res.status(500).json({ error: error.message, details: error.toString() });
     // Fallback to Groq
     try {
         const GROQ_KEY = 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF';
