@@ -93,28 +93,44 @@ const generateAdvice = (targets, current) => {
   const tips = [];
 
   // Urgent Water nags
-  if (consumedWater === 0) tips.push("You haven't logged ANY water today! Hydration is critical. Go drink a glass right now.");
-  else if (consumedWater < 8) tips.push(`You've only had ${consumedWater} glasses of water today. Grab your water bottle and take a big sip!`);
+  if (consumedWater === 0) tips.push({ text: "You haven't logged ANY water today! Hydration is critical. Go drink a glass right now." });
+  else if (consumedWater < 8) tips.push({ text: `You've only had ${consumedWater} glasses of water today. Grab your water bottle and take a big sip!` });
 
   // Urgent Workout nags
   if (!hasWorkedOut) {
-    if (hour < 12) tips.push("Morning! You haven't done your workout yet. A quick session will give you energy for the whole day!");
-    else if (hour < 18) tips.push("Afternoon slump? A quick 15-minute workout or walk is exactly what you need right now!");
-    else tips.push("It's getting late and you haven't worked out yet! Even a quick stretching session counts. Get moving!");
+    if (hour < 12) {
+      tips.push({ 
+        text: "Morning! You haven't done your workout yet. Start your day with a quick 15-min HIIT session!",
+        actionLabel: "Watch on YouTube",
+        actionUrl: "https://www.youtube.com/results?search_query=15+min+morning+hiit+workout"
+      });
+    } else if (hour < 18) {
+      tips.push({ 
+        text: "Afternoon slump? A 10-minute full body stretch will wake you right up!",
+        actionLabel: "Find a stretching routine",
+        actionUrl: "https://www.youtube.com/results?search_query=10+min+afternoon+stretch+energy"
+      });
+    } else {
+      tips.push({ 
+        text: "It's getting late, but it's not too late for some gentle evening yoga to unwind.",
+        actionLabel: "Try Evening Yoga",
+        actionUrl: "https://www.youtube.com/results?search_query=10+min+evening+yoga+wind+down"
+      });
+    }
   }
 
   // Macro nags
   const remainingCals = targetCals - consumedCals;
   const remainingProtein = targetProtein - consumedProtein;
-  if (remainingProtein > 20 && remainingCals > 150) tips.push(`You're ${remainingProtein.toFixed(0)}g short on protein today. How about a quick protein shake?`);
-  if (remainingCals > 500) tips.push(`You still have ${remainingCals.toFixed(0)} calories to eat today to reach your goals. Grab a healthy snack!`);
+  if (remainingProtein > 20 && remainingCals > 150) tips.push({ text: `You're ${remainingProtein.toFixed(0)}g short on protein today. How about a quick protein shake?` });
+  if (remainingCals > 500) tips.push({ text: `You still have ${remainingCals.toFixed(0)} calories to eat today to reach your goals. Grab a healthy snack!` });
   
   if (tips.length > 0) {
     // Return a random tip from the applicable ones
     return tips[Math.floor(Math.random() * tips.length)];
   }
 
-  return "Incredible job today! You hit your water, worked out, and nailed your macros. You are crushing it!";
+  return { text: "Incredible job today! You hit your water, worked out, and nailed your macros. You are crushing it!" };
 };
 
 export function ProactiveCoach({ profile }) {
@@ -178,8 +194,18 @@ export function ProactiveCoach({ profile }) {
               <div>
                 <h4 className="font-bold text-ink-900 dark:text-white mb-1">AI Coach</h4>
                 <p className="text-sm font-medium text-ink-500 dark:text-ink-400 leading-relaxed">
-                  {advice}
+                  {advice?.text || advice}
                 </p>
+                {advice?.actionUrl && (
+                  <a 
+                    href={advice.actionUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center mt-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline"
+                  >
+                    {advice.actionLabel} &rarr;
+                  </a>
+                )}
               </div>
             </div>
           </GlassCard>
