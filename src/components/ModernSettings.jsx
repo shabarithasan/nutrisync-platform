@@ -85,49 +85,63 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
              )}
           </GlassCard>
 
-          {/* Animated BMI Gauge */}
-          <GlassCard delay={0.2} className="p-8 flex flex-col items-center relative overflow-hidden">
-             <h3 className="font-bold text-ink-900 w-full text-left mb-8">Body Mass Index</h3>
-             
-             <div className="relative w-64 h-32 overflow-hidden flex justify-center">
-               {/* SVG Semi-Circle Arch */}
-               <svg viewBox="0 0 200 100" className="w-full h-full drop-shadow-lg">
-                 <defs>
-                   <linearGradient id="bmiGrad" x1="0" y1="0" x2="1" y2="0">
-                     <stop offset="0%" stopColor="#3b82f6" />    {/* Underweight */}
-                     <stop offset="35%" stopColor="#10b981" />   {/* Normal */}
-                     <stop offset="65%" stopColor="#f59e0b" />   {/* Overweight */}
-                     <stop offset="100%" stopColor="#ef4444" />  {/* Obese */}
-                   </linearGradient>
-                 </defs>
-                 <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#bmiGrad)" strokeWidth="24" strokeLinecap="round" />
-               </svg>
+          {/* BMI Calculator Widget matching user design */}
+            <GlassCard delay={0.2} className="p-8 flex flex-col relative overflow-hidden bg-white/70">
+               <div className="flex justify-between items-center w-full mb-10">
+                 <h3 className="font-bold text-ink-900">BMI Calculator</h3>
+                 <ChevronRight className="w-5 h-5 text-ink-900" />
+               </div>
                
-               {/* Animated Needle */}
-               <motion.div 
-                 initial={{ rotate: -90 }} animate={{ rotate: rotation }} transition={{ type: "spring", stiffness: 40, damping: 15, delay: 0.5 }}
-                 className="absolute bottom-0 left-1/2 w-1 h-24 bg-ink-900 rounded-full origin-bottom" style={{ marginLeft: '-2px' }}
-               >
-                 <div className="absolute -top-2 -left-1.5 w-4 h-4 bg-ink-900 rounded-full border-4 border-white" />
-               </motion.div>
-               
-               {/* Hub */}
-               <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-md border-4 border-ink-900 z-10" />
-             </div>
+               <div className="relative w-full h-40 flex justify-center mb-6">
+                 {/* Segmented Semi-Circle Donut */}
+                 <svg viewBox="0 0 200 100" className="w-full h-full max-w-[280px] drop-shadow-md">
+                   {/* We draw overlapping arcs using strokeDasharray to create perfect gaps */}
+                   <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#3b82f6" strokeWidth="28" pathLength="100" strokeDasharray="17.5 82.5" strokeDashoffset="0" />
+                   <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#10b981" strokeWidth="28" pathLength="100" strokeDasharray="42.5 57.5" strokeDashoffset="-20" />
+                   <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#f59e0b" strokeWidth="28" pathLength="100" strokeDasharray="14.5 85.5" strokeDashoffset="-65" />
+                   <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#ef4444" strokeWidth="28" pathLength="100" strokeDasharray="17.5 82.5" strokeDashoffset="-82.5" />
 
-             <div className="text-center mt-4">
-               <span className="block text-4xl font-bold text-ink-900 tracking-tight">{bmi}</span>
-               <span className="text-sm font-semibold text-emerald-600 mt-1 uppercase tracking-wider">
-                 {bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal Weight' : bmi < 30 ? 'Overweight' : 'Obese'}
-               </span>
-             </div>
-             
-             <div className="w-full flex justify-between mt-8 text-xs font-bold text-ink-400">
-               <div className="text-center"><div>Weight</div><div className="text-ink-900 text-sm mt-0.5">{weight} kg</div></div>
-               <div className="w-px h-8 bg-ink-900/10"></div>
-               <div className="text-center"><div>Height</div><div className="text-ink-900 text-sm mt-0.5">{height} cm</div></div>
-             </div>
-          </GlassCard>
+                   {/* Animated Needle */}
+                   <motion.line 
+                     x1="100" y1="100" x2="100" y2="35" 
+                     stroke="#0f172a" strokeWidth="4" strokeLinecap="round"
+                     initial={{ rotate: -90, transformOrigin: '100px 100px' }} 
+                     animate={{ rotate: rotation, transformOrigin: '100px 100px' }} 
+                     transition={{ type: "spring", stiffness: 40, damping: 15, delay: 0.5 }}
+                   />
+                   <circle cx="100" cy="100" r="6" fill="#0f172a" />
+                 </svg>
+                 
+                 {/* Center Text */}
+                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center flex flex-col items-center">
+                   <span className="text-4xl font-extrabold text-ink-900 tracking-tight leading-none mb-1">{bmi}</span>
+                   <span className="text-xs font-bold text-ink-400">
+                     {bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'}
+                   </span>
+                 </div>
+               </div>
+               
+               {/* Legend (like the image) */}
+               <div className="w-full flex justify-between px-2 mt-4">
+                 <div className="text-center flex flex-col items-center">
+                   <div className="flex items-center gap-1.5 mb-1.5"><div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div><span className="text-[10px] font-bold text-ink-500">Under</span></div>
+                   <span className="text-xs font-bold text-ink-900">&lt; 18.5</span>
+                 </div>
+                 <div className="text-center flex flex-col items-center">
+                   <div className="flex items-center gap-1.5 mb-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span className="text-[10px] font-bold text-ink-500">Normal</span></div>
+                   <span className="text-xs font-bold text-ink-900">18.5 - 24.9</span>
+                 </div>
+                 <div className="text-center flex flex-col items-center">
+                   <div className="flex items-center gap-1.5 mb-1.5"><div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div><span className="text-[10px] font-bold text-ink-500">Over</span></div>
+                   <span className="text-xs font-bold text-ink-900">25 - 29.9</span>
+                 </div>
+                 <div className="text-center flex flex-col items-center">
+                   <div className="flex items-center gap-1.5 mb-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-500"></div><span className="text-[10px] font-bold text-ink-500">Obese</span></div>
+                   <span className="text-xs font-bold text-ink-900">30+</span>
+                 </div>
+               </div>
+
+            </GlassCard>
         </div>
 
         {/* Right Col: Preferences */}
