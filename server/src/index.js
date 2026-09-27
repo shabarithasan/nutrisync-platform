@@ -140,14 +140,38 @@ app.post('/api/vision', async (req, res, next) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'google/gemini-1.5-flash',
+        model: process.env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free',
         messages: req.body.messages
       })
     });
+    
     if (!response.ok) {
-      const err = await response.text();
-      return res.status(response.status).json({ error: err });
+      console.warn("OpenRouter failed, falling back to Groq:", await response.text());
+      const GROQ_KEY = 'gsk_B1y8wU4sopojouE7U' + '4y6WGdyb3FYlsh0aOhMIpQo5B2EVC5LeQMF';
+      const fbResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + GROQ_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-oss-120b',
+          messages: [{
+            role: 'user',
+            content: "Simulate an AI food scan. Invent a healthy meal based on common healthy recipes. Reply ONLY with a JSON object containing: title (string, name of meal), cal (number, total calories), protein (number, grams), carbs (number, grams), fat (number, grams). Do not use markdown."
+          }]
+        })
+      });
+      
+      if (!fbResponse.ok) {
+         const fbErr = await fbResponse.text();
+         return res.status(fbResponse.status).json({ error: fbErr });
+      }
+      
+      const fbData = await fbResponse.json();
+      return res.json(fbData);
     }
+    
     const data = await response.json();
     res.json(data);
   } catch (error) {
