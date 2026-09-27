@@ -289,7 +289,13 @@ export function ModernDashboard({ profile, page, setPage, children }) {
               <GlassCard delay={0.6} className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="font-bold text-ink-900">Meal Tracker</h3>
-                  <MoreHorizontal className="w-5 h-5 text-ink-400" />
+                  <button 
+                    onClick={() => setPage('scan')}
+                    className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Scan Meal</span>
+                  </button>
                 </div>
                 <div className="flex gap-6">
                    {/* Mini Pie */}
@@ -305,7 +311,13 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                    
                    <div className="flex-1 flex flex-col justify-center gap-3">
                       {meals.length === 0 ? (
-                        <div className="text-center text-sm font-semibold text-ink-400 py-4">No meals logged yet. Use the Scanner!</div>
+                        <div 
+                          onClick={() => setPage('scan')}
+                          className="text-center text-sm font-semibold text-emerald-600 hover:text-emerald-700 py-4 cursor-pointer hover:underline flex flex-col items-center gap-1.5 bg-emerald-50/40 rounded-2xl border border-dashed border-emerald-200/80 p-3 transition-all hover:bg-emerald-50"
+                        >
+                          <Camera className="w-4 h-4 text-emerald-500" />
+                          <span>No meals logged yet. Click to open Scanner!</span>
+                        </div>
                       ) : meals.slice(0, 3).map(meal => (
                         <div key={meal.id} className="flex items-center p-3 rounded-2xl bg-white/50 border border-white/60 hover:bg-white/80 transition-colors cursor-pointer group">
                           <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-lg shadow-inner mr-3 group-hover:scale-110 transition-transform">??</div>
