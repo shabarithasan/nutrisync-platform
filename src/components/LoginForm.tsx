@@ -131,9 +131,64 @@ export function LoginForm({
     return Object.keys(e).length === 0;
   };
 
-  const handleSocialLogin = (provider) => {
-    setErrors({ email: `${provider} authentication is disabled in this environment. Please use email and password to sign up or log in.` });
-    setShakeKey((k) => k + 1);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [googleStep, setGoogleStep] = useState(1);
+  const [googleEmail, setGoogleEmail] = useState("");
+  const [googleStatus, setGoogleStatus] = useState("idle");
+
+  const handleSocialLogin = (provider: string) => {
+    if (provider === "Google") {
+      setShowGoogleModal(true);
+      setGoogleStep(1);
+      setGoogleEmail("");
+      setGoogleStatus("idle");
+    } else {
+      setErrors({ email: `${provider} authentication is disabled in this environment. Please use email and password to sign up or log in.` });
+      setShakeKey((k) => k + 1);
+    }
+  };
+
+  const handleGoogleSubmit = (e: any) => {
+    e.preventDefault();
+    if (googleStep === 1) {
+      if (!googleEmail.trim()) return;
+      setGoogleStatus("loading");
+      setTimeout(() => {
+        setGoogleStep(2);
+        setGoogleStatus("idle");
+      }, 800);
+    } else {
+      setGoogleStatus("loading");
+      setTimeout(() => {
+        try {
+          const users = JSON.parse(localStorage.getItem('nts-users') || '[]');
+          const existingUser = users.find((u: any) => u.email.toLowerCase() === googleEmail.toLowerCase());
+          let userName = "Google User";
+          if (!existingUser) {
+            userName = googleEmail.split('@')[0];
+            const newUser = { email: googleEmail.toLowerCase(), password: "oauth-placeholder", name: userName };
+            users.push(newUser);
+            localStorage.setItem('nts-users', JSON.stringify(users));
+          } else {
+            userName = existingUser.name || userName;
+          }
+          
+          const mockAuth = {
+            accessToken: 'mock-google-token-' + Date.now(),
+            user: { id: Date.now(), email: googleEmail.toLowerCase(), name: userName, role: "USER" }
+          };
+          sessionStorage.setItem('nts-auth', JSON.stringify(mockAuth));
+          
+          setGoogleStatus("success");
+          setTimeout(() => {
+            setShowGoogleModal(false);
+            onSuccess();
+          }, 400);
+        } catch (err) {
+          setGoogleStatus("idle");
+        }
+      }, 1200);
+    }
   };
 
   const onSubmit = async (ev: FormEvent) => {
@@ -510,6 +565,67 @@ export function LoginForm({
       <div className="animate-fade-in d-6 relative z-10 shrink-0">
         <FeatureTicker />
       </div>
+
+      {/* Fake Google OAuth Modal */}
+      {showGoogleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 animate-fade-in">
+          <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-[420px] overflow-hidden flex flex-col relative transition-all">
+            {/* Progress bar (fake loading) */}
+            {(googleStatus === "loading" || googleStatus === "success") && (
+              <div className="absolute top-0 left-0 h-1 bg-[#1a73e8] animate-pulse" style={{ width: '100%' }}></div>
+            )}
+            
+            <div className="px-10 pt-12 pb-10 flex flex-col items-center">
+              <GoogleIcon />
+              <h2 className="text-2xl font-normal text-[#202124] mt-4 mb-2">
+                {googleStep === 1 ? "Sign in" : "Welcome"}
+              </h2>
+              <p className="text-[#202124] text-[15px] mb-8 text-center">
+                {googleStep === 1 ? "Use your Google Account" : googleEmail}
+              </p>
+
+              <form onSubmit={handleGoogleSubmit} className="w-full flex flex-col gap-8">
+                <div className="relative">
+                  <input
+                    type={googleStep === 1 ? "email" : "password"}
+                    value={googleStep === 1 ? googleEmail : ""}
+                    onChange={googleStep === 1 ? (e) => setGoogleEmail(e.target.value) : undefined}
+                    placeholder=" "
+                    autoFocus
+                    required
+                    readOnly={googleStatus === "loading" || googleStatus === "success"}
+                    className="peer w-full h-[54px] rounded border border-[#dadce0] px-4 text-base text-[#202124] focus:border-[#1a73e8] focus:border-2 focus:outline-none placeholder-transparent transition-all"
+                  />
+                  <label className="absolute left-3.5 top-[-10px] bg-white px-1 text-xs text-[#1a73e8] peer-placeholder-shown:top-[17px] peer-placeholder-shown:text-base peer-placeholder-shown:text-[#5f6368] peer-focus:top-[-10px] peer-focus:text-xs peer-focus:text-[#1a73e8] transition-all pointer-events-none">
+                    {googleStep === 1 ? "Email or phone" : "Enter your password"}
+                  </label>
+                </div>
+
+                {googleStep === 1 && (
+                  <p className="text-[#1a73e8] text-sm font-medium mt-[-20px] cursor-pointer hover:underline">
+                    Forgot email?
+                  </p>
+                )}
+                {googleStep === 2 && (
+                  <div className="flex items-center gap-2 mt-[-16px]">
+                    <input type="checkbox" id="showpw-google" className="w-4 h-4 rounded-sm border-[#dadce0]" />
+                    <label htmlFor="showpw-google" className="text-sm text-[#202124]">Show password</label>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center mt-2">
+                  <button type="button" onClick={() => setShowGoogleModal(false)} className="text-[#1a73e8] text-sm font-medium hover:bg-[#f1f3f4] px-4 py-2 rounded-md transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={googleStatus === "loading"} className="bg-[#1a73e8] hover:bg-[#1b66c9] text-white text-sm font-medium px-6 py-2 rounded-md transition-colors shadow-sm disabled:opacity-70">
+                    Next
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
