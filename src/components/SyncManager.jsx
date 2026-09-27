@@ -8,7 +8,8 @@ const SYNC_KEYS = [
   'nts-gym-schedule',
   'nts-diet-plan',
   'nts-workouts',
-  'nts-water-modern'
+  'nts-water-modern',
+  'nts-integrations'
 ];
 
 export function SyncManager({ session }) {

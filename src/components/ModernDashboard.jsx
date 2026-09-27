@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Apple, Activity, Target, Lightbulb, Users, Settings,
   Search, Bell, MoreHorizontal, ChevronRight, Droplet, Flame, ArrowUpRight,
-  Camera, BarChart2, User, Salad, Heart
+  Camera, BarChart2, User, Salad, Heart, Watch
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { MotivationalQuote } from './MotivationalQuote';
@@ -100,6 +100,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
     { icon: Salad, label: 'Diet Plans', id: 'diet' },
     { icon: Activity, label: 'Workouts', id: 'progress' },
     { icon: Droplet, label: 'Hydration', id: 'water' },
+    { icon: Watch, label: 'Devices', id: 'integrations' },
     { icon: BarChart2, label: 'Analytics', id: 'reports' },
     { icon: User, label: 'Profile', id: 'calculator' },
   ];
