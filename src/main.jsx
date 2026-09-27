@@ -15,6 +15,7 @@ import { ModernActivity } from './components/ModernActivity';
 import { ModernGoals } from './components/ModernGoals';
 import { ModernSettings } from './components/ModernSettings';
 import { ModernDietPlan } from './components/ModernDietPlan';
+import { ModernOnboarding } from './components/ModernOnboarding';
 
 import {
   AreaChart,
@@ -527,7 +528,10 @@ const AuthPage = ({ onAuth }) => {
 };
 function App(){const defaults={name:'',age:'',gender:'',height:'',weight:'',targetWeight:'',activity:'',health:'Normal',healthDetails:'',allergies:'',avoid:'',goal:'loss',diet:'',mealsPerDay:'',cuisine:'',plan:'monthly'};const [page,setPage]=useState('overview'),[dark,setDark]=useState(false),[route,setRoute]=useState(()=>location.hash.startsWith('#admin')?'admin':'app');useEffect(()=>{const f=()=>setRoute(location.hash.startsWith('#admin')?'admin':'app');window.addEventListener('hashchange',f);return ()=>window.removeEventListener('hashchange',f)},[]);const [profile,setProfile]=useState(()=>{try{return {...defaults,...JSON.parse(localStorage.getItem('nutrisync-profile'))}}catch{return defaults}}),[auth,setAuth]=useState(()=>{try{return JSON.parse(sessionStorage.getItem('nts-auth'))}catch{return null}}),[loading,setLoading]=useState(false);if(route==='admin')return <AdminApp/>;const handleLogout = () => { sessionStorage.removeItem('nts-auth'); setAuth(null); setPage('overview'); };
 const handleUpdateProfile = (newP) => { setProfile(newP); localStorage.setItem('nutrisync-profile', JSON.stringify(newP)); };
-if(!auth)return <><AuthPage onAuth={a=>{setAuth(a);setProfile(p=>({...p,name:a.user.name}))}}/><AIChat /></>;const content={overview:null,progress:<ModernActivity />,water:<ModernGoals />,scan:<ModernScanner />,diet:<ModernDietPlan />,reports:<ModernReports />,calculator:<ModernSettings profile={profile} onUpdateProfile={handleUpdateProfile} dark={dark} setDark={setDark} onLogout={handleLogout} />}[page];return <><ModernDashboard profile={profile} page={page} setPage={setPage}>{content}</ModernDashboard>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /></>;}
+if(!auth)return <><AuthPage onAuth={a=>{setAuth(a);setProfile(p=>({...p,name:a.user.name}))}}/><AIChat /></>;
+const isProfileComplete = profile.age && profile.gender && profile.height && profile.weight && profile.activity;
+if(!isProfileComplete)return <><ModernOnboarding profile={profile} onComplete={handleUpdateProfile} /><AIChat /></>;
+const content={overview:null,progress:<ModernActivity />,water:<ModernGoals />,scan:<ModernScanner />,diet:<ModernDietPlan />,reports:<ModernReports />,calculator:<ModernSettings profile={profile} onUpdateProfile={handleUpdateProfile} dark={dark} setDark={setDark} onLogout={handleLogout} />}[page];return <><ModernDashboard profile={profile} page={page} setPage={setPage}>{content}</ModernDashboard>{loading&&<LoadingOverlay/>}<LiveSensors /><AIChat /></>;}
 createRoot(document.getElementById('root')).render(<ErrorBoundary><App/></ErrorBoundary>);
 
 
