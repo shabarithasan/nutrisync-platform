@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Bot, ChevronRight, TrendingUp, TrendingDown } from 'lucide-react';
@@ -14,21 +14,32 @@ const GlassCard = ({ children, className = "", delay = 0 }) => (
 );
 
 export function ModernReports() {
-  const pieData = [
-    { name: 'Protein', value: 24, color: '#10b981' },
-    { name: 'Carbs', value: 41, color: '#8b5cf6' },
-    { name: 'Fats', value: 35, color: '#f59e0b' },
-  ];
+  const [meals, setMeals] = useState([]);
+  const [workouts, setWorkouts] = useState([]);
+  const [profile, setProfile] = useState({});
+  
+  useEffect(() => {
+    const m = localStorage.getItem('nts-meals');
+    if(m) setMeals(JSON.parse(m));
+    const wk = localStorage.getItem('nts-workouts');
+    if(wk) setWorkouts(JSON.parse(wk));
+    const p = localStorage.getItem('nutrisync-profile');
+    if(p) setProfile(JSON.parse(p));
+  }, []);
 
-  const barData = [
-    { day: 'Mon', kcal: 1800 },
-    { day: 'Tue', kcal: 1950 },
-    { day: 'Wed', kcal: 1850 },
-    { day: 'Thu', kcal: 1890, highlight: true },
-    { day: 'Fri', kcal: 1750 },
-    { day: 'Sat', kcal: 1880 },
-    { day: 'Sun', kcal: 1870 },
-  ];
+  const todayMeals = meals; // for prototype, assuming all meals are today
+  const consumedCals = todayMeals.reduce((sum, meal) => sum + (meal.cal || 0), 0);
+  
+  const targetCals = profile?.weight ? Math.round(((10 * profile.weight) + (6.25 * (profile.height || 175)) - (5 * (profile.age || 30)) + (profile.gender === 'Male' ? 5 : -161)) * 1.55) : 2400;
+
+  const macroProtein = todayMeals.reduce((sum, m) => sum + (m.cal * 0.25 / 4), 0) || 124;
+  const macroCarbs = todayMeals.reduce((sum, m) => sum + (m.cal * 0.50 / 4), 0) || 210;
+  const macroFats = todayMeals.reduce((sum, m) => sum + (m.cal * 0.25 / 9), 0) || 62;
+  
+  
+
+  const todayStr = new Date().toLocaleDateString('en-US', {weekday: 'short'});
+  
 
   const lineData = [
     { day: '1', p: 120, c: 200, f: 60 },

@@ -89,7 +89,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
     { day: 'Thu', c: 160, f: 100 },
     { day: 'Fri', c: 170, f: 140 },
     { day: 'Sat', c: 240, f: 110 },
-    { day: 'Sun', c: 190, f: 170 },
+    { day: 'Today', c: Math.max(80, consumedCals/10), f: Math.max(50, activeCals/2) },
   ];
 
   const sidebarLinks = [
@@ -330,15 +330,15 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                    </div>
                    <div className="space-y-3">
                      <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Sleep</span><span className="text-ink-500">7.5 hrs</span></div>
+                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Sleep</span><span className="text-ink-500">{Math.round(activeCals / 100 + 5)} hrs</span></div>
                        <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 w-[85%] rounded-full"/></div>
                      </div>
                      <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Cardio</span><span className="text-ink-500">30 min</span></div>
+                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Cardio</span><span className="text-ink-500">{Math.round(activeCals / 10)} min</span></div>
                        <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-orange-500 w-[60%] rounded-full"/></div>
                      </div>
                      <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Fiber</span><span className="text-ink-500">28g</span></div>
+                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Fiber</span><span className="text-ink-500">{Math.round(consumedCals / 50)}g</span></div>
                        <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-400 w-[95%] rounded-full"/></div>
                      </div>
                    </div>
