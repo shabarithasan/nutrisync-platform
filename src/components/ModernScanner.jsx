@@ -28,7 +28,72 @@ const Ring = ({ value, max, color, size, strokeWidth, label, sublabel, trackColo
 export function ModernScanner() {
   const [dragActive, setDragActive] = useState(false);
   const [image, setImage] = useState(null);
-  const [status, setStatus] = useState('idle'); // idle | scanning | complete
+  const [status, setStatus] = useState('idle');
+
+  const [apiKey, setApiKey] = useState(localStorage.getItem('gemini-api-key') || '');
+  const [aiResult, setAiResult] = useState(null);
+
+  const analyzeImage = async (base64Image) => {
+    if (!apiKey) {
+      alert("Please enter a Gemini API Key to enable AI Vision.");
+      setStatus('idle');
+      return;
+    }
+    
+    setStatus('scanning');
+    try {
+      const base64Data = base64Image.split(',')[1];
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: "Analyze this food image. Reply ONLY with a JSON object containing: title (string, name of meal), cal (number, total calories), protein (number, grams), carbs (number, grams), fat (number, grams). Do not use markdown formatting like ```json." },
+              { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+            ]
+          }]
+        })
+      });
+      
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message);
+      
+      let resultText = data.candidates[0].content.parts[0].text;
+      resultText = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(resultText);
+      setAiResult(parsed);
+      setStatus('complete');
+    } catch (err) {
+      console.error(err);
+      alert("AI Analysis failed: " + err.message);
+      setStatus('idle');
+    }
+  };
+
+
+  const handleLogMeal = () => {
+    const saved = localStorage.getItem('nts-meals');
+    const meals = saved ? JSON.parse(saved) : [];
+    
+    const newMeal = { 
+      id: Date.now(), 
+      title: aiResult?.title || "Unknown Meal", 
+      cal: aiResult?.cal || 0,
+      p: aiResult?.protein || 0,
+      c: aiResult?.carbs || 0,
+      f: aiResult?.fat || 0,
+      time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+    };
+    
+    meals.unshift(newMeal);
+    localStorage.setItem('nts-meals', JSON.stringify(meals));
+    setImage(null);
+    setAiResult(null);
+    setStatus('idle');
+    alert(`Logged ${newMeal.title} successfully!`);
+  };
+ // idle | scanning | complete
   const fileInputRef = useRef(null);
 
   const handleDrag = (e) => {
@@ -46,21 +111,9 @@ export function ModernScanner() {
     const reader = new FileReader();
     reader.onload = (e) => {
       setImage(e.target.result);
-      setStatus('scanning');
-      setTimeout(() => setStatus('complete'), 3000);
+      analyzeImage(e.target.result);
     };
     reader.readAsDataURL(file);
-  };
-
-  
-  const handleLogMeal = () => {
-    const saved = localStorage.getItem('nts-meals');
-    const meals = saved ? JSON.parse(saved) : [];
-    meals.unshift({ id: Date.now(), title: "Avocado Toast & Egg", cal: 410, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-    localStorage.setItem('nts-meals', JSON.stringify(meals));
-    setImage(null);
-    setStatus('idle');
-    alert("Meal logged successfully!");
   };
 
   const handleDrop = (e) => {
