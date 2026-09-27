@@ -21,6 +21,7 @@ model User {
   isEmailVerified       Boolean                  @default(false)
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
+  appData               Json?                    @default("{}")
   sessions              Session[]
   passwordResetTokens   PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]

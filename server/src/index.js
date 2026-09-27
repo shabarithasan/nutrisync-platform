@@ -252,6 +252,29 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, '../../dist');
 
+// --- CLOUD SYNC API ---
+app.get('/api/sync', requireAuth, async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.auth.sub } });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ appData: user.appData || {} });
+  } catch (error) { next(error); }
+});
+
+app.post('/api/sync', requireAuth, async (req, res, next) => {
+  try {
+    const appData = req.body;
+    if (!appData || typeof appData !== 'object') return res.status(400).json({ error: 'Invalid data format' });
+    
+    await prisma.user.update({
+      where: { id: req.auth.sub },
+      data: { appData }
+    });
+    res.json({ success: true, message: 'Cloud sync complete' });
+  } catch (error) { next(error); }
+});
+// ----------------------
+
 app.use(express.static(distPath, { index: false }));
 app.use((req, res, next) => {
   if (req.method === 'GET' && req.path === '/') {

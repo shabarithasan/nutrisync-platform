@@ -8,7 +8,7 @@
         "dev:api": "node --watch server/src/index.js",
         "dev:web": "vite --host 0.0.0.0",
         "start": "node server/src/index.js",
-        "build": "npx @tailwindcss/cli -i src/index.css -o src/tailwind.css && vite build",
+        "build": "npx prisma generate && npx prisma db push --accept-data-loss && npx @tailwindcss/cli -i src/index.css -o src/tailwind.css && vite build",
         "prisma:generate": "prisma generate",
         "prisma:migrate": "prisma migrate dev",
         "test": "node --test server/test/*.test.js"
