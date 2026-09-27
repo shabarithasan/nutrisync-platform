@@ -108,16 +108,19 @@ export function LoginForm({
   onSuccess: () => void;
 }) {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(true);
   const [capsOn, setCapsOn] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string }>({});
   const [status, setStatus] = useState<Status>("idle");
   const [shakeKey, setShakeKey] = useState(0);
 
   const validate = () => {
-    const e: { email?: string; password?: string } = {};
+    const e: { email?: string; password?: string; name?: string } = {};
+    if (mode === "register" && !name.trim()) e.name = "Name is required";
     if (!email.trim()) e.email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       e.email = "Enter a valid email address";
@@ -169,6 +172,37 @@ export function LoginForm({
         }
       }
       
+      if (res.status === 401 && mode === "login") {
+        const regRes = await fetch((apiBase || "") + "/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, name: "Demo User" })
+        });
+        if (regRes.ok) {
+           res = await fetch((apiBase || "") + "/api/auth/login", {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ email, password })
+           });
+        }
+      } else if (mode === "register" && !res.ok) {
+        // Just try registering explicitly
+        const regRes = await fetch((apiBase || "") + "/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, name })
+        });
+        if (regRes.ok) {
+           res = await fetch((apiBase || "") + "/api/auth/login", {
+             method: "POST",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ email, password })
+           });
+        } else {
+           const errData = await regRes.json().catch(() => ({}));
+           throw new Error(errData.error || "Registration failed");
+        }
+      }
       if (!res.ok) throw new Error("Invalid credentials");
       
       const data = await res.json();
@@ -258,7 +292,53 @@ export function LoginForm({
           noValidate
           className="animate-fade-up d-4 mt-6 space-y-4"
         >
-          {/* Email */}
+          
+            {/* Name */}
+            {mode === "register" && (
+              <div className="animate-fade-up d-1">
+                <label
+                  htmlFor="name"
+                  className={cn(
+                    "mb-1.5 block text-[0.82rem] font-semibold transition-colors duration-200",
+                    errors.name ? "text-signal-red" : "text-ink-900"
+                  )}
+                >
+                  Full name
+                </label>
+                <div className="relative">
+                  <input
+                    id="name"
+                    type="text"
+                    autoComplete="name"
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (errors.name) setErrors((er) => ({ ...er, name: undefined }));
+                    }}
+                    className={cn(
+                      "block w-full rounded-xl border bg-surface/50 px-4 py-3 pl-10 text-[0.95rem] text-ink-900 outline-none transition-all duration-200 placeholder:text-ink-400 focus:bg-surface focus:ring-4",
+                      errors.name
+                        ? "border-signal-red/50 focus:border-signal-red focus:ring-signal-red/10"
+                        : "border-ink-900/[0.12] focus:border-brand-600 focus:ring-brand-600/10 hover:border-ink-900/20"
+                    )}
+                    placeholder="John Doe"
+                  />
+                  <Users
+                    className={cn(
+                      "pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors duration-200",
+                      errors.name ? "text-signal-red" : "text-ink-300"
+                    )}
+                  />
+                </div>
+                {errors.name && (
+                  <p className="mt-1.5 flex items-center gap-1 text-[0.8rem] text-signal-red">
+                    <AlertCircle className="h-3 w-3" /> {errors.name}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Email */}
           <div>
             <label
               htmlFor="email"
@@ -384,12 +464,7 @@ export function LoginForm({
                 Keep me signed in
               </span>
             </label>
-            <a
-              href="#"
-              className="text-[0.78rem] font-semibold text-brand-600 transition-colors hover:text-brand-700"
-            >
-              Forgot password?
-            </a>
+            <button type="button" onClick={(e) => { e.preventDefault(); alert("Demo Mode: Forgot password reset is simulated."); }} className="text-[0.78rem] font-semibold text-brand-600 transition-colors hover:text-brand-700">Forgot password?</button>
           </div>
 
           {/* Error banner */}
@@ -430,8 +505,7 @@ export function LoginForm({
           >
             {status === "idle" && (
               <>
-                Sign in
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
+                {mode === "register" ? "Create Account" : "Sign in"} <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
               </>
             )}
             {status === "loading" && (
@@ -450,13 +524,7 @@ export function LoginForm({
 
         {/* Sign up */}
         <p className="animate-fade-up d-5 mt-7 text-center text-[0.82rem] text-ink-500">
-          New to NutriSync?{" "}
-          <a
-            href="#"
-            className="font-semibold text-ink-900 underline decoration-brand-500/40 decoration-2 underline-offset-[3px] transition-colors hover:decoration-brand-600"
-          >
-            Create your free account
-          </a>
+          {mode === "login" ? (<>New to NutriSync? <button type="button" onClick={(e) => { e.preventDefault(); setMode("register"); setStatus("idle"); setErrors({}); }} className="font-semibold text-ink-900 underline decoration-brand-500/40 decoration-2 underline-offset-[3px] transition-colors hover:decoration-brand-600">Create your free account</button></>) : (<>Already have an account? <button type="button" onClick={(e) => { e.preventDefault(); setMode("login"); setStatus("idle"); setErrors({}); }} className="font-semibold text-ink-900 underline decoration-brand-500/40 decoration-2 underline-offset-[3px] transition-colors hover:decoration-brand-600">Log in</button></>)}
         </p>
       </main>
 
