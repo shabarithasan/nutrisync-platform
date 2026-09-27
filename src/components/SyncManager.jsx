@@ -36,6 +36,7 @@ export function SyncManager({ session }) {
             
             for (const key of SYNC_KEYS) {
               if (cloudData[key]) {
+                const localVal = localStorage.getItem(key);
                 let shouldOverwrite = true;
                 
                 // Prevent overwriting a completed local profile with an incomplete cloud profile
@@ -57,8 +58,8 @@ export function SyncManager({ session }) {
               }
             }
             
-            // Reload page if we just synced down new data for the first time
-            if (changesMade && !isInitialSyncDone.current) {
+            // Dispatch storage event so React components update when cloud data is pulled
+            if (changesMade) {
                console.log('Cloud sync downloaded new data.');
                window.dispatchEvent(new Event('storage'));
             }
@@ -106,8 +107,15 @@ export function SyncManager({ session }) {
       }
     };
 
-    // Push every 15 seconds
-    const interval = setInterval(pushToCloud, 15000);
+    // 3. Periodic Sync Loop (Pull then Push)
+    const syncLoop = async () => {
+      if (document.visibilityState === 'hidden') return;
+      await pullFromCloud();
+      await pushToCloud();
+    };
+
+    // Sync every 10 seconds
+    const interval = setInterval(syncLoop, 10000);
 
     // Push on window unload/hide
     const handleVisibilityChange = () => {

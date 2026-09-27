@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Heart, Watch, Circle, Smartphone, Loader2, CheckCircle2 } from 'lucide-react';
+import { Activity, Heart, Watch, Circle, Smartphone, Loader2, CheckCircle2, X } from 'lucide-react';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
@@ -59,6 +59,8 @@ export function ModernIntegrations() {
     return () => window.removeEventListener('nts-log-updated', loadSteps);
   }, []);
 
+  const [showQrModal, setShowQrModal] = useState(false);
+
   const toggleConnection = async (id) => {
     if (connectedIds.includes(id)) {
       setConnectedIds(prev => prev.filter(item => item !== id));
@@ -67,6 +69,12 @@ export function ModernIntegrations() {
     
     // Request permission for local pedometer on iOS
     if (id === 'device_pedometer') {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) {
+        setShowQrModal(true);
+        return; // Don't connect on desktop automatically, wait for them to scan
+      }
+
       try {
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
           const p1 = await DeviceMotionEvent.requestPermission();
@@ -166,6 +174,57 @@ export function ModernIntegrations() {
           );
         })}
       </div>
+
+      {/* QR Code Modal for Desktop Users */}
+      <AnimatePresence>
+        {showQrModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/40 backdrop-blur-md"
+            onClick={() => setShowQrModal(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 relative flex flex-col items-center text-center"
+            >
+              <button 
+                onClick={() => setShowQrModal(false)}
+                className="absolute top-4 right-4 p-2 text-ink-400 hover:text-ink-900 bg-ink-50 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+                <Smartphone className="w-8 h-8" />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-ink-900 mb-2">Connect Your Phone</h2>
+              <p className="text-ink-500 mb-6 text-sm leading-relaxed">
+                To track your live steps, scan this QR code with your phone's camera. Log into NutriSync on your phone, click "Connect", and your steps will magically sync back to this screen!
+              </p>
+              
+              <div className="p-4 bg-white border-2 border-ink-100 rounded-2xl shadow-sm mb-6">
+                <img 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://nutrisync-platform.onrender.com" 
+                  alt="Scan with phone" 
+                  className="w-48 h-48 mx-auto"
+                />
+              </div>
+
+              <button 
+                onClick={() => {
+                  setShowQrModal(false);
+                  alert("If you are on a laptop, step tracking won't work correctly as laptops lack motion sensors. Please use a mobile device.");
+                }}
+                className="text-sm font-semibold text-ink-400 hover:text-ink-600 underline"
+              >
+                I'm on a laptop, skip this
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
