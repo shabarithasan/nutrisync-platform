@@ -33,28 +33,30 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      const gkey = "QVEuQWI4Uk42STlYOEdHMFd3TDB2WDhVNzN5dHBnSUZBZDVzWkJjblJUWUloZ2lyakJpd1E=";
-      const systemPrompt = "You are NutriSync AI, an expert, encouraging health and fitness assistant. Keep answers concise, actionable, and friendly.";
-      
-      const contents = newMessages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
-
-      const response = await fetch('https://generativelanguage.googleapis.com/v1alpha/models/gemini-3.5-flash-lite:generateContent?key=' + gkey, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          systemInstruction: { parts: [{text: systemPrompt }] },
-          contents: contents
+          model: 'openai/gpt-oss-120b',
+          messages: [
+            { role: 'system', content: 'You are NutriSync AI, an expert, encouraging health and fitness assistant. Keep answers concise, actionable, and friendly.' },
+            ...newMessages
+          ]
         })
       });
 
-      if (!response.ok) throw new Error('API Error');
       const data = await response.json();
-      const reply = data.candidates[0].content.parts[0].text;
-
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Unknown server error');
+      }
+      
+      if (data.choices && data.choices[0]) {
+        const reply = data.choices[0].message.content;
+        setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      } else {
+        throw new Error('Unexpected response format from Groq');
+      }
     } catch (error) {
       console.error('AI CHAT ERROR:', error);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Error: ' + error.message }]);
