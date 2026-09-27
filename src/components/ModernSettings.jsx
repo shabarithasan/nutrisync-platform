@@ -20,6 +20,8 @@ const Toggle = ({ active, onToggle }) => (
 export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogout }) {
   const [notif, setNotif] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [showBmiModal, setShowBmiModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [form, setForm] = useState({ name: profile?.name || '', weight: profile?.weight || '', height: profile?.height || '' });
   
   // BMI calc
@@ -89,7 +91,7 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
             <GlassCard delay={0.2} className="p-8 flex flex-col relative overflow-hidden bg-white/70">
                <div className="flex justify-between items-center w-full mb-10">
                  <h3 className="font-bold text-ink-900">BMI Calculator</h3>
-                 <ChevronRight className="w-5 h-5 text-ink-900" />
+                 <button onClick={() => setShowBmiModal(true)} className="p-1 hover:bg-black/5 rounded-lg transition-colors"><ChevronRight className="w-5 h-5 text-ink-900" /></button>
                </div>
                
                <div className="relative w-full h-40 flex justify-center mb-6">
@@ -165,7 +167,7 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
            </GlassCard>
            
            <GlassCard delay={0.4} className="p-2">
-              <div className="px-6 py-4 flex items-center justify-between group cursor-pointer hover:bg-white/40 rounded-2xl transition-colors">
+              <div onClick={() => setShowPrivacyModal(true)} className="px-6 py-4 flex items-center justify-between group cursor-pointer hover:bg-white/40 rounded-2xl transition-colors">
                  <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center"><Shield className="w-5 h-5 text-emerald-500" /></div>
                     <span className="font-bold text-ink-900">Privacy & Data</span>
@@ -183,6 +185,55 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
         </div>
 
       </div>
+
+      {/* BMI Edit Modal */}
+      <AnimatePresence>
+        {showBmiModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-md">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-ink-900">Update Body Metrics</h3>
+                <button onClick={() => setShowBmiModal(false)} className="p-2 hover:bg-ink-900/5 rounded-full"><X className="w-5 h-5 text-ink-500" /></button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold text-ink-700 mb-2">Weight (kg)</label>
+                  <input type="number" value={form.weight} onChange={e => setForm({...form, weight: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-ink-900/10 bg-ink-900/5 focus:outline-none focus:ring-2 ring-emerald-500/50 text-lg font-semibold" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-ink-700 mb-2">Height (cm)</label>
+                  <input type="number" value={form.height} onChange={e => setForm({...form, height: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-ink-900/10 bg-ink-900/5 focus:outline-none focus:ring-2 ring-emerald-500/50 text-lg font-semibold" />
+                </div>
+                <button onClick={() => { handleSave(); setShowBmiModal(false); }} className="w-full mt-4 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md shadow-emerald-500/20 transition-colors">
+                  Calculate BMI
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Privacy Modal */}
+      <AnimatePresence>
+        {showPrivacyModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }} className="bg-white rounded-[32px] shadow-2xl p-8 w-full max-w-md">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-ink-900">Privacy & Data</h3>
+                <button onClick={() => setShowPrivacyModal(false)} className="p-2 hover:bg-ink-900/5 rounded-full"><X className="w-5 h-5 text-ink-500" /></button>
+              </div>
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-ink-500">Your data is stored locally in your browser. We never share your nutritional data with third parties.</p>
+                <div className="p-4 rounded-xl bg-ink-900/5 flex items-center justify-between">
+                  <span className="font-bold text-ink-900">Clear all local data</span>
+                  <button onClick={() => { localStorage.clear(); window.location.reload(); }} className="px-4 py-2 bg-red-500/10 text-red-600 font-bold text-xs rounded-lg hover:bg-red-500/20 transition-colors">Delete</button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
