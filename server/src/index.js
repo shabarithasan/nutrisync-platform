@@ -135,7 +135,7 @@ app.get('/api/test-gemini', async (req, res) => {
     const GEMINI_KEY = process.env.GEMINI_API_KEY || DEFAULT_KEY;
     const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
     const response = await ai.models.generateContent({
-        model: 'gemini-3.7-flash',
+        model: 'gemini-3.5-flash-lite',
         contents: "Return only the word: WORKING"
     });
     res.json({ ok: true, text: response.text });
@@ -179,7 +179,7 @@ app.post('/api/vision', async (req, res, next) => {
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.7-flash',
+        model: 'gemini-3.5-flash-lite',
         contents: [
             textPrompt,
             { inlineData: { data: base64Image, mimeType: detectedMimeType } }
