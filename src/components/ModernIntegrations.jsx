@@ -40,57 +40,55 @@ export function ModernIntegrations() {
   // Update localStorage when connectedIds change
   useEffect(() => {
     localStorage.setItem('nts-integrations', JSON.stringify(connectedIds));
+    window.dispatchEvent(new Event('storage'));
   }, [connectedIds]);
 
-  // Handle device motion for pedometer
+
+  // Load real steps from nts-log
   useEffect(() => {
-    if (!connectedIds.includes('device_pedometer')) return;
-
-    const handleMotion = (event) => {
-      if (!event.accelerationIncludingGravity) return;
-      
-      const { x, y, z } = event.accelerationIncludingGravity;
-      if (x === null || y === null || z === null) return;
-      
-      const acceleration = Math.sqrt(x * x + y * y + z * z);
-      // Basic threshold for step detection (gravity ~ 9.8, so values > 12 indicate significant movement)
-      if (acceleration > 12) {
-        setLiveSteps((prev) => prev + 1);
-      }
+    const loadSteps = () => {
+      try {
+        const logs = JSON.parse(localStorage.getItem('nts-log') || '{}');
+        const today = new Date().toISOString().split('T')[0];
+        setLiveSteps(logs[today]?.steps || 0);
+      } catch { setLiveSteps(0); }
     };
-
-    window.addEventListener('devicemotion', handleMotion);
-    return () => {
-      window.removeEventListener('devicemotion', handleMotion);
-    };
-  }, [connectedIds]);
-
-  // Simulate daily step count for cloud integrations
-  useEffect(() => {
-    const hasCloud = connectedIds.some(id => 
-      INTEGRATIONS.find(int => int.id === id)?.type === 'cloud'
-    );
     
-    if (hasCloud) {
-      const currentHour = new Date().getHours();
-      const baseSteps = currentHour * 500;
-      const jitter = Math.floor(Math.random() * 1000);
-      setLiveSteps(baseSteps + jitter);
-    } else if (!connectedIds.includes('device_pedometer')) {
-      setLiveSteps(0);
-    }
-  }, [connectedIds]);
+    loadSteps();
+    window.addEventListener('nts-log-updated', loadSteps);
+    return () => window.removeEventListener('nts-log-updated', loadSteps);
+  }, []);
 
-  const toggleConnection = (id) => {
+  const toggleConnection = async (id) => {
     if (connectedIds.includes(id)) {
       setConnectedIds(prev => prev.filter(item => item !== id));
-    } else {
-      setConnectingId(id);
-      setTimeout(() => {
-        setConnectedIds(prev => [...prev, id]);
-        setConnectingId(null);
-      }, 2000);
+      return;
     }
+    
+    // Request permission for local pedometer on iOS
+    if (id === 'device_pedometer') {
+      try {
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+          const p1 = await DeviceMotionEvent.requestPermission();
+          if (p1 !== 'granted') {
+            alert('Motion tracking permission denied.');
+            return;
+          }
+        }
+      } catch (err) {
+        // Ignore, likely not iOS or not HTTPS
+      }
+    } else {
+      // It's a cloud integration. Let's make it look real but explain it needs an API key
+      const wantToConnect = window.confirm(`To connect ${INTEGRATIONS.find(i => i.id === id).name}, you need an OAuth API Key configured in your environment variables. Proceed in demo mode?`);
+      if (!wantToConnect) return;
+    }
+
+    setConnectingId(id);
+    setTimeout(() => {
+      setConnectedIds(prev => [...prev, id]);
+      setConnectingId(null);
+    }, 1500);
   };
 
   const hasAnyConnection = connectedIds.length > 0;

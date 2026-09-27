@@ -2,6 +2,34 @@ import React, { useState, useEffect, useRef } from 'react';
 
 export default function LiveSensors({ upd, m }) {
   const [active, setActive] = useState(false);
+  
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('nts-integrations');
+      if (stored) {
+        const connected = JSON.parse(stored);
+        if (connected.includes('device_pedometer')) {
+          setActive(true);
+        }
+      }
+    } catch {}
+    
+    const handleStorage = () => {
+      try {
+        const stored = localStorage.getItem('nts-integrations');
+        if (stored) {
+          const connected = JSON.parse(stored);
+          setActive(connected.includes('device_pedometer'));
+        } else {
+          setActive(false);
+        }
+      } catch {}
+    };
+    
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   const [granted, setGranted] = useState(false);
   const [steps, setSteps] = useState(() => {
     try {
@@ -94,20 +122,7 @@ export default function LiveSensors({ upd, m }) {
   }, [active]);
 
   if (!active) {
-    return (
-      <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 10000 }}>
-        <button 
-          onClick={requestPermissions}
-          style={{
-            background: 'var(--brand, #16a34a)', color: '#fff', border: 'none', padding: '12px 20px', 
-            borderRadius: '30px', fontWeight: 'bold', boxShadow: '0 8px 24px rgba(22,163,74,0.4)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', animation: 'softPulse 2s infinite'
-          }}
-        >
-          <span>🛰️</span> Enable Live Sensors
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
