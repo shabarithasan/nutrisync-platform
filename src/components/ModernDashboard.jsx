@@ -136,7 +136,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#e8efec] font-sans flex overflow-hidden selection:bg-brand-500/30">
+    <div className="h-[100dvh] w-full bg-[#e8efec] font-sans flex overflow-hidden selection:bg-brand-500/30">
       
       {/* Dynamic Animated Background Orbs */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -153,7 +153,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
       {/* Sidebar */}
       <motion.aside 
         initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.6 }}
-        className="w-64 h-full relative z-10 p-6 flex flex-col gap-8 border-r border-white/40 bg-white/20 backdrop-blur-3xl"
+        className="w-64 h-full relative z-10 p-6 flex flex-col gap-8 border-r border-white/40 bg-white/20 backdrop-blur-3xl overflow-y-auto"
       >
         <div className="flex items-center gap-3 px-2">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
