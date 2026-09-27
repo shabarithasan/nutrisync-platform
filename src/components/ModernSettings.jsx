@@ -274,8 +274,8 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
                  <button onClick={() => setShowBmiModal(true)} className="p-2 bg-white rounded-full shadow-sm hover:bg-ink-900/5 transition-colors"><Activity className="w-4 h-4 text-ink-900" /></button>
                </div>
                
-               <div className="relative w-full h-48 flex justify-center mb-2 mt-4">
-                 <svg viewBox="0 0 200 100" className="w-full h-full max-w-[320px] drop-shadow-md">
+                <div className="relative w-full h-48 flex justify-center mb-2 mt-4">
+                 <svg viewBox="0 0 200 100" className="w-full h-full max-w-[320px] drop-shadow-md relative z-10 pointer-events-none">
                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#3b82f6" strokeWidth="24" pathLength="100" strokeDasharray="17.5 82.5" strokeDashoffset="0" />
                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#10b981" strokeWidth="24" pathLength="100" strokeDasharray="42.5 57.5" strokeDashoffset="-20" />
                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#f59e0b" strokeWidth="24" pathLength="100" strokeDasharray="14.5 85.5" strokeDashoffset="-65" />
@@ -291,7 +291,7 @@ export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogo
                    <circle cx="100" cy="100" r="8" fill="#0f172a" />
                  </svg>
                  
-                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center flex flex-col items-center bg-white/80 backdrop-blur-md px-6 py-2 rounded-2xl shadow-sm border border-white">
+                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center flex flex-col items-center bg-white/80 backdrop-blur-md px-6 py-2 rounded-2xl shadow-sm border border-white z-0">
                    <span className="text-4xl font-extrabold text-ink-900 tracking-tight leading-none">{bmi}</span>
                    <span className={`text-sm font-bold ${bmi < 18.5 ? 'text-blue-500' : bmi < 25 ? 'text-emerald-500' : bmi < 30 ? 'text-orange-500' : 'text-red-500'}`}>
                      {bmiCategory}

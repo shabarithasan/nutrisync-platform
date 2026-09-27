@@ -28,7 +28,7 @@ export function ModernOnboarding({ profile = {}, onComplete }) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const isStep1Valid = formData.age > 0 && formData.gender !== '';
+  const isStep1Valid = formData.name && formData.name.trim() !== '' && formData.age > 0 && formData.gender !== '';
   const isStep2Valid = formData.height > 0 && formData.weight > 0;
   const isStep3Valid = formData.targetWeight > 0 && formData.activity !== '' && formData.goal !== '';
 
@@ -95,6 +95,17 @@ export function ModernOnboarding({ profile = {}, onComplete }) {
                 </div>
 
                 <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-ink-500 mb-2">What should we call you?</label>
+                    <input 
+                      type="text"
+                      value={formData.name || ''}
+                      onChange={(e) => updateData('name', e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-emerald-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      placeholder="e.g. Alex"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-semibold text-ink-500 mb-2">Age</label>
                     <input 
