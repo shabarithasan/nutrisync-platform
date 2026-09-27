@@ -330,7 +330,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                       <MoreHorizontal className="w-4 h-4 text-ink-400" />
                    </div>
                    <div className="z-10 relative mt-2">
-                      <span className="text-2xl font-bold text-ink-900 block">62.4 kg</span>
+                      <span className="text-2xl font-bold text-ink-900 block">{profile?.weight || "--"} kg</span>
                       <span className="text-[10px] font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
                          <ArrowUpRight className="w-3 h-3 rotate-90" />
                          -0.8 kg this week

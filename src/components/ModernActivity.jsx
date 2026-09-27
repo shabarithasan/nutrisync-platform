@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, Flame, Heart, Timer, MapPin, ChevronRight, Play } from 'lucide-react';
+import { Activity, Flame, Heart, Timer, MapPin, ChevronRight, Play, X, Plus } from 'lucide-react';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
@@ -14,6 +14,20 @@ const GlassCard = ({ children, className = "", delay = 0 }) => (
 );
 
 export function ModernActivity() {
+  const [showModal, setShowModal] = useState(false);
+  const [workouts, setWorkouts] = useState([
+    { id: 1, title: 'Morning Run', loc: 'Central Park', km: 5.2, cal: 320, min: 28, type: 'run' },
+    { id: 2, title: 'Vinyasa Yoga', loc: 'Living Room', km: null, cal: 180, min: 45, type: 'yoga' }
+  ]);
+  const [form, setForm] = useState({ title: '', cal: '', min: '' });
+
+  const handleAdd = () => {
+    if (!form.title || !form.cal || !form.min) return;
+    setWorkouts([{ id: Date.now(), title: form.title, loc: 'Home', km: null, cal: parseInt(form.cal), min: parseInt(form.min), type: 'custom' }, ...workouts]);
+    setShowModal(false);
+    setForm({ title: '', cal: '', min: '' });
+  };
+
   const activityData = [
     { day: 'Mon', cal: 450, avg: 300 },
     { day: 'Tue', cal: 520, avg: 300 },
@@ -25,13 +39,13 @@ export function ModernActivity() {
   ];
 
   return (
-    <div className="h-full w-full flex flex-col">
+    <div className="h-full w-full flex flex-col relative">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-bold text-ink-900 tracking-tight">Activity & Workouts</h2>
           <p className="text-ink-500 font-medium mt-1">Track your fitness journey and active calories.</p>
         </div>
-        <button className="px-6 py-2.5 bg-ink-900 text-white rounded-xl font-bold shadow-lg shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95">
+        <button onClick={() => setShowModal(true)} className="px-6 py-2.5 bg-ink-900 text-white rounded-xl font-bold shadow-lg shadow-ink-900/20 hover:bg-ink-800 transition-all hover:-translate-y-0.5 active:scale-95">
           Log Workout
         </button>
       </div>
@@ -101,56 +115,69 @@ export function ModernActivity() {
             <button className="text-ink-400 hover:text-ink-900"><ChevronRight className="w-5 h-5"/></button>
           </div>
           
-          <div className="flex-1 flex flex-col gap-4">
-             {/* Workout 1 */}
-             <div className="bg-white/60 p-4 rounded-2xl border border-white/80 hover:bg-white hover:shadow-md transition-all cursor-pointer group">
-               <div className="flex gap-4 items-center mb-3">
-                 <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                   <Activity className="w-6 h-6 text-orange-500" />
+          <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+             {workouts.map(w => (
+               <div key={w.id} className="bg-white/60 p-4 rounded-2xl border border-white/80 hover:bg-white hover:shadow-md transition-all cursor-pointer group">
+                 <div className="flex gap-4 items-center mb-3">
+                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform ${w.type === 'run' ? 'bg-orange-100' : 'bg-purple-100'}`}>
+                     {w.type === 'run' ? <Activity className="w-6 h-6 text-orange-500" /> : <span className="text-2xl">?????</span>}
+                   </div>
+                   <div>
+                     <h4 className="font-bold text-ink-900">{w.title}</h4>
+                     <p className="text-xs font-medium text-ink-500 flex items-center gap-1"><MapPin className="w-3 h-3"/> {w.loc}</p>
+                   </div>
                  </div>
-                 <div>
-                   <h4 className="font-bold text-ink-900">Morning Run</h4>
-                   <p className="text-xs font-medium text-ink-500 flex items-center gap-1"><MapPin className="w-3 h-3"/> Central Park</p>
-                 </div>
-               </div>
-               <div className="flex justify-between items-center px-2 py-2 bg-ink-900/5 rounded-xl">
-                 <div className="text-center"><span className="block text-sm font-bold text-ink-900">5.2</span><span className="text-[10px] text-ink-500 font-semibold uppercase">km</span></div>
-                 <div className="w-px h-6 bg-ink-900/10"></div>
-                 <div className="text-center"><span className="block text-sm font-bold text-ink-900">320</span><span className="text-[10px] text-ink-500 font-semibold uppercase">kcal</span></div>
-                 <div className="w-px h-6 bg-ink-900/10"></div>
-                 <div className="text-center"><span className="block text-sm font-bold text-ink-900">28</span><span className="text-[10px] text-ink-500 font-semibold uppercase">min</span></div>
-               </div>
-             </div>
-
-             {/* Workout 2 */}
-             <div className="bg-white/60 p-4 rounded-2xl border border-white/80 hover:bg-white hover:shadow-md transition-all cursor-pointer group">
-               <div className="flex gap-4 items-center mb-3">
-                 <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                   <span className="text-2xl">?????</span>
-                 </div>
-                 <div>
-                   <h4 className="font-bold text-ink-900">Vinyasa Yoga</h4>
-                   <p className="text-xs font-medium text-ink-500 flex items-center gap-1"><MapPin className="w-3 h-3"/> Living Room</p>
+                 <div className="flex justify-between items-center px-2 py-2 bg-ink-900/5 rounded-xl">
+                   <div className="text-center"><span className="block text-sm font-bold text-ink-900">{w.km || '--'}</span><span className="text-[10px] text-ink-500 font-semibold uppercase">km</span></div>
+                   <div className="w-px h-6 bg-ink-900/10"></div>
+                   <div className="text-center"><span className="block text-sm font-bold text-ink-900">{w.cal}</span><span className="text-[10px] text-ink-500 font-semibold uppercase">kcal</span></div>
+                   <div className="w-px h-6 bg-ink-900/10"></div>
+                   <div className="text-center"><span className="block text-sm font-bold text-ink-900">{w.min}</span><span className="text-[10px] text-ink-500 font-semibold uppercase">min</span></div>
                  </div>
                </div>
-               <div className="flex justify-between items-center px-2 py-2 bg-ink-900/5 rounded-xl">
-                 <div className="text-center"><span className="block text-sm font-bold text-ink-900">--</span><span className="text-[10px] text-ink-500 font-semibold uppercase">km</span></div>
-                 <div className="w-px h-6 bg-ink-900/10"></div>
-                 <div className="text-center"><span className="block text-sm font-bold text-ink-900">180</span><span className="text-[10px] text-ink-500 font-semibold uppercase">kcal</span></div>
-                 <div className="w-px h-6 bg-ink-900/10"></div>
-                 <div className="text-center"><span className="block text-sm font-bold text-ink-900">45</span><span className="text-[10px] text-ink-500 font-semibold uppercase">min</span></div>
-               </div>
-             </div>
+             ))}
              
              {/* Start new */}
              <div className="mt-auto pt-4">
-                <button className="w-full py-4 border-2 border-dashed border-emerald-400 bg-emerald-50/50 hover:bg-emerald-100 text-emerald-600 font-bold rounded-2xl flex items-center justify-center gap-2 transition-colors">
+                <button onClick={() => setShowModal(true)} className="w-full py-4 border-2 border-dashed border-emerald-400 bg-emerald-50/50 hover:bg-emerald-100 text-emerald-600 font-bold rounded-2xl flex items-center justify-center gap-2 transition-colors">
                   <Play className="w-4 h-4 fill-emerald-600" /> Start New Workout
                 </button>
              </div>
           </div>
         </GlassCard>
       </div>
+
+      <AnimatePresence>
+        {showModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white/90 backdrop-blur-2xl border border-white p-8 rounded-3xl w-full max-w-sm shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-ink-900">Log Workout</h3>
+                <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-ink-400 hover:text-ink-900" /></button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-ink-500 uppercase mb-1">Workout Name</label>
+                  <input type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. HIIT Training" className="w-full px-4 py-3 rounded-xl border border-ink-900/10 bg-white/50 focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div className="flex gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-ink-500 uppercase mb-1">Calories</label>
+                    <input type="number" value={form.cal} onChange={e => setForm({...form, cal: e.target.value})} placeholder="kcal" className="w-full px-4 py-3 rounded-xl border border-ink-900/10 bg-white/50 focus:outline-none focus:border-emerald-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-ink-500 uppercase mb-1">Duration</label>
+                    <input type="number" value={form.min} onChange={e => setForm({...form, min: e.target.value})} placeholder="min" className="w-full px-4 py-3 rounded-xl border border-ink-900/10 bg-white/50 focus:outline-none focus:border-emerald-500" />
+                  </div>
+                </div>
+                <button onClick={handleAdd} className="w-full mt-4 py-3 bg-emerald-500 text-white rounded-xl font-bold shadow-md hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2">
+                  <Plus className="w-5 h-5" /> Save Workout
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

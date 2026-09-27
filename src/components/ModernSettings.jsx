@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { User, Settings, Bell, Moon, Shield, LogOut, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Settings, Bell, Moon, Shield, LogOut, ChevronRight, Save, X } from 'lucide-react';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
@@ -17,9 +17,10 @@ const Toggle = ({ active, onToggle }) => (
   </div>
 );
 
-export function ModernSettings({ profile }) {
+export function ModernSettings({ profile, onUpdateProfile, dark, setDark, onLogout }) {
   const [notif, setNotif] = useState(true);
-  const [dark, setDark] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState({ name: profile?.name || '', weight: profile?.weight || '', height: profile?.height || '' });
   
   // BMI calc
   const weight = Number(profile?.weight) || 70;
@@ -33,8 +34,13 @@ export function ModernSettings({ profile }) {
   const pct = (clamped - min) / (max - min);
   const rotation = -90 + (pct * 180);
 
+  const handleSave = () => {
+    onUpdateProfile({ ...profile, ...form });
+    setIsEditing(false);
+  };
+
   return (
-    <div className="h-full w-full flex flex-col items-center">
+    <div className="h-full w-full flex flex-col items-center relative">
       <div className="w-full max-w-4xl flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-bold text-ink-900 tracking-tight">Profile & Settings</h2>
@@ -47,17 +53,36 @@ export function ModernSettings({ profile }) {
         {/* Left Col: Profile & BMI */}
         <div className="flex flex-col gap-6">
           {/* Profile Card */}
-          <GlassCard delay={0.1} className="p-8 flex items-center gap-6">
-             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/20 text-3xl text-white font-bold">
-               {profile?.name ? profile.name.charAt(0).toUpperCase() : 'U'}
-             </div>
-             <div>
-               <h3 className="text-2xl font-bold text-ink-900">{profile?.name || 'User Name'}</h3>
-               <p className="text-ink-500 font-medium">{profile?.email || 'user@example.com'}</p>
-               <button className="mt-3 px-4 py-1.5 bg-ink-900/5 hover:bg-ink-900/10 text-ink-900 text-xs font-bold rounded-full transition-colors">
-                 Edit Profile
-               </button>
-             </div>
+          <GlassCard delay={0.1} className="p-8 relative">
+             {!isEditing ? (
+               <div className="flex items-center gap-6">
+                 <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/20 text-3xl text-white font-bold">
+                   {profile?.name ? profile.name.charAt(0).toUpperCase() : 'U'}
+                 </div>
+                 <div className="flex-1">
+                   <h3 className="text-2xl font-bold text-ink-900 truncate">{profile?.name || 'User Name'}</h3>
+                   <p className="text-ink-500 font-medium truncate">{profile?.email || 'user@example.com'}</p>
+                   <button onClick={() => setIsEditing(true)} className="mt-3 px-4 py-1.5 bg-ink-900/5 hover:bg-ink-900/10 text-ink-900 text-xs font-bold rounded-full transition-colors">
+                     Edit Profile
+                   </button>
+                 </div>
+               </div>
+             ) : (
+               <div className="flex flex-col gap-4">
+                 <div className="flex justify-between items-center mb-2">
+                   <h3 className="font-bold text-ink-900">Edit Details</h3>
+                   <button onClick={() => setIsEditing(false)}><X className="w-5 h-5 text-ink-400 hover:text-ink-900" /></button>
+                 </div>
+                 <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Name" className="w-full px-4 py-2 rounded-xl border border-ink-900/10 bg-white/50 focus:outline-none focus:border-emerald-500" />
+                 <div className="flex gap-4">
+                   <input type="number" value={form.weight} onChange={e => setForm({...form, weight: e.target.value})} placeholder="Weight (kg)" className="w-full px-4 py-2 rounded-xl border border-ink-900/10 bg-white/50 focus:outline-none focus:border-emerald-500" />
+                   <input type="number" value={form.height} onChange={e => setForm({...form, height: e.target.value})} placeholder="Height (cm)" className="w-full px-4 py-2 rounded-xl border border-ink-900/10 bg-white/50 focus:outline-none focus:border-emerald-500" />
+                 </div>
+                 <button onClick={handleSave} className="w-full py-2 bg-emerald-500 text-white rounded-xl font-bold shadow-md hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2">
+                   <Save className="w-4 h-4" /> Save Changes
+                 </button>
+               </div>
+             )}
           </GlassCard>
 
           {/* Animated BMI Gauge */}
@@ -134,7 +159,7 @@ export function ModernSettings({ profile }) {
                  <ChevronRight className="w-5 h-5 text-ink-400 group-hover:text-ink-900 transition-colors" />
               </div>
               <div className="w-full h-px bg-ink-900/5 my-1" />
-              <div className="px-6 py-4 flex items-center justify-between group cursor-pointer hover:bg-red-50/50 rounded-2xl transition-colors">
+              <div onClick={onLogout} className="px-6 py-4 flex items-center justify-between group cursor-pointer hover:bg-red-50/50 rounded-2xl transition-colors">
                  <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center"><LogOut className="w-5 h-5 text-red-500" /></div>
                     <span className="font-bold text-red-600">Sign Out</span>

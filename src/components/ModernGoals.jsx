@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Droplet, Plus, Target, Award, Calendar, Flame } from 'lucide-react';
 
@@ -13,7 +13,14 @@ const GlassCard = ({ children, className = "", delay = 0 }) => (
 );
 
 export function ModernGoals() {
-  const [water, setWater] = useState(1500);
+  const [water, setWater] = useState(() => {
+    const saved = localStorage.getItem('nts-water-modern');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('nts-water-modern', water.toString());
+  }, [water]);
   const target = 2500;
   const pct = Math.min((water / target) * 100, 100);
   
