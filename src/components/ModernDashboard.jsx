@@ -125,13 +125,13 @@ export function ModernDashboard({ profile, page, setPage, children }) {
 
   const sidebarLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', id: 'overview' },
+    { icon: BarChart2, label: 'Analysis', id: 'reports' },
     { icon: Camera, label: 'Scanner', id: 'scan' },
     { icon: Salad, label: 'Diet Plans', id: 'diet' },
     { icon: Activity, label: 'Workouts', id: 'progress' },
     { icon: Droplet, label: 'Hydration', id: 'water' },
     { icon: Watch, label: 'Devices', id: 'integrations' },
     { icon: Users, label: 'Community', id: 'social' },
-    { icon: BarChart2, label: 'Analytics', id: 'reports' },
     { icon: User, label: 'Profile', id: 'calculator' },
   ];
 
