@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Bot, ChevronRight, TrendingUp, TrendingDown, Sparkles, Calculator, BarChart3, LayoutGrid } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Bot, ChevronRight, Sparkles, Calculator, BarChart3, LayoutGrid } from 'lucide-react';
 import { CalorieCalculator, NutritionCalculator } from './Calculators';
 
 const GlassCard = ({ children, className = "", delay = 0 }) => (
@@ -82,16 +82,6 @@ export function ModernReports() {
     };
   });
 
-  const lineData = [
-    { day: '1', p: 120, c: 200, f: 60 },
-    { day: '5', p: 130, c: 180, f: 65 },
-    { day: '10', p: 125, c: 220, f: 70 },
-    { day: '15', p: 140, c: 190, f: 55 },
-    { day: '20', p: 150, c: 210, f: 60 },
-    { day: '25', p: 145, c: 205, f: 62 },
-    { day: '30', p: 135, c: 195, f: 58 },
-  ];
-
   const userName = profile?.name ? profile.name.split(' ')[0] : 'Member';
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'calculators', 'analytics'
   const [calcCalories, setCalcCalories] = useState(targetCals);
@@ -109,7 +99,7 @@ export function ModernReports() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-ink-900 tracking-tight">AI Insights & Nutrition Analysis</h2>
-          <p className="text-ink-500 font-medium mt-1">Deep dive into your energy expenditure, macro breakdown & daily trends.</p>
+          <p className="text-ink-500 font-medium mt-1">Deep dive into your energy expenditure, macro breakdown & daily caloric balance.</p>
         </div>
 
         {/* Tab Switcher */}
@@ -147,7 +137,7 @@ export function ModernReports() {
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Charts & Trends</span>
+            <span>Charts & Analytics</span>
           </button>
         </div>
       </div>
@@ -182,7 +172,7 @@ export function ModernReports() {
           {activeTab === 'all' && (
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <h3 className="text-lg font-bold text-ink-900">Historical Trends & Nutrient Composition</h3>
+              <h3 className="text-lg font-bold text-ink-900">Nutrient Composition & Caloric Breakdown</h3>
             </div>
           )}
 
@@ -292,30 +282,7 @@ export function ModernReports() {
                </button>
             </GlassCard>
 
-            {/* Macronutrient Trends (Full Width Bottom) */}
-            <GlassCard delay={0.4} className="col-span-1 lg:col-span-3 p-6 flex flex-col">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-ink-900">Macronutrient Trends (30 Days)</h3>
-                <div className="flex gap-4">
-                     <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"/> <span className="text-xs font-semibold text-ink-500">Protein</span></div>
-                     <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-purple-500"/> <span className="text-xs font-semibold text-ink-500">Carbs</span></div>
-                     <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500"/> <span className="text-xs font-semibold text-ink-500">Fats</span></div>
-                </div>
-              </div>
-              
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={lineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                     <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#97a29b', fontWeight: 600 }} dy={10} />
-                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#97a29b', fontWeight: 600 }} />
-                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                     <Line type="monotone" dataKey="p" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }} />
-                     <Line type="monotone" dataKey="c" stroke="#8b5cf6" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#8b5cf6', stroke: '#fff', strokeWidth: 2 }} />
-                     <Line type="monotone" dataKey="f" stroke="#f59e0b" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </GlassCard>
+
           </div>
         </div>
       )}
