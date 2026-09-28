@@ -200,6 +200,8 @@ export function ModernScanner() {
     
     meals.unshift(newMeal);
     localStorage.setItem('nts-meals', JSON.stringify(meals));
+    window.dispatchEvent(new Event('nts-meals-updated'));
+    window.dispatchEvent(new Event('nts-data-updated'));
     setImage(null);
     setAiResult(null);
     setStatus('idle');

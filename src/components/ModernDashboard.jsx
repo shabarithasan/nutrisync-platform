@@ -80,24 +80,40 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   
   useEffect(() => {
     if (page === 'overview') {
-      const w = parseInt(localStorage.getItem('nts-water-modern')) || 0;
-      setWater(w);
-      const m = localStorage.getItem('nts-meals');
-      if(m) setMeals(JSON.parse(m));
-      const wk = localStorage.getItem('nts-workouts');
-      if(wk) setWorkouts(JSON.parse(wk));
-      
-      const loadSteps = () => {
+      const loadData = () => {
+        const w = parseInt(localStorage.getItem('nts-water-modern')) || 0;
+        setWater(w);
+        const m = localStorage.getItem('nts-meals');
+        if (m) setMeals(JSON.parse(m));
+        
+        try {
+          const wkHistory = localStorage.getItem('nts-workout-history');
+          const wkOld = localStorage.getItem('nts-workouts');
+          const parsed = wkHistory ? JSON.parse(wkHistory) : (wkOld ? JSON.parse(wkOld) : []);
+          setWorkouts(parsed);
+        } catch {
+          setWorkouts([]);
+        }
+
         try {
           const logs = JSON.parse(localStorage.getItem('nts-log') || '{}');
           const today = new Date().toISOString().split('T')[0];
           setSteps(logs[today]?.steps || 0);
         } catch { setSteps(0); }
       };
-      
-      loadSteps();
-      window.addEventListener('nts-log-updated', loadSteps);
-      return () => window.removeEventListener('nts-log-updated', loadSteps);
+
+      loadData();
+
+      const events = [
+        'nts-log-updated',
+        'nts-water-updated',
+        'nts-meals-updated',
+        'nts-workouts-updated',
+        'nts-data-updated',
+        'storage'
+      ];
+      events.forEach(evt => window.addEventListener(evt, loadData));
+      return () => events.forEach(evt => window.removeEventListener(evt, loadData));
     }
   }, [page]);
 
@@ -109,7 +125,7 @@ export function ModernDashboard({ profile, page, setPage, children }) {
   const targetCals = Math.round(bmr * 1.55) || 2400;
   
   const consumedCals = meals.reduce((sum, meal) => sum + (meal.cal || 0), 0);
-  const activeCals = workouts.reduce((sum, wk) => sum + (wk.cal || 0), 0);
+  const activeCals = workouts.reduce((sum, wk) => sum + (wk.calories || wk.cal || 0), 0);
   
   const waterGlasses = Math.floor(water / 250);
 
@@ -254,35 +270,47 @@ export function ModernDashboard({ profile, page, setPage, children }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 auto-rows-min">
             
-            {/* Row 0: Health Circle */}
-            <GlassCard delay={0.05} className="col-span-1 lg:col-span-4 p-6 flex flex-col items-center justify-center">
-              <HealthCircle profile={profile} size={140} />
-            </GlassCard>
+            {/* Row 0: Live Dynamic Wellness Index & Controls */}
+            <HealthCircle 
+              profile={profile} 
+              setPage={setPage} 
+              delay={0.05} 
+              className="col-span-1 lg:col-span-4 min-h-[290px]" 
+            />
 
-            <GlassCard delay={0.08} className="col-span-1 lg:col-span-4 p-6 flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <Heart className="w-5 h-5 text-emerald-500" />
+            <GlassCard delay={0.08} className="col-span-1 lg:col-span-4 p-6 flex flex-col justify-between min-h-[290px]">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-ink-900">Quick Actions</h3>
+                    <p className="text-[11px] font-medium text-ink-400">Log habits & routines</p>
+                  </div>
                 </div>
-                <h3 className="font-bold text-ink-900">Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  <button onClick={() => setPage('scan')} className="px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold text-emerald-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <Camera className="w-3.5 h-3.5" /> Scan Food
+                  </button>
+                  <button onClick={() => setPage('diet')} className="px-3 py-2.5 bg-amber-50 hover:bg-amber-100 rounded-xl text-xs font-bold text-amber-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <Salad className="w-3.5 h-3.5" /> Diet Plan
+                  </button>
+                  <button onClick={() => setPage('progress')} className="px-3 py-2.5 bg-blue-50 hover:bg-blue-100 rounded-xl text-xs font-bold text-blue-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <Activity className="w-3.5 h-3.5" /> Workouts
+                  </button>
+                  <button onClick={() => setPage('water')} className="px-3 py-2.5 bg-cyan-50 hover:bg-cyan-100 rounded-xl text-xs font-bold text-cyan-700 transition-all flex items-center gap-1.5 cursor-pointer">
+                    <Droplet className="w-3.5 h-3.5" /> Hydrate
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setPage('scan')} className="px-3 py-2.5 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold text-emerald-700 transition-all flex items-center gap-1.5 cursor-pointer">
-                  <Camera className="w-3.5 h-3.5" /> Scan Food
-                </button>
-                <button onClick={() => setPage('diet')} className="px-3 py-2.5 bg-amber-50 hover:bg-amber-100 rounded-xl text-xs font-bold text-amber-700 transition-all flex items-center gap-1.5 cursor-pointer">
-                  <Salad className="w-3.5 h-3.5" /> Diet Plan
-                </button>
-                <button onClick={() => setPage('progress')} className="px-3 py-2.5 bg-blue-50 hover:bg-blue-100 rounded-xl text-xs font-bold text-blue-700 transition-all flex items-center gap-1.5 cursor-pointer">
-                  <Activity className="w-3.5 h-3.5" /> Workouts
-                </button>
-                <button onClick={() => setPage('water')} className="px-3 py-2.5 bg-cyan-50 hover:bg-cyan-100 rounded-xl text-xs font-bold text-cyan-700 transition-all flex items-center gap-1.5 cursor-pointer">
-                  <Droplet className="w-3.5 h-3.5" /> Hydrate
-                </button>
+              <div className="pt-3 border-t border-ink-100/60 flex items-center justify-between text-[11px] text-ink-500 font-medium">
+                <span>Instant habit updates</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1">Live Sync <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /></span>
               </div>
             </GlassCard>
 
-            <GlassCard delay={0.1} className="col-span-1 lg:col-span-4 p-6 flex flex-col justify-between">
+            <GlassCard delay={0.1} className="col-span-1 lg:col-span-4 p-6 flex flex-col justify-between min-h-[290px]">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
                   <Target className="w-5 h-5 text-orange-500" />

@@ -20,6 +20,8 @@ export function ModernGoals() {
 
   useEffect(() => {
     localStorage.setItem('nts-water-modern', water.toString());
+    window.dispatchEvent(new CustomEvent('nts-water-updated', { detail: water }));
+    window.dispatchEvent(new Event('nts-data-updated'));
   }, [water]);
   const target = 2500;
   const pct = Math.min((water / target) * 100, 100);

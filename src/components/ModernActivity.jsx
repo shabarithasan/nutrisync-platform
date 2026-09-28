@@ -71,6 +71,8 @@ export function ModernActivity({ profile }) {
 
   useEffect(() => {
     localStorage.setItem('nts-workout-history', JSON.stringify(history));
+    window.dispatchEvent(new Event('nts-workouts-updated'));
+    window.dispatchEvent(new Event('nts-data-updated'));
   }, [history]);
 
   const todayIndex = new Date().getDay(); // 0 is Sunday
