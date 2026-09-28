@@ -298,225 +298,142 @@ export function ModernDashboard({ profile, page, setPage, children }) {
                 <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Water</span><span className="font-bold text-ink-900">{waterGlasses} / {Math.max(6, Math.round(weight * 35 / 250))} glasses</span></div>
                 <div className="h-1.5 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{width: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%`}} /></div>
                 <div className="flex justify-between items-center text-xs"><span className="font-semibold text-ink-700">Meals Logged</span><span className="font-bold text-ink-900">{meals.length} today</span></div>
-                
-                <div className="flex justify-between items-center text-xs mt-2"><span className="font-semibold text-ink-700">Steps</span><span className="font-bold text-ink-900">{steps.toLocaleString()} / 10,000</span></div>
-                <div className="h-1.5 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-blue-400 rounded-full transition-all duration-700" style={{width: `${Math.min(100, (steps/10000)*100)}%`}} /></div>
               </div>
             </GlassCard>
             
-            {/* Row 1: 4 Cards */}
-            <GlassCard delay={0.15} className="col-span-1 lg:col-span-5 p-6">
+            {/* Row 1: Macros & Water */}
+            <GlassCard delay={0.15} className="col-span-1 lg:col-span-7 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-ink-900">Today's Macros</h3>
+                <div>
+                  <h3 className="font-bold text-ink-900 text-base">Today's Macros</h3>
+                  <p className="text-xs text-ink-400 font-medium">Daily macronutrient consumption</p>
+                </div>
                 <span className="text-xs font-semibold text-ink-400">{consumedCals > 0 ? 'From logged meals' : 'No meals logged yet'}</span>
               </div>
-              <div className="flex justify-between items-center px-2">
+              <div className="flex justify-around items-center px-4">
                 <div className="flex flex-col items-center gap-2">
-                  <Ring value={meals.reduce((s,m) => s+(m.p||0), 0)} max={Math.round(targetCals*0.3/4)} color="#10b981" size={80} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.p||0), 0)}g`} sublabel={`${Math.round(targetCals*0.3/4)}g`} />
-                  <span className="text-xs font-semibold text-ink-900">Protein</span>
+                  <Ring value={meals.reduce((s,m) => s+(m.p||0), 0)} max={Math.round(targetCals*0.3/4)} color="#10b981" size={88} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.p||0), 0)}g`} sublabel={`${Math.round(targetCals*0.3/4)}g`} />
+                  <span className="text-xs font-bold text-ink-900">Protein</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <Ring value={meals.reduce((s,m) => s+(m.c||0), 0)} max={Math.round(targetCals*0.45/4)} color="#f59e0b" size={80} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.c||0), 0)}g`} sublabel={`${Math.round(targetCals*0.45/4)}g`} />
-                  <span className="text-xs font-semibold text-ink-900">Carbs</span>
+                  <Ring value={meals.reduce((s,m) => s+(m.c||0), 0)} max={Math.round(targetCals*0.45/4)} color="#f59e0b" size={88} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.c||0), 0)}g`} sublabel={`${Math.round(targetCals*0.45/4)}g`} />
+                  <span className="text-xs font-bold text-ink-900">Carbs</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <Ring value={meals.reduce((s,m) => s+(m.f||0), 0)} max={Math.round(targetCals*0.25/9)} color="#f97316" size={80} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.f||0), 0)}g`} sublabel={`${Math.round(targetCals*0.25/9)}g`} />
-                  <span className="text-xs font-semibold text-ink-900">Fats</span>
+                  <Ring value={meals.reduce((s,m) => s+(m.f||0), 0)} max={Math.round(targetCals*0.25/9)} color="#f97316" size={88} strokeWidth={8} label={`${meals.reduce((s,m) => s+(m.f||0), 0)}g`} sublabel={`${Math.round(targetCals*0.25/9)}g`} />
+                  <span className="text-xs font-bold text-ink-900">Fats</span>
                 </div>
               </div>
             </GlassCard>
 
-            <GlassCard delay={0.2} className="col-span-1 lg:col-span-3 p-6 flex flex-col justify-between relative group">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-bold text-ink-900">Calorie Balance</h3>
-                  <ChevronRight className="w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors" />
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-bold text-ink-900 tracking-tight">{consumedCals.toLocaleString()}</span>
-                  <span className="text-sm font-semibold text-ink-400">/ {targetCals.toLocaleString()} kcal</span>
-                </div>
-              </div>
-              {/* Sparkline Visual Filler */}
-              <div className="h-16 mt-4 w-full flex items-end">
-                <svg viewBox="0 0 100 30" className="w-full h-full preserve-aspect-ratio-none overflow-visible">
-                  <path d="M0,25 Q10,10 20,20 T40,15 T60,25 T80,5 T100,10" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M0,30 Q15,20 25,30 T50,20 T75,30 T100,15" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-                </svg>
-              </div>
-              <p className="text-xs font-medium text-ink-500 mt-2">Remaining: <strong className="text-ink-900">{Math.max(0, targetCals - consumedCals).toLocaleString()} kcal</strong></p>
-            </GlassCard>
-
-            <GlassCard delay={0.3} className="col-span-1 lg:col-span-2 p-6 flex flex-col justify-between group">
+            <GlassCard delay={0.2} className="col-span-1 lg:col-span-5 p-6 flex flex-col justify-between group">
                <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h3 className="font-bold text-ink-900">Water</h3>
-                    <p className="text-[10px] font-semibold text-ink-400 uppercase tracking-wider">Glasses</p>
+                    <h3 className="font-bold text-ink-900 text-base">Water Tracker</h3>
+                    <p className="text-xs text-ink-400 font-medium">Daily Hydration Intake</p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors" />
+                  <ChevronRight onClick={() => setPage('water')} className="w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors cursor-pointer" />
                 </div>
                 <div className="flex items-end justify-between mt-4">
                   <div>
-                    <span className="text-2xl font-bold text-ink-900">{waterGlasses}<span className="text-sm text-ink-400">/{Math.max(6, Math.round(weight * 35 / 250))}</span></span>
-                    <p className="text-[10px] font-medium text-ink-500 mt-1">{waterGlasses * 250}/{Math.max(6, Math.round(weight * 35 / 250)) * 250}ml</p>
+                    <span className="text-3xl font-extrabold text-ink-900">{waterGlasses}<span className="text-sm font-semibold text-ink-400">/{Math.max(6, Math.round(weight * 35 / 250))}</span></span>
+                    <p className="text-xs font-medium text-ink-500 mt-1">{waterGlasses * 250}/{Math.max(6, Math.round(weight * 35 / 250)) * 250}ml</p>
                   </div>
-                  <div className="w-10 h-14 bg-blue-100 rounded-b-lg rounded-t-sm border-2 border-blue-200 relative overflow-hidden">
+                  <div className="w-12 h-16 bg-blue-100 rounded-b-xl rounded-t-sm border-2 border-blue-200 relative overflow-hidden">
                     <motion.div 
                       initial={{ height: "0%" }} animate={{ height: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
                       className="absolute bottom-0 left-0 right-0 bg-blue-400"
                     />
                   </div>
                 </div>
-                <div className="h-1.5 w-full bg-ink-900/5 rounded-full mt-4 overflow-hidden">
+                <div className="h-2 w-full bg-ink-900/5 rounded-full mt-4 overflow-hidden">
                    <motion.div initial={{ width: "0%" }} animate={{ width: `${Math.min(100, (waterGlasses/Math.max(6, Math.round(weight * 35 / 250)))*100)}%` }} transition={{ duration: 1, delay: 0.5 }} className="h-full bg-blue-400 rounded-full" />
                 </div>
             </GlassCard>
 
-            <GlassCard delay={0.4} className="col-span-1 lg:col-span-2 p-6 flex flex-col items-center justify-center relative group">
-               <ChevronRight className="absolute top-6 right-6 w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors" />
-               <h3 className="font-bold text-ink-900 absolute top-6 left-6">Steps</h3>
-               <div className="mt-6">
-                 <Ring value={steps} max={10000} color="#10b981" size={110} strokeWidth={10} label={steps.toLocaleString()} sublabel="10,000" />
+            {/* Row 2: Meal Tracker & Health Goals */}
+            <GlassCard delay={0.25} className="col-span-1 lg:col-span-7 p-6 flex flex-col justify-between">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="font-bold text-ink-900 text-base">Meal Tracker</h3>
+                  <p className="text-xs text-ink-400 font-medium">Logged fuel & meals</p>
+                </div>
+                <button 
+                  onClick={() => setPage('scan')}
+                  className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Scan Meal</span>
+                </button>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-6 items-center">
+                 {/* Mini Pie */}
+                 <div className="w-28 shrink-0 flex flex-col items-center">
+                    <Ring value={consumedCals} max={targetCals} color="#f59e0b" trackColor="#10b981" size={88} strokeWidth={8} label={consumedCals.toString()} sublabel="kcal" />
+                    <div className="mt-3 flex gap-3 text-[10px] font-bold text-ink-500">
+                      <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"/> Protein</div>
+                      <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500"/> Carbs</div>
+                    </div>
+                 </div>
+                 
+                 {/* List */}
+                 <div className="flex-1 w-full flex flex-col justify-center gap-2.5">
+                    {meals.length === 0 ? (
+                      <div 
+                        onClick={() => setPage('scan')}
+                        className="text-center text-sm font-semibold text-emerald-600 hover:text-emerald-700 py-6 cursor-pointer hover:underline flex flex-col items-center gap-2 bg-emerald-50/40 rounded-2xl border border-dashed border-emerald-200/80 p-4 transition-all hover:bg-emerald-50"
+                      >
+                        <Camera className="w-5 h-5 text-emerald-500" />
+                        <span>No meals logged yet. Click to open Scanner!</span>
+                      </div>
+                    ) : meals.slice(0, 3).map(meal => (
+                      <div key={meal.id} className="flex items-center p-3 rounded-2xl bg-white/50 border border-white/60 hover:bg-white/80 transition-colors cursor-pointer group">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-lg shadow-inner mr-3 group-hover:scale-110 transition-transform">🥗</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-ink-900 truncate">{meal.title}</p>
+                          <p className="text-[10px] font-semibold text-ink-400">{meal.time || 'Today'}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-bold text-ink-900">{meal.cal} kcal</p>
+                        </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+            </GlassCard>
+
+            <GlassCard delay={0.3} className="col-span-1 lg:col-span-5 p-6 flex flex-col justify-between group">
+               <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h3 className="font-bold text-ink-900 text-base">Health Goals</h3>
+                    <p className="text-xs text-ink-400 font-medium">Activity & Workout Progress</p>
+                  </div>
+                  <ChevronRight onClick={() => setPage('progress')} className="w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors cursor-pointer" />
+               </div>
+               <div className="space-y-4 my-auto">
+                 <div>
+                   <div className="flex justify-between text-xs mb-1.5 font-semibold"><span className="text-ink-900 font-bold">Workouts Completed</span><span className="text-ink-500 font-bold">{workouts.length} / 4</span></div>
+                   <div className="h-2 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (workouts.length / 4) * 100)}%` }}/></div>
+                 </div>
+                 <div>
+                   <div className="flex justify-between text-xs mb-1.5 font-semibold"><span className="text-ink-900 font-bold">Active Calories</span><span className="text-ink-500 font-bold">{activeCals} / 500 kcal</span></div>
+                   <div className="h-2 bg-ink-900/5 rounded-full overflow-hidden"><div className="h-full bg-orange-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(100, (activeCals / 500) * 100)}%` }}/></div>
+                 </div>
+               </div>
+               <div className="mt-4 pt-3 border-t border-ink-900/5 flex justify-between items-center text-xs font-semibold text-ink-500">
+                 <span>Weekly Activity Target</span>
+                 <span className="text-emerald-600 font-bold">{workouts.length >= 4 ? 'Goal Achieved! 🎉' : `${4 - workouts.length} sessions left`}</span>
                </div>
             </GlassCard>
 
-            {/* Row 2: Main Chart & Side Widgets */}
-            <GlassCard delay={0.5} className="col-span-1 lg:col-span-7 p-6 min-h-[380px] flex flex-col">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="font-bold text-ink-900">Nutrition Trends (This Week)</h3>
-                <div className="flex gap-4">
-                   <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"/> <span className="text-xs font-semibold text-ink-500">P</span></div>
-                   <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-amber-500"/> <span className="text-xs font-semibold text-ink-500">C</span></div>
-                   <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500"/> <span className="text-xs font-semibold text-ink-500">F</span></div>
-                </div>
-              </div>
-              <div className="flex-1 w-full relative">
-                 <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorC" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorF" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7871', fontWeight: 600 }} dy={10} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7871', fontWeight: 600 }} />
-                      <Tooltip cursor={{ stroke: '#e2e8f0', strokeWidth: 2, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                      <Area type="monotone" dataKey="c" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorC)" />
-                      <Area type="monotone" dataKey="f" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorF)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-              </div>
-            </GlassCard>
-
-            <div className="col-span-1 lg:col-span-5 grid grid-rows-[auto_1fr] gap-6">
-              
-              {/* Meal Tracker */}
-              <GlassCard delay={0.6} className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="font-bold text-ink-900">Meal Tracker</h3>
-                  <button 
-                    onClick={() => setPage('scan')}
-                    className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span>Scan Meal</span>
-                  </button>
-                </div>
-                <div className="flex gap-6">
-                   {/* Mini Pie */}
-                   <div className="w-24 shrink-0 flex flex-col items-center">
-                      <Ring value={consumedCals} max={targetCals} color="#f59e0b" trackColor="#10b981" size={80} strokeWidth={8} label={consumedCals.toString()} sublabel="kcal" />
-                      <div className="mt-3 space-y-1">
-                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"/> <span className="text-[10px] font-bold text-ink-500">P/C</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500"/> <span className="text-[10px] font-bold text-ink-500">F/F</span></div>
-                      </div>
-                   </div>
-                   
-                   {/* List */}
-                   
-                   <div className="flex-1 flex flex-col justify-center gap-3">
-                      {meals.length === 0 ? (
-                        <div 
-                          onClick={() => setPage('scan')}
-                          className="text-center text-sm font-semibold text-emerald-600 hover:text-emerald-700 py-4 cursor-pointer hover:underline flex flex-col items-center gap-1.5 bg-emerald-50/40 rounded-2xl border border-dashed border-emerald-200/80 p-3 transition-all hover:bg-emerald-50"
-                        >
-                          <Camera className="w-4 h-4 text-emerald-500" />
-                          <span>No meals logged yet. Click to open Scanner!</span>
-                        </div>
-                      ) : meals.slice(0, 3).map(meal => (
-                        <div key={meal.id} className="flex items-center p-3 rounded-2xl bg-white/50 border border-white/60 hover:bg-white/80 transition-colors cursor-pointer group">
-                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-lg shadow-inner mr-3 group-hover:scale-110 transition-transform">??</div>
-                          <div className="flex-1">
-                            <p className="text-sm font-bold text-ink-900">{meal.title}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-ink-900">{meal.cal} kcal</p>
-                            <p className="text-[10px] font-semibold text-ink-400">{meal.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                   </div>
-</div></GlassCard>
-
-              {/* Bottom 2 mini cards */}
-              <div className="grid grid-cols-2 gap-6 h-full">
-                <GlassCard delay={0.7} className="p-5 flex flex-col justify-between group cursor-pointer">
-                   <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-bold text-ink-900 text-sm">Health Goals</h3>
-                      <ChevronRight className="w-4 h-4 text-ink-400 group-hover:text-ink-900 transition-colors" />
-                   </div>
-                   <div className="space-y-3">
-                     <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Workouts</span><span className="text-ink-500">{workouts.length} done</span></div>
-                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(100, (workouts.length / 4) * 100)}%` }}/></div>
-                     </div>
-                     <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Active Cals</span><span className="text-ink-500">{activeCals} kcal</span></div>
-                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-orange-500 rounded-full" style={{ width: `${Math.min(100, (activeCals / 500) * 100)}%` }}/></div>
-                     </div>
-                     <div>
-                       <div className="flex justify-between text-xs mb-1 font-semibold"><span className="text-ink-900">Steps</span><span className="text-ink-500">{steps}</span></div>
-                       <div className="h-1.5 bg-ink-900/10 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(100, (steps / 10000) * 100)}%` }}/></div>
-                     </div>
-                   </div>
-                </GlassCard>
-                
-                <GlassCard delay={0.8} className="p-5 flex flex-col justify-between relative overflow-hidden group cursor-pointer">
-                   <div className="flex justify-between items-center z-10 relative">
-                      <h3 className="font-bold text-ink-900 text-sm">Weight</h3>
-                      <MoreHorizontal className="w-4 h-4 text-ink-400" />
-                   </div>
-                   <div className="z-10 relative mt-2">
-                      <span className="text-2xl font-bold text-ink-900 block">{profile?.weight || "--"} kg</span>
-                      <span className="text-[10px] font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
-                         <ArrowUpRight className="w-3 h-3 rotate-90" />
-                         -0.8 kg this week
-                      </span>
-                   </div>
-                   {/* Absolute Sparkline */}
-                   <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
-                      <svg viewBox="0 0 100 40" className="w-full h-full preserve-aspect-ratio-none">
-                         <path d="M0,10 Q20,5 30,15 T60,10 T80,25 T100,20 L100,40 L0,40 Z" fill="url(#colorF)" />
-                         <path d="M0,10 Q20,5 30,15 T60,10 T80,25 T100,20" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                   </div>
-                </GlassCard>
-              </div>
-            </div>
-            
           </div>
-          </div>
-        ) : (
-          <GlassCard className="p-8 min-h-[600px] relative z-10 bg-white/70">
-            {children}
-          </GlassCard>
-        )}
-</main>
-    </div>
-  );
+        </div>
+      ) : (
+        <GlassCard className="p-8 min-h-[600px] relative z-10 bg-white/70">
+          {children}
+        </GlassCard>
+      )}
+    </main>
+  </div>
+);
 }
