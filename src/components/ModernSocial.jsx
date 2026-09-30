@@ -318,31 +318,78 @@ export function ModernSocial({ profile }) {
   /* -----------------------------------------------------------
    * 3. REAL TIME LEADERBOARDS & NUDGING
    * ----------------------------------------------------------- */
+  const [customFriends, setCustomFriends] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nts-community-friends');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [inviteEmail, setInviteEmail] = useState('');
+
+  const handleInviteFriend = (e) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    
+    triggerToast(`📨 Invite sent to ${inviteEmail}! (Simulating join...)`);
+    const emailParts = inviteEmail.split('@')[0];
+    const name = emailParts.charAt(0).toUpperCase() + emailParts.slice(1).replace(/[._-]/g, ' ');
+    const avatar = name.substring(0, 2).toUpperCase();
+
+    setTimeout(() => {
+      const newFriend = {
+        name: name,
+        avatar: avatar,
+        weeklySteps: Math.floor(Math.random() * (45000 - 15000) + 15000),
+        isUser: false,
+        streak: `🔥 ${Math.floor(Math.random() * 10 + 1)} days`
+      };
+      setCustomFriends(prev => {
+        const next = [...prev, newFriend];
+        localStorage.setItem('nts-community-friends', JSON.stringify(next));
+        return next;
+      });
+      triggerToast(`🎉 ${name} just joined your squad!`);
+    }, 3000);
+
+    setInviteEmail('');
+  };
+
   const weeklySteps = userSteps > 0 ? (userSteps * 4.2) : 38400;
   const monthlySteps = userSteps > 0 ? (userSteps * 18.5) : 156000;
 
+  const baseToday = [
+    { name: 'Sarah Chen', avatar: 'SC', steps: 11200, isUser: false, streak: '🔥 14 days' },
+    { name: userName, avatar: userInitial, steps: userSteps, isUser: true, streak: '🔥 5 days' },
+    { name: 'Marcus Johnson', avatar: 'MJ', steps: 7850, isUser: false, streak: '🔥 8 days' },
+    { name: 'Emma Davis', avatar: 'ED', steps: 6920, isUser: false, streak: '🔥 3 days' },
+    { name: 'Alex Rivera', avatar: 'AR', steps: 5400, isUser: false, streak: '🔥 1 day' }
+  ];
+  const baseWeek = [
+    { name: 'Sarah Chen', avatar: 'SC', steps: 52400, isUser: false, streak: '🔥 14 days' },
+    { name: userName, avatar: userInitial, steps: Math.round(weeklySteps), isUser: true, streak: '🔥 5 days' },
+    { name: 'Marcus Johnson', avatar: 'MJ', steps: 41800, isUser: false, streak: '🔥 8 days' },
+    { name: 'Emma Davis', avatar: 'ED', steps: 36200, isUser: false, streak: '🔥 3 days' },
+    { name: 'Alex Rivera', avatar: 'AR', steps: 29500, isUser: false, streak: '🔥 1 day' }
+  ];
+  const baseMonth = [
+    { name: 'Sarah Chen', avatar: 'SC', steps: 215000, isUser: false, streak: '🔥 14 days' },
+    { name: 'Marcus Johnson', avatar: 'MJ', steps: 182000, isUser: false, streak: '🔥 8 days' },
+    { name: userName, avatar: userInitial, steps: Math.round(monthlySteps), isUser: true, streak: '🔥 5 days' },
+    { name: 'Emma Davis', avatar: 'ED', steps: 148000, isUser: false, streak: '🔥 3 days' },
+    { name: 'Alex Rivera', avatar: 'AR', steps: 119000, isUser: false, streak: '🔥 1 day' }
+  ];
+
+  const customToday = customFriends.map(f => ({ ...f, steps: Math.round(f.weeklySteps / 4.2) }));
+  const customWeek = customFriends.map(f => ({ ...f, steps: f.weeklySteps }));
+  const customMonth = customFriends.map(f => ({ ...f, steps: Math.round(f.weeklySteps * 4.2) }));
+
   const rawLeaderboards = {
-    today: [
-      { name: 'Sarah Chen', avatar: 'SC', steps: 11200, isUser: false, streak: '🔥 14 days' },
-      { name: userName, avatar: userInitial, steps: userSteps, isUser: true, streak: '🔥 5 days' },
-      { name: 'Marcus Johnson', avatar: 'MJ', steps: 7850, isUser: false, streak: '🔥 8 days' },
-      { name: 'Emma Davis', avatar: 'ED', steps: 6920, isUser: false, streak: '🔥 3 days' },
-      { name: 'Alex Rivera', avatar: 'AR', steps: 5400, isUser: false, streak: '🔥 1 day' }
-    ],
-    week: [
-      { name: 'Sarah Chen', avatar: 'SC', steps: 52400, isUser: false, streak: '🔥 14 days' },
-      { name: userName, avatar: userInitial, steps: Math.round(weeklySteps), isUser: true, streak: '🔥 5 days' },
-      { name: 'Marcus Johnson', avatar: 'MJ', steps: 41800, isUser: false, streak: '🔥 8 days' },
-      { name: 'Emma Davis', avatar: 'ED', steps: 36200, isUser: false, streak: '🔥 3 days' },
-      { name: 'Alex Rivera', avatar: 'AR', steps: 29500, isUser: false, streak: '🔥 1 day' }
-    ],
-    month: [
-      { name: 'Sarah Chen', avatar: 'SC', steps: 215000, isUser: false, streak: '🔥 14 days' },
-      { name: 'Marcus Johnson', avatar: 'MJ', steps: 182000, isUser: false, streak: '🔥 8 days' },
-      { name: userName, avatar: userInitial, steps: Math.round(monthlySteps), isUser: true, streak: '🔥 5 days' },
-      { name: 'Emma Davis', avatar: 'ED', steps: 148000, isUser: false, streak: '🔥 3 days' },
-      { name: 'Alex Rivera', avatar: 'AR', steps: 119000, isUser: false, streak: '🔥 1 day' }
-    ]
+    today: [...baseToday, ...customToday],
+    week: [...baseWeek, ...customWeek],
+    month: [...baseMonth, ...customMonth]
   };
 
   const currentLeaderboard = rawLeaderboards[leaderboardFilter].sort((a, b) => b.steps - a.steps);
@@ -765,27 +812,27 @@ export function ModernSocial({ profile }) {
 
           <div className="lg:col-span-4 space-y-6">
             <GlassCard className="p-6">
-              <h3 className="font-bold text-ink-900 text-base mb-2">Invite Friends to NutriSync</h3>
-              <p className="text-xs text-ink-500 font-medium mb-4">Share your invite link to build your private fitness squad and unlock the Squad Leader badge.</p>
+              <h3 className="font-bold text-ink-900 text-base mb-2">Invite Friends</h3>
+              <p className="text-xs text-ink-500 font-medium mb-4">Add friends to your private fitness squad to see them on your leaderboard.</p>
               
-              <div className="flex items-center gap-2 bg-ink-900/5 p-2 rounded-xl mb-4">
+              <form onSubmit={handleInviteFriend} className="flex flex-col gap-3 mb-4">
                 <input 
-                  type="text" 
-                  readOnly 
-                  value="https://nutrisync-platform.onrender.com/#invite" 
-                  className="bg-transparent text-xs font-semibold text-ink-700 flex-1 outline-none px-2"
+                  type="email" 
+                  required
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="friend@example.com" 
+                  className="bg-white/80 border border-ink-900/10 text-xs font-semibold text-ink-900 flex-1 outline-none px-4 py-2.5 rounded-xl focus:border-emerald-500 transition-colors"
                 />
                 <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText('https://nutrisync-platform.onrender.com/#invite');
-                    triggerToast('📋 Invite link copied to clipboard!');
-                  }}
-                  className="px-3 py-1.5 bg-ink-900 text-white text-xs font-bold rounded-lg hover:bg-ink-800 transition-colors"
+                  type="submit"
+                  disabled={!inviteEmail.trim()}
+                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors w-full"
                 >
-                  Copy
+                  <UserPlus className="w-4 h-4" />
+                  Send Invite
                 </button>
-              </div>
+              </form>
 
               <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100 flex items-center gap-3">
                 <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" />

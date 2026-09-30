@@ -146,7 +146,6 @@ export function ModernDashboard({ profile, page, setPage, children }) {
     { icon: Salad, label: 'Diet Plans', id: 'diet' },
     { icon: Activity, label: 'Workouts', id: 'progress' },
     { icon: Droplet, label: 'Hydration', id: 'water' },
-    { icon: Watch, label: 'Devices', id: 'integrations' },
     { icon: Users, label: 'Community', id: 'social' },
     { icon: User, label: 'Profile', id: 'calculator' },
   ];
