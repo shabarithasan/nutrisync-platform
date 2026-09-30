@@ -17,7 +17,6 @@ import { ModernSettings } from './components/ModernSettings';
 import { ModernDietPlan } from './components/ModernDietPlan';
 import { ModernOnboarding } from './components/ModernOnboarding';
 import { SyncManager } from './components/SyncManager';
-import { ModernIntegrations } from './components/ModernIntegrations';
 import { ProactiveCoach } from './components/ProactiveCoach';
 import { ModernSocial } from './components/ModernSocial';
 
