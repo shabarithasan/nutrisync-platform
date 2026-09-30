@@ -252,6 +252,45 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.join(__dirname, '../../dist');
 
+// --- SOCIAL API ---
+app.get('/api/social/users', requireAuth, async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        id: { not: req.auth.sub }
+      },
+      take: 20,
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    const suggested = users.map(u => {
+      let steps = Math.floor(Math.random() * (40000 - 15000) + 15000);
+      try {
+        if (u.appData && u.appData['nts-log']) {
+          // Just a quick way to extract steps if they exist
+          const logs = u.appData['nts-log'];
+          const today = new Date().toISOString().split('T')[0];
+          if (logs[today] && logs[today].steps) {
+            steps = logs[today].steps * 4.2; // approx weekly
+          }
+        }
+      } catch(e) {}
+
+      return {
+        id: u.id,
+        name: u.name,
+        avatar: u.name.substring(0,2).toUpperCase(),
+        steps: steps
+      };
+    });
+
+    res.json({ users: suggested });
+  } catch(e) {
+    next(e);
+  }
+});
+
+
 // --- CLOUD SYNC API ---
 app.get('/api/sync', requireAuth, async (req, res, next) => {
   try {

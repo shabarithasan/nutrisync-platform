@@ -327,11 +327,26 @@ export function ModernSocial({ profile }) {
     }
   });
 
-  const [suggestedFriends, setSuggestedFriends] = useState([
-    { name: 'David Kim', avatar: 'DK', steps: 35000 },
-    { name: 'Jessica Lee', avatar: 'JL', steps: 28000 },
-    { name: 'Sam Taylor', avatar: 'ST', steps: 19500 },
-  ]);
+  const [suggestedFriends, setSuggestedFriends] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const session = JSON.parse(sessionStorage.getItem('nts-auth'));
+        if (!session) return;
+        const apiBase = import.meta.env.PROD ? '' : 'http://localhost:4000';
+        const res = await fetch(apiBase + '/api/social/users', {
+          headers: { Authorization: 'Bearer ' + session.accessToken }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const existingNames = customFriends.map(f => f.name);
+          setSuggestedFriends(data.users.filter(u => !existingNames.includes(u.name)).slice(0, 5));
+        }
+      } catch(e) {}
+    };
+    fetchUsers();
+  }, [customFriends.length]);
 
   const handleAddSuggestedFriend = (friend) => {
     setSuggestedFriends(prev => prev.filter(f => f.name !== friend.name));
