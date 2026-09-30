@@ -327,6 +327,29 @@ export function ModernSocial({ profile }) {
     }
   });
 
+  const [suggestedFriends, setSuggestedFriends] = useState([
+    { name: 'David Kim', avatar: 'DK', steps: 35000 },
+    { name: 'Jessica Lee', avatar: 'JL', steps: 28000 },
+    { name: 'Sam Taylor', avatar: 'ST', steps: 19500 },
+  ]);
+
+  const handleAddSuggestedFriend = (friend) => {
+    setSuggestedFriends(prev => prev.filter(f => f.name !== friend.name));
+    const newFriend = {
+      name: friend.name,
+      avatar: friend.avatar,
+      weeklySteps: friend.steps,
+      isUser: false,
+      streak: `🔥 ${Math.floor(Math.random() * 5 + 1)} days`
+    };
+    setCustomFriends(prev => {
+      const next = [...prev, newFriend];
+      localStorage.setItem('nts-community-friends', JSON.stringify(next));
+      return next;
+    });
+    triggerToast(`🎉 You and ${friend.name} are now connected!`);
+  };
+
   const [inviteEmail, setInviteEmail] = useState('');
 
   const handleInviteFriend = (e) => {
@@ -841,6 +864,33 @@ export function ModernSocial({ profile }) {
                 </span>
               </div>
             </GlassCard>
+
+            {suggestedFriends.length > 0 && (
+              <GlassCard className="p-6">
+                <h3 className="font-bold text-ink-900 text-base mb-3">Suggested Friends</h3>
+                <div className="space-y-3">
+                  {suggestedFriends.map(friend => (
+                    <div key={friend.name} className="flex items-center justify-between p-3 bg-white/50 border border-white/60 rounded-2xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-xs">
+                          {friend.avatar}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-ink-900">{friend.name}</p>
+                          <p className="text-[10px] font-semibold text-ink-500">NutriSync Member</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleAddSuggestedFriend(friend)}
+                        className="p-2 rounded-xl bg-ink-900/5 hover:bg-emerald-50 hover:text-emerald-700 text-ink-600 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            )}
           </div>
         </div>
       )}
