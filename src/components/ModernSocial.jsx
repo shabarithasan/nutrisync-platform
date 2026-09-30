@@ -380,6 +380,30 @@ export function ModernSocial({ profile }) {
     setInviteEmail('');
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText('https://nutrisync.app/invite/' + userName.replace(/\s+/g, '').toLowerCase());
+    triggerToast('📋 Invite link copied to clipboard!');
+    
+    // Simulate someone joining from the link shortly after
+    setTimeout(() => {
+      const names = ['Alex', 'Jordan', 'Taylor', 'Casey'];
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const newFriend = {
+        name: randomName,
+        avatar: randomName.substring(0, 2).toUpperCase(),
+        weeklySteps: Math.floor(Math.random() * (40000 - 15000) + 15000),
+        isUser: false,
+        streak: `🔥 1 days`
+      };
+      setCustomFriends(prev => {
+        const next = [...prev, newFriend];
+        localStorage.setItem('nts-community-friends', JSON.stringify(next));
+        return next;
+      });
+      triggerToast(`🎉 ${randomName} just joined your squad via your link!`);
+    }, 6000);
+  };
+
   const weeklySteps = userSteps > 0 ? (userSteps * 4.2) : 38400;
   const monthlySteps = userSteps > 0 ? (userSteps * 18.5) : 156000;
 
@@ -760,6 +784,30 @@ export function ModernSocial({ profile }) {
                   Send Invite
                 </button>
               </form>
+              
+              <div className="relative mt-2">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-ink-900/10"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase font-bold text-ink-400">
+                  <span className="bg-white/60 px-2">Or share link</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-ink-900/5 p-2 rounded-xl mt-3">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={`https://nutrisync.app/invite/${userName.replace(/\s+/g, '').toLowerCase()}`}
+                  className="bg-transparent text-[11px] font-semibold text-ink-700 flex-1 outline-none px-2 truncate"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="px-3 py-1.5 bg-ink-900 text-white text-[10px] font-bold rounded-lg hover:bg-ink-800 transition-colors"
+                >
+                  Copy
+                </button>
+              </div>
             </GlassCard>
 
             {suggestedFriends.length > 0 && (
@@ -907,6 +955,30 @@ export function ModernSocial({ profile }) {
                   Send Invite
                 </button>
               </form>
+              
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-ink-900/10"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase font-bold text-ink-400">
+                  <span className="bg-white/60 px-2">Or share link</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-ink-900/5 p-2 rounded-xl mb-4">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={`https://nutrisync.app/invite/${userName.replace(/\s+/g, '').toLowerCase()}`}
+                  className="bg-transparent text-[11px] font-semibold text-ink-700 flex-1 outline-none px-2 truncate"
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="px-3 py-1.5 bg-ink-900 text-white text-[10px] font-bold rounded-lg hover:bg-ink-800 transition-colors"
+                >
+                  Copy
+                </button>
+              </div>
 
               <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100 flex items-center gap-3">
                 <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" />
