@@ -737,6 +737,57 @@ export function ModernSocial({ profile }) {
                 <span>+1,000 Steps Progress</span>
               </button>
             </GlassCard>
+
+            <GlassCard className="p-6">
+              <h3 className="font-bold text-ink-900 text-base mb-2">Invite Friends</h3>
+              <p className="text-xs text-ink-500 font-medium mb-4">Add friends to your squad to see them on your leaderboard.</p>
+              
+              <form onSubmit={handleInviteFriend} className="flex flex-col gap-3 mb-4">
+                <input 
+                  type="email" 
+                  required
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="friend@example.com" 
+                  className="bg-white/80 border border-ink-900/10 text-xs font-semibold text-ink-900 flex-1 outline-none px-4 py-2.5 rounded-xl focus:border-emerald-500 transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={!inviteEmail.trim()}
+                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors w-full"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Send Invite
+                </button>
+              </form>
+            </GlassCard>
+
+            {suggestedFriends.length > 0 && (
+              <GlassCard className="p-6">
+                <h3 className="font-bold text-ink-900 text-base mb-3">Suggested Friends</h3>
+                <div className="space-y-3">
+                  {suggestedFriends.map(friend => (
+                    <div key={friend.name} className="flex items-center justify-between p-3 bg-white/50 border border-white/60 rounded-2xl">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-xs">
+                          {friend.avatar}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-ink-900">{friend.name}</p>
+                          <p className="text-[10px] font-semibold text-ink-500">NutriSync Member</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleAddSuggestedFriend(friend)}
+                        className="p-2 rounded-xl bg-ink-900/5 hover:bg-emerald-50 hover:text-emerald-700 text-ink-600 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </GlassCard>
+            )}
           </div>
         </div>
       )}
